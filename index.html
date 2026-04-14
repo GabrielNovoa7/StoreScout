@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StoreScout</title>
+
+    <!--connect the css file-->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>StoreScout</h1>
+        <p class="subtitle">Find The best grocery prices fast</p>
+        
+        <!--container for the search bar-->
+        <div class="searchBox">
+            <input
+                type="text"
+                id="itemInput"
+                placeholder="Search grocery item (ex: eggs)">
+
+            <button id="searchButton">Search</button>
+        </div>
+
+        <div class="storeSelection">
+            <!--Walmart checkbox-->
+            <label>
+                <input type="checkbox" value="Walmart" checked>
+                Walmart
+            </label>
+            <!--Kroger checkbox-->
+            <label>
+                <input type="checkbox" value="Kroger" checked>
+                Kroger
+            </label>
+            <!--HEB checkbox-->
+            <label>
+                <input type="checkbox" value="HEB" checked>
+                HEB
+            </label>
+            <!--Sam's Club checkbox-->
+            <label>
+                <input type="checkbox" value="SamsClub" checked>
+                Sam's Club
+            </label>
+            <!--Cosco checkbox-->
+            <label>
+                <input type="checkbox" value="Cosco" checked>
+                Cosco
+            </label>
+        </div>
+        <div id="results">
+            <!-- Results go here-->
+        </div>
+    </div>
+<script scr="script.js"></script>
+</body>
+</html>
