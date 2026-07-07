@@ -16,5 +16,17 @@ searchButton.addEventListener("click", function() {
     <div class="result-card">
         HEB: $6.19
     </div>
+
+    <div class="result-card">
+        HEB: $6.19
+    </div>
+
+    <div class="result-card">
+        Sam's Club: $6.18
+    </div>
+
+    <div class="result-card">
+        Costco: $6.80
+    </div>
     `;
 });
