@@ -42,3 +42,31 @@ button{
 #results{
     margin-top: 25px;
 }
+
+.result-card{
+    background: white;
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #ddd;
+}
+
+.result-card p{
+    margin: 5px 0 0;
+    color: #555;
+}
+
+.best{
+    border: 2px solid green;
+}
+
+.badge{
+    background: green;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
