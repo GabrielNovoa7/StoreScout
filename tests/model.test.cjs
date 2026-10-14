@@ -31,7 +31,7 @@ test('restoring malformed local data produces a valid starter state', () => {
 test('totals include quantity and keep duplicate requests independent', () => {
   assert.equal(typeof M.summary, 'function');
   const offer = M.catalog.find(o => o.available !== false);
-  const items = [{id:'a',name:'eggs',quantity:2,offerId:offer.id,done:false}, {id:'b',name:'eggs',quantity:1,offerId:offer.id,done:true}];
+  const items = [{id:'a',name:offer.category,quantity:2,offerId:offer.id,done:false}, {id:'b',name:offer.category,quantity:1,offerId:offer.id,done:true}];
   assert.equal(M.summary(items).total, offer.price * 3);
   assert.equal(M.summary(items).done, 1);
   assert.equal(M.summary([{id:'c', name:'rice',quantity:1,offerId:null}]).total, 0);

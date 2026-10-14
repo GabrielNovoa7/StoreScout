@@ -58,6 +58,7 @@
   }
   function render(){
     const s=current(),selected=user?'Your account':mode==='signup'?'Create your account':mode==='reset'?'Reset your password':'Welcome back.';
+    if(!user&&configured&&connection==='connecting')return '<div class="page-heading"><div><div class="eyebrow">YOUR LIST. YOUR SPACE.</div><h1>Restoring your session…</h1><p role="status">Checking your sign-in before opening your list.</p></div></div>';
     let body='';
     if(user){
       body=`<div class="signed-in-identity"><span class="account-avatar">${esc((s.state?.profile?.name||user.email)?.charAt(0).toUpperCase()||'Y')}</span><div><strong>${esc(s.state?.profile?.name||user.email)}</strong><small>${esc(user.email)}</small><small>${user.emailVerified?'Email verified':'Email verification required'}</small></div></div>`;
@@ -80,7 +81,7 @@
       ${signup?`<ul class="password-requirements" id="password-requirements" aria-live="polite">${Core.passwordChecks('').map(check=>`<li data-requirement="${check.id}" class="requirement-missing"><span class="requirement-mark" aria-hidden="true">×</span><span>${check.label}</span><span class="sr-only requirement-status"> — not met</span></li>`).join('')}</ul><label for="account-confirm">Confirm password</label><input class="dialog-input" id="account-confirm" name="confirm" type="password" autocomplete="new-password" minlength="9" maxlength="128" required>`:''}
       <p class="account-form-status ${isError?'error':''}" id="account-form-status" role="status">${esc(feedback)}</p><button class="button primary full" type="submit" ${!configured||connection!=='connected'||busy?'disabled':''}>${busy?'Please wait…':signup?'Create account':reset?'Send reset email':'Sign in'}</button></form>
       ${!reset?button('mode-reset','Forgot your password?','text-button'):button('mode-login','Back to sign in','text-button')}
-      <div class="account-privacy"><strong>Your password stays with Firebase Authentication.</strong><p>Store Scout never saves your password or login tokens in browser storage. For this first secure version, you’ll sign in again after a page reload. Signed-in lists stay in memory while open and are saved to your account in Firestore.</p></div>`;
+      <div class="account-privacy"><strong>Your password stays with Firebase Authentication.</strong><p>Store Scout never saves your password. Firebase securely manages your sign-in state for this tab, so refreshing keeps you signed in. Sign out when finished on a shared device. Closing the tab normally ends the session; browser session-restore features may restore it. Your lists and settings are stored in your account, with no persistent offline list cache.</p></div>`;
     }
     return `<div class="page-heading"><div><div class="eyebrow">YOUR LIST. YOUR SPACE.</div><h1>${selected}</h1><p>One account, wherever your next grocery run begins.</p></div></div><section class="account-panel">${body}${user&&feedback?`<p role="status" class="account-form-status ${isError?'error':''}">${esc(feedback)}</p>`:''}</section><p class="account-footnote">Guest lists are local to this browser. Account lists are stored online. Signing out hides the account list and returns to the guest workspace.</p>`;
   }
@@ -158,5 +159,5 @@
   });
   document.addEventListener('click',event=>{const target=event.target.closest('[data-account-action]');if(target)void act(target.dataset.accountAction);});
   window.addEventListener('beforeunload',event=>{if(current().dirty||profileDraft){event.preventDefault();event.returnValue='';}});
-  window.ScoutAccount={init,save,render,label,user:()=>user,locked:()=>!!user&&(!user.emailVerified||!current().state),dirty:()=>current().dirty};
+  window.ScoutAccount={init,save,render,label,user:()=>user,locked:()=>configured&&connection==='connecting'||!!user&&(!user.emailVerified||!current().state),dirty:()=>current().dirty};
 })();

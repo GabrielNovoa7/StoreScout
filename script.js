@@ -1,142 +1,575 @@
 /* Store Scout frontend. Retailer data is illustrative; accounts use Firebase when configured. */
 (() => {
-  'use strict';
+  "use strict";
   const M = window.Scout;
   const Account = window.ScoutAccount;
-  const KEY = 'store-scout-gui-v1';
-  let storageOK = true, state;
-  try { state=M.restore(localStorage.getItem(KEY)); } catch { state=M.initial(); storageOK=false; }
-  let view='list', filter='all', listQuery='', compareQuery='', compareSort='price', activeId=null, removed=null;
-  let renderedUid=null,renderedLocked=false;
-  const main=document.querySelector('#main');
-  const dialog=document.querySelector('#dialog');
-  const money=value=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(value);
-  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const paths={list:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v4H9zM9 11h6M9 15h6"/>',compare:'<path d="M5 20V10m7 10V4m7 16v-7M3 20h18"/>',shopping:'<path d="M5 8h14l1 13H4L5 8zM8 8V6a4 4 0 0 1 8 0v2"/>',stores:'<path d="M3 9l2-6h14l2 6M4 10v11h16V10M9 21v-7h6v7M3 9c0 4 4 4 4 0 0 4 5 4 5 0 0 4 5 4 5 0 0 4 4 4 4 0"/>',pin:'<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/>',search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',plus:'<path d="M12 5v14M5 12h14"/>',arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',check:'<path d="m5 12 4 4L19 6"/>',sync:'<path d="M20 8a8 8 0 0 0-14-3L3 8m0-5v5h5m-4 8a8 8 0 0 0 14 3l3-3m0 5v-5h-5"/>',close:'<path d="m6 6 12 12M6 18 18 6"/>',trash:'<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',leaf:'<path d="M5 19C0 6 13 4 21 3c-1 9-3 21-16 16zm0 0L16 8"/>',spark:'<path d="m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z"/>'};
-  const icon=(name,cls='')=>`<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.list}</svg>`;
-  const names={list:'My List',compare:'Compare',shopping:'Shopping',stores:'Stores',account:'Account'};
-  const offerFor=item=>M.catalog.find(o=>o.id===item.offerId);
-  const storeFor=id=>M.stores.find(s=>s.id===id);
-  const storeBadge=id=>`<span class="store-mark ${id}">${esc(storeFor(id).short)}</span>`;
-  function readGuest(){try{return M.restore(localStorage.getItem(KEY));}catch{return M.initial();}}
-  function save(){
-    if(Account.user()){
-      try{Account.save(state);}catch{notify('Could not save these changes. Visit Account to check your connection.');}
+  const KEY = "store-scout-gui-v1";
+  let storageOK = true,
+    state;
+  try {
+    state = M.restore(localStorage.getItem(KEY));
+  } catch {
+    state = M.initial();
+    storageOK = false;
+  }
+  let view = "list",
+    filter = "all",
+    listQuery = "",
+    compareQuery = "",
+    compareSort = "price",
+    activeId = null,
+    removed = null;
+  let renderedUid = null,
+    renderedLocked = false;
+  const main = document.querySelector("#main");
+  const dialog = document.querySelector("#dialog");
+  const money = (value) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(value);
+  const esc = (value) =>
+    String(value ?? "").replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c],
+    );
+  const paths = {
+    list: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v4H9zM9 11h6M9 15h6"/>',
+    compare: '<path d="M5 20V10m7 10V4m7 16v-7M3 20h18"/>',
+    shopping: '<path d="M5 8h14l1 13H4L5 8zM8 8V6a4 4 0 0 1 8 0v2"/>',
+    stores:
+      '<path d="M3 9l2-6h14l2 6M4 10v11h16V10M9 21v-7h6v7M3 9c0 4 4 4 4 0 0 4 5 4 5 0 0 4 5 4 5 0 0 4 4 4 4 0"/>',
+    pin: '<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/>',
+    search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    arrow: '<path d="M4 12h16m-6-6 6 6-6 6"/>',
+    check: '<path d="m5 12 4 4L19 6"/>',
+    sync: '<path d="M20 8a8 8 0 0 0-14-3L3 8m0-5v5h5m-4 8a8 8 0 0 0 14 3l3-3m0 5v-5h-5"/>',
+    close: '<path d="m6 6 12 12M6 18 18 6"/>',
+    trash: '<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    leaf: '<path d="M5 19C0 6 13 4 21 3c-1 9-3 21-16 16zm0 0L16 8"/>',
+    spark: '<path d="m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z"/>',
+  };
+  const icon = (name, cls = "") =>
+    `<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.list}</svg>`;
+  const names = {
+    list: "My List",
+    compare: "Compare",
+    shopping: "Shopping",
+    stores: "Stores",
+    account: "Account",
+  };
+  const offerFor = (item) => M.selectedOffer(item);
+  const storeFor = (id) => M.stores.find((s) => s.id === id);
+  const storeBadge = (id) =>
+    `<span class="store-mark ${id}">${esc(storeFor(id).short)}</span>`;
+  function readGuest() {
+    try {
+      return M.restore(localStorage.getItem(KEY));
+    } catch {
+      return M.initial();
+    }
+  }
+  function save() {
+    if (Account.user()) {
+      try {
+        Account.save(state);
+      } catch {
+        notify(
+          "Could not save these changes. Visit Account to check your connection.",
+        );
+      }
       return;
     }
-    try{localStorage.setItem(KEY,JSON.stringify(state));}catch{storageOK=false;}
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+    } catch {
+      storageOK = false;
+    }
   }
-  function notify(message,undo=false){const el=document.querySelector('#toast');el.innerHTML=`${esc(message)}${undo?'<button data-action="undo">Undo</button>':''}`;el.classList.add('show');clearTimeout(notify.timer);notify.timer=setTimeout(()=>el.classList.remove('show'),4500);}
-  function navigate(next){if(!names[next])next='list';view=next;window.location.hash=next;render();window.scrollTo({top:0,behavior:'instant'});}
-  function nav(){const html=Object.entries(names).filter(([key])=>key!=='account').map(([key,name])=>`<a href="#${key}" class="nav-item ${view===key?'active':''}" ${view===key?'aria-current="page"':''}>${icon(key)}<span>${name}</span>${key==='list'?`<span class="nav-count">${state.items.length}</span>`:''}</a>`).join('');document.querySelector('#desktop-nav').innerHTML=html;document.querySelector('#mobile-nav').innerHTML=html;document.querySelector('#breadcrumb').textContent=names[view];}
-  const storageLabel=()=>Account.user()?Account.label():storageOK?'Guest list saved on this device.':'Browser storage unavailable; changes last for this session.';
-  const demo=()=>`<div class="demo-note"><span class="demo-label">PREVIEW</span> Sample prices & illustrative store locations. <span class="cloud-save-status" role="status">${esc(storageLabel())}</span></div>`;
-  function heading(eyebrow,title,description,action=''){return `<div class="page-heading"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${description}</p></div>${action}</div>`;}
-  function groceryArt(){return `<div class="grocery-art" aria-hidden="true"><span class="art-circle"></span><div class="floating-leaf leaf-one">✦</div><div class="floating-leaf leaf-two">✧</div><span class="art-bread">🥖</span><span class="art-leaves">🥬</span><span class="art-carrot">🥕</span><span class="art-milk">🥛</span><div class="paper-bag"><span class="bag-handle"></span><span class="bag-logo">✳</span><span>GOOD THINGS<br>IN STORE.</span></div><span class="art-tomato">🍅</span><span class="art-avocado">🥑</span><div class="art-sticker">${icon('check')} A smarter shop</div></div>`;}
-  function listPage(){
-    const summary=M.summary(state.items), pending=state.items.length-summary.selected;
-    const visible=state.items.filter(i=>(filter==='all'||(filter==='pending'?!i.offerId:!!i.offerId))&&i.name.toLowerCase().includes(listQuery.toLowerCase()));
-    return heading('A LITTLE PLANNING. A BETTER SHOP.','Your list, a little smarter.','The groceries you need. The choices you love. All in one place.',`<button class="button primary" data-action="add-dialog">${icon('plus')} Add an item</button>`)+
-    `<section class="welcome-card"><div class="welcome-copy"><span class="pill light">${icon('leaf')} SMALL HABITS, SMARTER SHOPPING</span><h2>Good groceries.<br>Less guesswork.</h2><p>Start with your usual list. Find your favorites.<br>Head to the store with a plan.</p><button class="button white" data-action="navigate" data-view="compare">Explore products ${icon('arrow')}</button></div>${groceryArt()}</section>
-    <div class="stats-grid"><div class="stat"><span class="stat-icon mint">${icon('list')}</span><div><strong>${state.items.length} <span>items on your list</span></strong><small>Your next grocery run</small></div></div><div class="stat"><span class="stat-icon peach">${icon('check')}</span><div><strong>${summary.selected} <span>products picked</span></strong><small>${pending?`${pending} more to make your own`:'You’re ready to shop'}</small></div></div><div class="stat"><span class="stat-icon lavender">${icon('shopping')}</span><div><strong>${money(summary.total)} <span>sample subtotal</span></strong><small>Selected products only</small></div></div></div>
-    <div class="list-layout"><section class="list-panel"><div class="section-heading"><div><h2>My shopping list <span class="count-bubble">${state.items.length}</span></h2><p>A little of what you need, a little of what you love.</p></div><button class="icon-button" data-action="add-dialog" aria-label="Add grocery">${icon('plus')}</button></div>
-    <div class="list-toolbar"><div class="tabs" aria-label="Filter list">${[['all','All items'],['pending','Needs a pick'],['picked','Picked']].map(([id,label])=>`<button data-action="filter" data-filter="${id}" class="${filter===id?'selected':''}" aria-pressed="${filter===id}">${label}</button>`).join('')}</div><label class="list-search">${icon('search')}<input id="list-search" aria-label="Search your list" placeholder="Find an item" value="${esc(listQuery)}"></label></div>
-    <div class="grocery-rows">${visible.map(row).join('')||`<div class="empty">${icon('list')}<h3>${state.items.length?'No items here yet':'A fresh start.'}</h3><p>${state.items.length?'Try another filter or search.':'Add your first grocery to start planning.'}</p><button class="button secondary" data-action="add-dialog">Add an item</button></div>`}</div>
-    <form class="quick-add" id="quick-add">${icon('plus')}<input name="grocery" aria-label="Add a grocery item" placeholder="Add something to your list…" maxlength="100" required><button type="submit" aria-label="Add item">${icon('arrow')}</button></form>
-    <div class="list-bottom">${icon('clock')} Your choices stay here for your next visit.<button data-action="navigate" data-view="shopping">Go shopping ${icon('arrow')}</button></div></section>
-    <aside class="right-rail"><section class="sync-card"><div class="reminders-icon"><span></span><span></span><span></span></div><span class="small-pill">MADE FOR YOUR ROUTINE</span><h2>Siri adds it.<br>Scout takes it from here.</h2><p>Keep using your Apple Reminders shopping list. We’re building a simple bridge to bring it here.</p><button class="button primary full" data-action="sync">${icon('sync')} Sync Apple Reminders</button><span class="connection"><i></i> Not connected · integration planned</span></section>
-    <section class="next-card"><span class="eyebrow">YOUR NEXT STOP</span><h3>Good things nearby.</h3><p>Two familiar stores.<br>One thoughtfully planned list.</p><div class="store-pair">${storeBadge('heb')}${storeBadge('walmart')}<span>H-E-B & Walmart</span></div><button data-action="navigate" data-view="stores">Manage your stores ${icon('arrow')}</button></section></aside></div>${demo()}`;
+  function notify(message, undo = false) {
+    const el = document.querySelector("#toast");
+    el.innerHTML = `${esc(message)}${undo ? '<button data-action="undo">Undo</button>' : ""}`;
+    el.classList.add("show");
+    clearTimeout(notify.timer);
+    notify.timer = setTimeout(() => el.classList.remove("show"), 4500);
   }
-  function row(item){const o=offerFor(item);const glyph=o?.emoji || ({basil:'🌿','sourdough bread':'🍞','chicken breast':'🍗'}[item.name.toLowerCase()] || '🛒');return `<article class="grocery-row ${item.done?'is-done':''}"><span class="food-thumb ${o?.department||'produce'}">${glyph}</span><div class="grocery-detail"><h3>${esc(item.name)}</h3><p>${o?`${esc(o.brand)} <span>·</span> ${esc(o.size)}`:M.intent(item.name).needsForm?'Fresh or dried? Let’s find your kind.':'Choose the product that’s right for you.'}</p>${o?`<span class="inline-store">${storeBadge(o.storeId)} ${esc(storeFor(o.storeId).name)}${!state.stores.includes(o.storeId)?' · disabled for comparison':''}</span>`:'<span class="needs-label">Needs a pick</span>'}</div><div class="quantity" aria-label="Quantity"><button data-action="quantity" data-id="${esc(item.id)}" data-delta="-1" aria-label="Decrease ${esc(item.name)} quantity" ${item.quantity<=1?'disabled':''}>−</button><span>${item.quantity}</span><button data-action="quantity" data-id="${esc(item.id)}" data-delta="1" aria-label="Increase ${esc(item.name)} quantity" ${item.quantity>=99?'disabled':''}>+</button></div><div class="row-action">${o?`<strong>${money(o.price*item.quantity)}</strong><button class="text-button" data-action="compare-item" data-id="${esc(item.id)}">Change ${icon('arrow')}</button>`:`<button class="button pick-button" data-action="compare-item" data-id="${esc(item.id)}">Pick product ${icon('arrow')}</button>`}</div><button class="remove-button" data-action="remove" data-id="${esc(item.id)}" aria-label="Remove ${esc(item.name)}">${icon('close')}</button></article>`;}
-  function comparePage(){
-    const active=state.items.find(i=>i.id===activeId);
-    const query=compareQuery || active?.name || '';
-    const needsForm=M.intent(query).needsForm;
-    const offers=M.sortOffers(query?M.matchOffers(query,state.stores):M.catalog.filter(o=>state.stores.includes(o.storeId)),compareSort);
-    return heading('FIND YOUR KIND OF GOOD.','A better pick for every item.','Compare the details. Choose what works for you.')+
-    `<div class="compare-search-card"><form id="compare-form" class="compare-form"><label>${icon('search')}<input name="query" aria-label="Search products" placeholder="Try eggs, fresh basil, or milk…" value="${esc(query)}" maxlength="100"></label><button class="button primary" type="submit">Find products ${icon('arrow')}</button></form><div class="compare-controls"><div class="store-filters">${M.stores.map(s=>`<button class="store-chip ${state.stores.includes(s.id)?'on':''}" data-action="toggle-store" data-store="${s.id}" aria-pressed="${state.stores.includes(s.id)}">${storeBadge(s.id)} ${s.name}${state.stores.includes(s.id)?icon('check'):''}</button>`).join('')}</div><label class="sort-label">Sort by <select id="sort" aria-label="Sort products"><option value="price" ${compareSort==='price'?'selected':''}>Package price</option><option value="unit" ${compareSort==='unit'?'selected':''}>Unit price</option></select></label></div></div>
-    ${active?`<div class="active-request">${icon('list')} Picking for <strong>${esc(active.name)}</strong><span>· ${active.quantity} package${active.quantity>1?'s':''}</span><button data-action="clear-active">Browse all products ${icon('close')}</button></div>`:''}
-    ${needsForm?`<section class="clarify-card"><span class="big-emoji">🌿</span><div><span class="eyebrow">A QUICK CHECK</span><h2>What kind of basil?</h2><p>Fresh herbs and dried spices serve different purposes. Let’s keep them separate.</p><div class="inline-actions"><button class="button primary" data-action="clarify" data-query="Fresh basil">Fresh basil</button><button class="button secondary" data-action="clarify" data-query="Dried basil">Dried basil</button></div></div></section>`:
-    `<div class="results-heading"><h2>${query?`Matches for “${esc(query)}”`:'Find your next favorite'} <span class="count-bubble">${offers.length}</span></h2><span>In-store · sample offers</span></div><div class="product-grid">${offers.map(o=>productCard(o,active)).join('')||`<div class="empty wide">${icon('search')}<h3>No matching sample products</h3><p>${state.stores.length?'Try eggs, milk, fresh basil, avocados, or chicken.':'Enable a store to see its sample products.'}</p><button class="button secondary" data-action="clear-query">Browse sample catalog</button></div>`}</div>`}
-    <div class="compare-explainer">${icon('spark')}<div><strong>Your choice comes first.</strong><p>Different brands are alternatives, not exact product matches. Store offers for the same product will be grouped when verified identifiers are available. Unit-price sorting groups compatible units.</p></div></div>${demo()}`;
+  function navigate(next) {
+    if (!names[next]) next = "list";
+    view = next;
+    window.location.hash = next;
+    render();
+    window.scrollTo({ top: 0, behavior: "instant" });
   }
-  function productCard(o,active){const selected=active?.offerId===o.id;return `<article class="product-card ${selected?'product-selected':''}"><div class="product-art ${o.department}"><span>${o.emoji}</span><span class="product-type">${o.category==='fresh basil'?'FRESH HERB':o.category==='dried basil'?'DRIED SPICE':'SAMPLE PRODUCT'}</span>${selected?`<span class="selected-badge">${icon('check')} Your pick</span>`:''}</div><div class="product-body"><span class="product-brand">${esc(o.brand)}</span><h3>${esc(o.name)}</h3><p class="product-size">${esc(o.size)} <span>·</span> ${active&&offerFor(active)&&active.offerId!==o.id?'Alternative product':'Individual product'}</p><div class="product-price"><strong>${money(o.price)}</strong><span>${money(o.price/o.amount)} / ${o.unit}</span></div><div class="product-store">${storeBadge(o.storeId)}<span>${esc(storeFor(o.storeId).label)}<small>Illustrative location · in-store</small></span></div><div class="stock ${o.available===true?'available':''}"><i></i>${o.available===true?'Sample: in stock':o.available===false?'Sample: unavailable':'Availability unknown'}</div>${o.promotion?`<p class="promo">${esc(o.promotion)}</p>`:''}<button class="button ${selected?'secondary':'primary'} full" data-action="select-offer" data-offer="${o.id}" ${o.available===false?'disabled':''}>${icon(selected?'check':'plus')} ${selected?'Selected':active?'Choose this product':'Add to my list'}</button></div></article>`;}
-  function shoppingPage(){const sum=M.summary(state.items), pending=state.items.filter(i=>!i.offerId), selected=state.items.filter(i=>i.offerId);return heading('LESS THINKING IN THE AISLES.','Let’s make it a good shop.','Your picks, organized by where you’re buying them.',`<button class="button secondary" data-action="navigate" data-view="list">${icon('list')} Back to my list</button>`)+
-    `<section class="shopping-summary"><span class="stat-icon mint">${icon('shopping')}</span><div><h2>${sum.done===sum.selected&&sum.selected?'All picked up. Nicely done!':'Your trip, at a glance.'}</h2><p>${sum.done} of ${sum.selected} selected items picked up${pending.length?` · ${pending.length} still need a product`:''}</p></div><strong>${money(sum.total)}<small>sample subtotal</small></strong><div class="progress-track"><span style="width:${sum.selected?sum.done/sum.selected*100:0}%"></span></div></section>
-    <div class="shopping-columns">${M.stores.map(s=>{const items=selected.filter(i=>offerFor(i).storeId===s.id);if(!items.length)return '';return `<section class="shopping-store"><div class="shopping-store-head">${storeBadge(s.id)}<div><h2>${s.name}</h2><p>Houston pilot · illustrative location</p></div><strong>${money(M.summary(items).total)}</strong></div>${!state.stores.includes(s.id)?'<div class="store-warning">Disabled for comparisons. Your existing picks are kept here.</div>':''}<div class="shopping-items">${items.map(i=>{const o=offerFor(i);return `<label class="shopping-item ${i.done?'completed':''}"><input type="checkbox" data-check-id="${esc(i.id)}" ${i.done?'checked':''}><span class="shopping-food">${o.emoji}</span><span><strong>${esc(i.name)}</strong><small>${esc(o.brand)} · ${esc(o.size)} · Qty ${i.quantity}</small></span><b>${money(o.price*i.quantity)}</b></label>`;}).join('')}</div><div class="store-completion">${items.filter(i=>i.done).length} of ${items.length} picked up <span>In-store shopping</span></div></section>`;}).join('')||'<div class="empty wide"><h3>Your shopping trip starts with a pick.</h3><p>Choose products from your list to organize them here.</p><button class="button primary" data-action="navigate" data-view="compare">Find products</button></div>'}</div>
-    ${pending.length?`<section class="pending-panel"><span class="stat-icon peach">${icon('list')}</span><div><h3>A few choices before you go.</h3><p>${pending.map(i=>esc(i.name)).join(' · ')}</p></div><button class="button secondary" data-action="compare-item" data-id="${esc(pending[0].id)}">Finish picking ${icon('arrow')}</button></section>`:''}${demo()}`;}
-  function storesPage(){return heading('YOUR NEIGHBORHOOD. YOUR CHOICES.','Familiar stores, smarter stops.','Start close to home. Keep the stores that work for you.')+
-    `<section class="area-card"><span class="area-icon">${icon('pin')}</span><div><span class="eyebrow">YOUR PILOT AREA</span><h2>Houston, Texas <span>77019</span></h2><p>Our first neighborhood. More places to come.</p></div><span class="pill light">In-store shopping</span></section><div class="results-heading"><h2>Your stores <span class="count-bubble">${state.stores.length} enabled</span></h2><span>Choose stores to include in comparisons</span></div><div class="stores-grid">${M.stores.map(s=>`<article class="store-card"><div class="store-visual ${s.id}">${storeBadge(s.id)}<span>YOUR EVERYDAY ESSENTIALS</span></div><div class="store-card-body"><div class="store-name-line"><h2>${s.name}</h2><button class="toggle ${state.stores.includes(s.id)?'enabled':''}" role="switch" aria-checked="${state.stores.includes(s.id)}" aria-label="Include ${s.name} in comparisons" data-action="toggle-store" data-store="${s.id}"><span></span></button></div><p>Houston pilot · illustrative location</p><div class="store-facts"><span>${icon('shopping')} In-store</span><span>${M.catalog.filter(o=>o.storeId===s.id).length} sample products</span></div><div class="coverage-note"><strong>Sample catalog available</strong><p>Live prices and availability aren’t connected. The exact pilot location is still to be verified.</p></div><button class="button secondary full" data-action="browse-store" data-store="${s.id}">Browse sample products ${icon('arrow')}</button></div></article>`).join('')}</div><section class="future-card">${icon('leaf')}<div><h3>Starting small. Shopping thoughtfully.</h3><p>H-E-B and Walmart are our first pilot retailers. Pickup, delivery, and more stores will get their own verified coverage later.</p></div></section>${demo()}`;}
-  function render(){
+  function nav() {
+    const html = Object.entries(names)
+      .filter(([key]) => key !== "account")
+      .map(
+        ([key, name]) =>
+          `<a href="#${key}" class="nav-item ${view === key ? "active" : ""}" ${view === key ? 'aria-current="page"' : ""}>${icon(key)}<span>${name}</span>${key === "list" ? `<span class="nav-count">${state.items.length}</span>` : ""}</a>`,
+      )
+      .join("");
+    document.querySelector("#desktop-nav").innerHTML = html;
+    document.querySelector("#mobile-nav").innerHTML = html;
+    document.querySelector("#breadcrumb").textContent = names[view];
+  }
+  const storageLabel = () =>
+    Account.user()
+      ? Account.label()
+      : storageOK
+        ? "Guest list saved on this device."
+        : "Browser storage unavailable; changes last for this session.";
+  const demo = () =>
+    `<div class="demo-note"><span class="demo-label">PREVIEW</span> Sample prices & illustrative store locations. <span class="cloud-save-status" role="status">${esc(storageLabel())}</span></div>`;
+  function heading(eyebrow, title, description, action = "") {
+    return `<div class="page-heading"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${description}</p></div>${action}</div>`;
+  }
+  function groceryArt() {
+    return `<div class="grocery-art" aria-hidden="true"><span class="art-circle"></span><div class="floating-leaf leaf-one">✦</div><div class="floating-leaf leaf-two">✧</div><span class="art-bread">🥖</span><span class="art-leaves">🥬</span><span class="art-carrot">🥕</span><span class="art-milk">🥛</span><div class="paper-bag"><span class="bag-handle"></span><span class="bag-logo">✳</span><span>GOOD THINGS<br>IN STORE.</span></div><span class="art-tomato">🍅</span><span class="art-avocado">🥑</span><div class="art-sticker">${icon("check")} A smarter shop</div></div>`;
+  }
+  function listPage() {
+    const summary = M.summary(state.items),
+      pending = state.items.length - summary.selected;
+    const visible = state.items.filter(
+      (i) =>
+        (filter === "all" ||
+          (filter === "pending" ? !i.offerId : !!i.offerId)) &&
+        i.name.toLowerCase().includes(listQuery.toLowerCase()),
+    );
+    return (
+      heading(
+        "A LITTLE PLANNING. A BETTER SHOP.",
+        "Your list, a little smarter.",
+        "The groceries you need. The choices you love. All in one place.",
+        `<button class="button primary" data-action="add-dialog">${icon("plus")} Add an item</button>`,
+      ) +
+      `<section class="welcome-card"><div class="welcome-copy"><span class="pill light">${icon("leaf")} SMALL HABITS, SMARTER SHOPPING</span><h2>Good groceries.<br>Less guesswork.</h2><p>Start with your usual list. Find your favorites.<br>Head to the store with a plan.</p><button class="button white" data-action="navigate" data-view="compare">Explore products ${icon("arrow")}</button></div>${groceryArt()}</section>
+    <div class="stats-grid"><div class="stat"><span class="stat-icon mint">${icon("list")}</span><div><strong>${state.items.length} <span>items on your list</span></strong><small>Your next grocery run</small></div></div><div class="stat"><span class="stat-icon peach">${icon("check")}</span><div><strong>${summary.selected} <span>products picked</span></strong><small>${pending ? `${pending} more to make your own` : "You’re ready to shop"}</small></div></div><div class="stat"><span class="stat-icon lavender">${icon("shopping")}</span><div><strong>${money(summary.total)} <span>sample subtotal</span></strong><small>Selected products only</small></div></div></div>
+    <div class="list-layout"><section class="list-panel"><div class="section-heading"><div><h2>My shopping list <span class="count-bubble">${state.items.length}</span></h2><p>A little of what you need, a little of what you love.</p></div><button class="icon-button" data-action="add-dialog" aria-label="Add grocery">${icon("plus")}</button></div>
+    <div class="list-toolbar"><div class="tabs" aria-label="Filter list">${[
+      ["all", "All items"],
+      ["pending", "Needs a pick"],
+      ["picked", "Picked"],
+    ]
+      .map(
+        ([id, label]) =>
+          `<button data-action="filter" data-filter="${id}" class="${filter === id ? "selected" : ""}" aria-pressed="${filter === id}">${label}</button>`,
+      )
+      .join(
+        "",
+      )}</div><label class="list-search">${icon("search")}<input id="list-search" aria-label="Search your list" placeholder="Find an item" value="${esc(listQuery)}"></label></div>
+    <div class="grocery-rows">${visible.map(row).join("") || `<div class="empty">${icon("list")}<h3>${state.items.length ? "No items here yet" : "A fresh start."}</h3><p>${state.items.length ? "Try another filter or search." : "Add your first grocery to start planning."}</p><button class="button secondary" data-action="add-dialog">Add an item</button></div>`}</div>
+    <form class="quick-add" id="quick-add">${icon("plus")}<input name="grocery" aria-label="Add a grocery item" placeholder="Add something to your list…" maxlength="100" required><button type="submit" aria-label="Add item">${icon("arrow")}</button></form>
+    <div class="list-bottom">${icon("clock")} Your choices stay here for your next visit.<button data-action="navigate" data-view="shopping">Go shopping ${icon("arrow")}</button></div></section>
+    <aside class="right-rail"><section class="sync-card"><div class="reminders-icon"><span></span><span></span><span></span></div><span class="small-pill">MADE FOR YOUR ROUTINE</span><h2>Siri adds it.<br>Scout takes it from here.</h2><p>Keep using your Apple Reminders shopping list. We’re building a simple bridge to bring it here.</p><button class="button primary full" data-action="sync">${icon("sync")} Sync Apple Reminders</button><span class="connection"><i></i> Not connected · integration planned</span></section>
+    <section class="next-card"><span class="eyebrow">YOUR NEXT STOP</span><h3>Good things nearby.</h3><p>Two familiar stores.<br>One thoughtfully planned list.</p><div class="store-pair">${storeBadge("heb")}${storeBadge("walmart")}<span>H-E-B & Walmart</span></div><button data-action="navigate" data-view="stores">Manage your stores ${icon("arrow")}</button></section></aside></div>${demo()}`
+    );
+  }
+  function row(item) {
+    const o = offerFor(item);
+    const glyph =
+      o?.emoji ||
+      { basil: "🌿", "sourdough bread": "🍞", "chicken breast": "🍗" }[
+        item.name.toLowerCase()
+      ] ||
+      "🛒";
+    return `<article class="grocery-row ${item.done ? "is-done" : ""}"><span class="food-thumb ${o?.department || "produce"}">${glyph}</span><div class="grocery-detail"><h3>${esc(item.name)}</h3><p>${o ? `${esc(o.brand)} <span>·</span> ${esc(o.size)}` : M.intent(item.name).needsForm ? "Fresh or dried? Let’s find your kind." : "Choose the product that’s right for you."}</p>${o ? `<span class="inline-store">${storeBadge(o.storeId)} ${esc(storeFor(o.storeId).name)}${!state.stores.includes(o.storeId) ? " · disabled for comparison" : ""}</span>` : '<span class="needs-label">Needs a pick</span>'}</div><div class="quantity" aria-label="Quantity"><button data-action="quantity" data-id="${esc(item.id)}" data-delta="-1" aria-label="Decrease ${esc(item.name)} quantity" ${item.quantity <= 1 ? "disabled" : ""}>−</button><span>${item.quantity}</span><button data-action="quantity" data-id="${esc(item.id)}" data-delta="1" aria-label="Increase ${esc(item.name)} quantity" ${item.quantity >= 99 ? "disabled" : ""}>+</button></div><div class="row-action">${o ? `<strong>${money(o.price * item.quantity)}</strong><button class="text-button" data-action="compare-item" data-id="${esc(item.id)}">Change ${icon("arrow")}</button>` : `<button class="button pick-button" data-action="compare-item" data-id="${esc(item.id)}">Pick product ${icon("arrow")}</button>`}</div><button class="remove-button" data-action="remove" data-id="${esc(item.id)}" aria-label="Remove ${esc(item.name)}">${icon("close")}</button></article>`;
+  }
+  function comparePage() {
+    const active = state.items.find((i) => i.id === activeId);
+    const query = compareQuery || active?.name || "";
+    const needsForm = M.intent(active?.name || query).needsForm;
+    const offers = M.sortOffers(
+      (query
+        ? M.matchOffers(query, state.stores)
+        : M.catalog.filter((o) => state.stores.includes(o.storeId))
+      ).filter((o) => !active || M.canSelect(active.name, o.id)),
+      compareSort,
+    );
+    const selected = active && offerFor(active),
+      current = offers.filter((o) => o.id === selected?.id),
+      alternatives = offers.filter((o) => o.id !== selected?.id);
+    return (
+      heading(
+        "FIND YOUR KIND OF GOOD.",
+        "A better pick for every item.",
+        "Compare the details. Choose what works for you.",
+      ) +
+      `<div class="compare-search-card"><form id="compare-form" class="compare-form"><label>${icon("search")}<input name="query" aria-label="Search products" placeholder="Try eggs, fresh basil, or milk…" value="${esc(query)}" maxlength="100"></label><button class="button primary" type="submit">Find products ${icon("arrow")}</button></form><div class="compare-controls"><div class="store-filters">${M.stores.map((s) => `<button class="store-chip ${state.stores.includes(s.id) ? "on" : ""}" data-action="toggle-store" data-store="${s.id}" aria-pressed="${state.stores.includes(s.id)}">${storeBadge(s.id)} ${s.name}${state.stores.includes(s.id) ? icon("check") : ""}</button>`).join("")}</div><label class="sort-label">Sort by <select id="sort" aria-label="Sort products"><option value="price" ${compareSort === "price" ? "selected" : ""}>Package price</option><option value="unit" ${compareSort === "unit" ? "selected" : ""}>Unit price</option></select></label></div></div>
+    ${active ? `<div class="active-request">${icon("list")} Picking for <strong>${esc(active.name)}</strong><span>· ${active.quantity} package${active.quantity > 1 ? "s" : ""}</span><button data-action="clear-active">Search whole catalog ${icon("close")}</button></div>` : ""}
+    ${
+      needsForm
+        ? `<section class="clarify-card"><span class="big-emoji">🌿</span><div><span class="eyebrow">A QUICK CHECK</span><h2>What kind of basil?</h2><p>Fresh herbs and dried spices serve different purposes. Let’s keep them separate.</p><div class="inline-actions"><button class="button primary" data-action="clarify" data-query="Fresh basil">Fresh basil</button><button class="button secondary" data-action="clarify" data-query="Dried basil">Dried basil</button></div></div></section>`
+        : `<div class="results-heading"><h2>${query ? `Relevant options for “${esc(query)}”` : "Find your next favorite"} <span class="count-bubble">${offers.length}</span></h2><span>In-store · sample offers</span></div>${current.length ? `<h3 class="match-group-heading">Your selected product</h3><div class="product-grid">${current.map((o) => productCard(o, active)).join("")}</div><h3 class="match-group-heading">Other relevant options · alternatives</h3>` : ""}<div class="product-grid">${alternatives.map((o) => productCard(o, active)).join("") || (current.length ? '<p class="no-alternatives">No other relevant sample products for this search.</p>' : `<div class="empty wide">${icon("search")}<h3>No matching sample products</h3><p>${!state.stores.length ? "Enable a store to see its sample products." : active ? `You are still choosing for ${esc(active.name)}. Search the whole catalog to find a different grocery and add it separately.` : "This sample catalog is limited. Try eggs, milk, fresh basil, avocados, or chicken."}</p><button class="button secondary" data-action="${active ? "clear-active" : "clear-query"}">${active ? "Search whole catalog" : "Browse sample catalog"}</button></div>`)}</div>`
+    }
+    <div class="compare-explainer">${icon("spark")}<div><strong>Your choice comes first.</strong><p>Different brands are alternatives, not exact product matches. Store offers for the same product will be grouped when verified identifiers are available. Unit-price sorting groups compatible units.</p></div></div>${demo()}`
+    );
+  }
+  function productCard(o, active) {
+    const selected = active?.offerId === o.id;
+    return `<article class="product-card ${selected ? "product-selected" : ""}"><div class="product-art ${o.department}"><span>${o.emoji}</span><span class="product-type">${o.category === "fresh basil" ? "FRESH HERB" : o.category === "dried basil" ? "DRIED SPICE" : "SAMPLE PRODUCT"}</span>${selected ? `<span class="selected-badge">${icon("check")} Your pick</span>` : ""}</div><div class="product-body"><span class="product-brand">${esc(o.brand)}</span><h3>${esc(o.name)}</h3><p class="product-size">${esc(o.size)} <span>·</span> ${selected ? "Your selected product" : active && offerFor(active) ? "Alternative to your selected product" : active ? "Relevant sample option" : "Sample product"}</p><div class="product-price"><strong>${money(o.price)}</strong><span>${money(o.price / o.amount)} / ${o.unit}</span></div><div class="product-store">${storeBadge(o.storeId)}<span>${esc(storeFor(o.storeId).label)}<small>Illustrative location · in-store</small></span></div><div class="stock ${o.available === true ? "available" : ""}"><i></i>${o.available === true ? "Sample: in stock" : o.available === false ? "Sample: unavailable" : "Availability unknown"}</div>${o.promotion ? `<p class="promo">${esc(o.promotion)}</p>` : ""}<button class="button ${selected ? "secondary" : "primary"} full" data-action="select-offer" data-offer="${o.id}" ${o.available === false ? "disabled" : ""}>${icon(selected ? "check" : "plus")} ${selected ? "Selected" : active ? "Choose this product" : "Add to my list"}</button></div></article>`;
+  }
+  function shoppingPage() {
+    const sum = M.summary(state.items),
+      pending = state.items.filter((i) => !offerFor(i)),
+      selected = state.items.filter((i) => offerFor(i));
+    return (
+      heading(
+        "LESS THINKING IN THE AISLES.",
+        "Let’s make it a good shop.",
+        "Your picks, organized by where you’re buying them.",
+        `<button class="button secondary" data-action="navigate" data-view="list">${icon("list")} Back to my list</button>`,
+      ) +
+      `<section class="shopping-summary"><span class="stat-icon mint">${icon("shopping")}</span><div><h2>${sum.done === sum.selected && sum.selected ? "All picked up. Nicely done!" : "Your trip, at a glance."}</h2><p>${sum.done} of ${sum.selected} selected items picked up${pending.length ? ` · ${pending.length} still need a product` : ""}</p></div><strong>${money(sum.total)}<small>sample subtotal</small></strong><div class="progress-track"><span style="width:${sum.selected ? (sum.done / sum.selected) * 100 : 0}%"></span></div></section>
+    <div class="shopping-columns">${
+      M.stores
+        .map((s) => {
+          const items = selected.filter((i) => offerFor(i).storeId === s.id);
+          if (!items.length) return "";
+          return `<section class="shopping-store"><div class="shopping-store-head">${storeBadge(s.id)}<div><h2>${s.name}</h2><p>Houston pilot · illustrative location</p></div><strong>${money(M.summary(items).total)}</strong></div>${!state.stores.includes(s.id) ? '<div class="store-warning">Disabled for comparisons. Your existing picks are kept here.</div>' : ""}<div class="shopping-items">${items
+            .map((i) => {
+              const o = offerFor(i);
+              return `<label class="shopping-item ${i.done ? "completed" : ""}"><input type="checkbox" data-check-id="${esc(i.id)}" ${i.done ? "checked" : ""}><span class="shopping-food">${o.emoji}</span><span><strong>${esc(i.name)}</strong><small>${esc(o.brand)} · ${esc(o.size)} · Qty ${i.quantity}</small></span><b>${money(o.price * i.quantity)}</b></label>`;
+            })
+            .join(
+              "",
+            )}</div><div class="store-completion">${items.filter((i) => i.done).length} of ${items.length} picked up <span>In-store shopping</span></div></section>`;
+        })
+        .join("") ||
+      '<div class="empty wide"><h3>Your shopping trip starts with a pick.</h3><p>Choose products from your list to organize them here.</p><button class="button primary" data-action="navigate" data-view="compare">Find products</button></div>'
+    }</div>
+    ${pending.length ? `<section class="pending-panel"><span class="stat-icon peach">${icon("list")}</span><div><h3>A few choices before you go.</h3><p>${pending.map((i) => esc(i.name)).join(" · ")}</p></div><button class="button secondary" data-action="compare-item" data-id="${esc(pending[0].id)}">Finish picking ${icon("arrow")}</button></section>` : ""}${demo()}`
+    );
+  }
+  function storesPage() {
+    return (
+      heading(
+        "YOUR NEIGHBORHOOD. YOUR CHOICES.",
+        "Familiar stores, smarter stops.",
+        "Start close to home. Keep the stores that work for you.",
+      ) +
+      `<section class="area-card"><span class="area-icon">${icon("pin")}</span><div><span class="eyebrow">YOUR PILOT AREA</span><h2>Houston, Texas <span>77019</span></h2><p>Our first neighborhood. More places to come.</p></div><span class="pill light">In-store shopping</span></section><div class="results-heading"><h2>Your stores <span class="count-bubble">${state.stores.length} enabled</span></h2><span>Choose stores to include in comparisons</span></div><div class="stores-grid">${M.stores.map((s) => `<article class="store-card"><div class="store-visual ${s.id}">${storeBadge(s.id)}<span>YOUR EVERYDAY ESSENTIALS</span></div><div class="store-card-body"><div class="store-name-line"><h2>${s.name}</h2><button class="toggle ${state.stores.includes(s.id) ? "enabled" : ""}" role="switch" aria-checked="${state.stores.includes(s.id)}" aria-label="Include ${s.name} in comparisons" data-action="toggle-store" data-store="${s.id}"><span></span></button></div><p>Houston pilot · illustrative location</p><div class="store-facts"><span>${icon("shopping")} In-store</span><span>${M.catalog.filter((o) => o.storeId === s.id).length} sample products</span></div><div class="coverage-note"><strong>Sample catalog available</strong><p>Live prices and availability aren’t connected. The exact pilot location is still to be verified.</p></div><button class="button secondary full" data-action="browse-store" data-store="${s.id}">Browse sample products ${icon("arrow")}</button></div></article>`).join("")}</div><section class="future-card">${icon("leaf")}<div><h3>Starting small. Shopping thoughtfully.</h3><p>H-E-B and Walmart are our first pilot retailers. Pickup, delivery, and more stores will get their own verified coverage later.</p></div></section>${demo()}`
+    );
+  }
+  function render() {
     nav();
-    main.innerHTML=(view==='account'||Account.locked())?Account.render():({list:listPage,compare:comparePage,shopping:shoppingPage,stores:storesPage}[view])();
-    document.querySelector('#location-icon').innerHTML=icon('pin');
+    main.innerHTML =
+      view === "account" || Account.locked()
+        ? Account.render()
+        : {
+            list: listPage,
+            compare: comparePage,
+            shopping: shoppingPage,
+            stores: storesPage,
+          }[view]();
+    document.querySelector("#location-icon").innerHTML = icon("pin");
     updateAccountChrome();
-    renderedUid=Account.user()?.uid||null;renderedLocked=Account.locked();
+    renderedUid = Account.user()?.uid || null;
+    renderedLocked = Account.locked();
   }
-  function updateAccountChrome(){
-    document.querySelector('.account-button').textContent=Account.user()?'Account':'Sign in';
-    document.querySelector('#workspace-label').textContent=Account.user()?(state.profile?.name||'Your account'):'Guest workspace';
-    document.querySelector('#workspace-status').textContent=Account.label();
-    document.querySelectorAll('.cloud-save-status').forEach(el=>el.textContent=storageLabel());
+  function updateAccountChrome() {
+    document.querySelector(".account-button").textContent = Account.user()
+      ? "Account"
+      : "Sign in";
+    document.querySelector("#workspace-label").textContent = Account.user()
+      ? state.profile?.name || "Your account"
+      : "Guest workspace";
+    document.querySelector("#workspace-status").textContent = Account.label();
+    document
+      .querySelectorAll(".cloud-save-status")
+      .forEach((el) => (el.textContent = storageLabel()));
   }
-  function openDialog(content){document.querySelector('#dialog-content').innerHTML=`<button class="dialog-close icon-button" data-action="close-dialog" aria-label="Close dialog">${icon('close')}</button>${content}`;dialog.showModal();}
-  function addItem(name){name=name.trim();if(!name)return;if(state.items.length>=200){notify('This pilot supports up to 200 grocery items per list.');return;}const preferred=state.preferences[M.normalize(name)];const known=M.catalog.find(o=>o.id===preferred&&state.stores.includes(o.storeId)&&o.available!==false);state.items.push({id:crypto.randomUUID(),name:name.slice(0,100),quantity:1,offerId:known?.id||null,done:false});save();dialog.close();filter='all';listQuery='';render();notify(known?'Added with your remembered product.':'Added to your list.');}
-  document.addEventListener('submit',event=>{if(['quick-add','add-form','compare-form'].includes(event.target.id)){event.preventDefault();const data=new FormData(event.target);if(event.target.id==='compare-form'){compareQuery=String(data.get('query')).trim();render();}else addItem(String(data.get('grocery')));}});
-  document.addEventListener('input',event=>{if(event.target.id==='list-search'){const start=event.target.selectionStart;listQuery=event.target.value;render();const input=document.querySelector('#list-search');input.focus();input.setSelectionRange(start,start);}});
-  document.addEventListener('change',event=>{if(event.target.id==='sort'){compareSort=event.target.value;render();}if(event.target.dataset.checkId){const item=state.items.find(i=>i.id===event.target.dataset.checkId);if(item){item.done=event.target.checked;save();render();}}});
-  document.addEventListener('click',event=>{
-    const navLink=event.target.closest('a[href^="#"]');
-    if(navLink && names[navLink.hash.slice(1)]){event.preventDefault();navigate(navLink.hash.slice(1));return;}
-    const button=event.target.closest('[data-action]');if(!button)return;
-    const action=button.dataset.action,id=button.dataset.id,item=state.items.find(i=>i.id===id);
-    if(action==='navigate')navigate(button.dataset.view);
-    if(action==='add-dialog')openDialog(`<span class="dialog-symbol">${icon('plus')}</span><span class="eyebrow">SOMETHING FOR YOUR NEXT SHOP</span><h2 id="dialog-title">What’s on your list?</h2><p>Start with a grocery. Pick your favorite product next.</p><form id="add-form"><label class="field-label" for="new-item">Grocery item</label><input class="dialog-input" id="new-item" name="grocery" placeholder="e.g. fresh basil" maxlength="100" required autofocus><button class="button primary full" type="submit">Add to my list ${icon('plus')}</button></form>`);
-    if(action==='close-dialog')dialog.close();
-    if(action==='sync')openDialog(`<div class="reminders-icon"><span></span><span></span><span></span></div><span class="eyebrow">APPLE REMINDERS</span><h2 id="dialog-title">Your routine stays yours.</h2><p>The planned Shortcut will read your chosen Reminders list and securely send it to your Store Scout account.</p><ol class="setup-steps"><li><span>1</span><div><strong>Connect your account</strong><p>Secure account pairing is coming with the backend.</p></div></li><li><span>2</span><div><strong>Install the prebuilt Shortcut</strong><p>Choose your usual shopping list and grant access on your iPhone.</p></div></li><li><span>3</span><div><strong>Tap to sync when you’re ready</strong><p>The Safari and Home Screen handoff still needs an iPhone test.</p></div></li></ol><div class="dialog-note">Not connected. This GUI preview cannot read or change your Reminders.</div><button class="button primary full" data-action="close-dialog">Got it</button>`);
-    if(action==='about')openDialog(`<span class="dialog-symbol">✳</span><h2 id="dialog-title">A little smarter, together.</h2><p>This is Store Scout’s first interactive GUI. Use a local guest list or sign in to save a private list across devices.</p><div class="dialog-note">Prices, availability, promotions, and locations are illustrative. Accounts and private cloud lists are connected. Apple sync and live retailer feeds are not connected.</div><button class="button primary full" data-action="close-dialog">Back to my list</button>`);
-    if(action==='filter'){filter=button.dataset.filter;render();}
-    if(action==='quantity'&&item){item.quantity=Math.min(99,Math.max(1,item.quantity+Number(button.dataset.delta)));save();render();}
-    if(action==='remove'&&item){removed={item,index:state.items.indexOf(item)};state.items=state.items.filter(i=>i.id!==id);save();render();notify(`${item.name} removed.`,true);}
-    if(action==='undo'&&removed){state.items.splice(removed.index,0,removed.item);removed=null;save();render();notify('Item restored.');}
-    if(action==='compare-item'&&item){activeId=id;compareQuery=item.name;navigate('compare');}
-    if(action==='clarify'){compareQuery=button.dataset.query;render();}
-    if(action==='clear-active'){activeId=null;compareQuery='';render();}
-    if(action==='clear-query'){compareQuery='';if(activeId)activeId=null;render();}
-    if(action==='toggle-store'){const sid=button.dataset.store;state.stores=state.stores.includes(sid)?state.stores.filter(s=>s!==sid):[...state.stores,sid];save();render();}
-    if(action==='browse-store'){state.stores=[button.dataset.store];save();compareQuery='';activeId=null;navigate('compare');notify(`Showing ${storeFor(button.dataset.store).name} sample products. Re-enable other stores to compare.`);}
-    if(action==='select-offer'){
-      const offer=M.catalog.find(o=>o.id===button.dataset.offer);if(!offer||offer.available===false||!state.stores.includes(offer.storeId))return;
-      const active=state.items.find(i=>i.id===activeId);
-      if(active){active.offerId=offer.id;active.done=false;state.preferences[M.normalize(active.name)]=offer.id;notify(`Your ${active.name.toLowerCase()} pick is saved.`);}
-      else {if(state.items.length>=200){notify('This pilot supports up to 200 grocery items per list.');return;}state.items.push({id:crypto.randomUUID(),name:offer.name,quantity:1,offerId:offer.id,done:false});state.preferences[M.normalize(offer.name)]=offer.id;notify('Product added to your list.');}
-      save();render();
+  function openDialog(content) {
+    document.querySelector("#dialog-content").innerHTML =
+      `<button class="dialog-close icon-button" data-action="close-dialog" aria-label="Close dialog">${icon("close")}</button>${content}`;
+    dialog.showModal();
+  }
+  function addItem(name) {
+    name = name.trim();
+    if (!name) return;
+    if (state.items.length >= 200) {
+      notify("This pilot supports up to 200 grocery items per list.");
+      return;
+    }
+    const preferred = state.preferences[M.normalize(name)];
+    const known = M.catalog.find(
+      (o) =>
+        o.id === preferred &&
+        M.canSelect(name, o.id) &&
+        state.stores.includes(o.storeId) &&
+        o.available !== false,
+    );
+    state.items.push({
+      id: crypto.randomUUID(),
+      name: name.slice(0, 100),
+      quantity: 1,
+      offerId: known?.id || null,
+      done: false,
+    });
+    save();
+    dialog.close();
+    filter = "all";
+    listQuery = "";
+    render();
+    notify(
+      known ? "Added with your remembered product." : "Added to your list.",
+    );
+  }
+  document.addEventListener("submit", (event) => {
+    if (["quick-add", "add-form", "compare-form"].includes(event.target.id)) {
+      event.preventDefault();
+      const data = new FormData(event.target);
+      if (event.target.id === "compare-form") {
+        compareQuery = String(data.get("query")).trim();
+        render();
+      } else addItem(String(data.get("grocery")));
     }
   });
-  dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
-  window.addEventListener('hashchange',()=>{view=names[location.hash.slice(1)]?location.hash.slice(1):'list';render();});
-  view=names[location.hash.slice(1)]?location.hash.slice(1):'list';render();
+  document.addEventListener("input", (event) => {
+    if (event.target.id === "list-search") {
+      const start = event.target.selectionStart;
+      listQuery = event.target.value;
+      render();
+      const input = document.querySelector("#list-search");
+      input.focus();
+      input.setSelectionRange(start, start);
+    }
+  });
+  document.addEventListener("change", (event) => {
+    if (event.target.id === "sort") {
+      compareSort = event.target.value;
+      render();
+    }
+    if (event.target.dataset.checkId) {
+      const item = state.items.find(
+        (i) => i.id === event.target.dataset.checkId,
+      );
+      if (item) {
+        item.done = event.target.checked;
+        save();
+        render();
+      }
+    }
+  });
+  document.addEventListener("click", (event) => {
+    const navLink = event.target.closest('a[href^="#"]');
+    if (navLink && names[navLink.hash.slice(1)]) {
+      event.preventDefault();
+      navigate(navLink.hash.slice(1));
+      return;
+    }
+    const button = event.target.closest("[data-action]");
+    if (!button) return;
+    const action = button.dataset.action,
+      id = button.dataset.id,
+      item = state.items.find((i) => i.id === id);
+    if (action === "navigate") navigate(button.dataset.view);
+    if (action === "add-dialog")
+      openDialog(
+        `<span class="dialog-symbol">${icon("plus")}</span><span class="eyebrow">SOMETHING FOR YOUR NEXT SHOP</span><h2 id="dialog-title">What’s on your list?</h2><p>Start with a grocery. Pick your favorite product next.</p><form id="add-form"><label class="field-label" for="new-item">Grocery item</label><input class="dialog-input" id="new-item" name="grocery" placeholder="e.g. fresh basil" maxlength="100" required autofocus><button class="button primary full" type="submit">Add to my list ${icon("plus")}</button></form>`,
+      );
+    if (action === "close-dialog") dialog.close();
+    if (action === "sync")
+      openDialog(
+        `<div class="reminders-icon"><span></span><span></span><span></span></div><span class="eyebrow">APPLE REMINDERS</span><h2 id="dialog-title">Your routine stays yours.</h2><p>The planned Shortcut will read your chosen Reminders list and securely send it to your Store Scout account.</p><ol class="setup-steps"><li><span>1</span><div><strong>Connect your account</strong><p>Secure account pairing is coming with the backend.</p></div></li><li><span>2</span><div><strong>Install the prebuilt Shortcut</strong><p>Choose your usual shopping list and grant access on your iPhone.</p></div></li><li><span>3</span><div><strong>Tap to sync when you’re ready</strong><p>The Safari and Home Screen handoff still needs an iPhone test.</p></div></li></ol><div class="dialog-note">Not connected. This GUI preview cannot read or change your Reminders.</div><button class="button primary full" data-action="close-dialog">Got it</button>`,
+      );
+    if (action === "about")
+      openDialog(
+        `<span class="dialog-symbol">✳</span><h2 id="dialog-title">A little smarter, together.</h2><p>This is Store Scout’s first interactive GUI. Use a local guest list or sign in to save a private list across devices.</p><div class="dialog-note">Prices, availability, promotions, and locations are illustrative. Accounts and private cloud lists are connected. Apple sync and live retailer feeds are not connected.</div><button class="button primary full" data-action="close-dialog">Back to my list</button>`,
+      );
+    if (action === "filter") {
+      filter = button.dataset.filter;
+      render();
+    }
+    if (action === "quantity" && item) {
+      item.quantity = Math.min(
+        99,
+        Math.max(1, item.quantity + Number(button.dataset.delta)),
+      );
+      save();
+      render();
+    }
+    if (action === "remove" && item) {
+      removed = { item, index: state.items.indexOf(item) };
+      state.items = state.items.filter((i) => i.id !== id);
+      save();
+      render();
+      notify(`${item.name} removed.`, true);
+    }
+    if (action === "undo" && removed) {
+      state.items.splice(removed.index, 0, removed.item);
+      removed = null;
+      save();
+      render();
+      notify("Item restored.");
+    }
+    if (action === "compare-item" && item) {
+      activeId = id;
+      compareQuery = item.name;
+      navigate("compare");
+    }
+    if (action === "clarify") {
+      compareQuery = button.dataset.query;
+      const active = state.items.find((i) => i.id === activeId);
+      if (active && M.intent(active.name).needsForm) {
+        active.name = compareQuery;
+        active.offerId = null;
+        active.done = false;
+        save();
+      }
+      render();
+    }
+    if (action === "clear-active") {
+      const search = document.querySelector('#compare-form input[name="query"]');
+      compareQuery = search?.value?.trim() || compareQuery;
+      activeId = null;
+      render();
+    }
+    if (action === "clear-query") {
+      compareQuery = "";
+      if (activeId) activeId = null;
+      render();
+    }
+    if (action === "toggle-store") {
+      const sid = button.dataset.store;
+      state.stores = state.stores.includes(sid)
+        ? state.stores.filter((s) => s !== sid)
+        : [...state.stores, sid];
+      save();
+      render();
+    }
+    if (action === "browse-store") {
+      state.stores = [button.dataset.store];
+      save();
+      compareQuery = "";
+      activeId = null;
+      navigate("compare");
+      notify(
+        `Showing ${storeFor(button.dataset.store).name} sample products. Re-enable other stores to compare.`,
+      );
+    }
+    if (action === "select-offer") {
+      const offer = M.catalog.find((o) => o.id === button.dataset.offer);
+      if (
+        !offer ||
+        offer.available === false ||
+        !state.stores.includes(offer.storeId)
+      )
+        return;
+      const active = state.items.find((i) => i.id === activeId);
+      if (active && !M.canSelect(active.name, offer.id)) {
+        notify(
+          "That product does not fit this grocery. Browse the catalog to add it separately.",
+        );
+        return;
+      }
+      if (active) {
+        active.offerId = offer.id;
+        active.done = false;
+        state.preferences[M.normalize(active.name)] = offer.id;
+        notify(`Product selected for ${active.name.toLowerCase()}.`);
+      } else {
+        if (state.items.length >= 200) {
+          notify("This pilot supports up to 200 grocery items per list.");
+          return;
+        }
+        const groceryName = M.canSelect(offer.name, offer.id)
+          ? offer.name
+          : offer.category;
+        state.items.push({
+          id: crypto.randomUUID(),
+          name: groceryName,
+          quantity: 1,
+          offerId: offer.id,
+          done: false,
+        });
+        state.preferences[M.normalize(groceryName)] = offer.id;
+        notify("Product added to your list.");
+      }
+      save();
+      render();
+    }
+  });
+  dialog.addEventListener("click", (event) => {
+    if (event.target === dialog) {
+      const r = dialog.getBoundingClientRect();
+      if (
+        event.clientX < r.left ||
+        event.clientX > r.right ||
+        event.clientY < r.top ||
+        event.clientY > r.bottom
+      )
+        dialog.close();
+    }
+  });
+  window.addEventListener("hashchange", () => {
+    view = names[location.hash.slice(1)] ? location.hash.slice(1) : "list";
+    render();
+  });
+  view = names[location.hash.slice(1)] ? location.hash.slice(1) : "list";
+  render();
   void Account.init({
-    getState:()=>state,
-    getGuest:readGuest,
-    onState:next=>{
-      state=next;window.ScoutTheme?.apply(Account.user()?next.profile:null);activeId=null;removed=null;compareQuery='';listQuery='';filter='all';
-      clearTimeout(notify.timer);const toast=document.querySelector('#toast');toast.classList.remove('show');toast.textContent='';
+    getState: () => state,
+    getGuest: readGuest,
+    onState: (next) => {
+      state = next;
+      window.ScoutTheme?.apply(Account.user() ? next.profile : null);
+      activeId = null;
+      removed = null;
+      compareQuery = "";
+      listQuery = "";
+      filter = "all";
+      clearTimeout(notify.timer);
+      const toast = document.querySelector("#toast");
+      toast.classList.remove("show");
+      toast.textContent = "";
     },
-    onStatus:()=>{
-      if(view==='account'||Account.locked()||renderedUid!==(Account.user()?.uid||null)||renderedLocked!==Account.locked())render();
+    onStatus: () => {
+      if (
+        view === "account" ||
+        Account.locked() ||
+        renderedUid !== (Account.user()?.uid || null) ||
+        renderedLocked !== Account.locked()
+      )
+        render();
       else updateAccountChrome();
     },
     navigate,
-    confirmReload:(reload,download)=>{
-      openDialog('<h2 id="dialog-title">Keep a copy before reloading.</h2><p>Loading the cloud copy replaces the unsaved list currently in this tab. Download your current list first if you want to keep those edits.</p><div class="account-actions"><button class="button secondary" id="export-before-reload">Download current list</button><button class="button primary" id="confirm-cloud-reload">Load cloud copy</button></div>');
-      document.querySelector('#export-before-reload').addEventListener('click',download);
-      document.querySelector('#confirm-cloud-reload').addEventListener('click',()=>{dialog.close();reload();});
+    confirmReload: (reload, download) => {
+      openDialog(
+        '<h2 id="dialog-title">Keep a copy before reloading.</h2><p>Loading the cloud copy replaces the unsaved list currently in this tab. Download your current list first if you want to keep those edits.</p><div class="account-actions"><button class="button secondary" id="export-before-reload">Download current list</button><button class="button primary" id="confirm-cloud-reload">Load cloud copy</button></div>',
+      );
+      document
+        .querySelector("#export-before-reload")
+        .addEventListener("click", download);
+      document
+        .querySelector("#confirm-cloud-reload")
+        .addEventListener("click", () => {
+          dialog.close();
+          reload();
+        });
     },
-    confirmSignout:(logout,download)=>{
-      openDialog('<h2 id="dialog-title">Some changes are not saved.</h2><p>Download a copy before signing out if you want to keep your unsaved edits. Signing out will clear them from this tab.</p><div class="account-actions"><button class="button secondary" id="export-before-signout">Download current list</button><button class="button primary" id="confirm-signout">Discard unsaved edits and sign out</button></div>');
-      document.querySelector('#export-before-signout').addEventListener('click',download);
-      document.querySelector('#confirm-signout').addEventListener('click',()=>{dialog.close();logout();});
-    }
+    confirmSignout: (logout, download) => {
+      openDialog(
+        '<h2 id="dialog-title">Some changes are not saved.</h2><p>Download a copy before signing out if you want to keep your unsaved edits. Signing out will clear them from this tab.</p><div class="account-actions"><button class="button secondary" id="export-before-signout">Download current list</button><button class="button primary" id="confirm-signout">Discard unsaved edits and sign out</button></div>',
+      );
+      document
+        .querySelector("#export-before-signout")
+        .addEventListener("click", download);
+      document
+        .querySelector("#confirm-signout")
+        .addEventListener("click", () => {
+          dialog.close();
+          logout();
+        });
+    },
   });
 })();

@@ -19,8 +19,8 @@
 ## Behavior and privacy
 
 - Visitors can continue using a guest workspace saved in this browser.
-- Signup and password reset are handled by Firebase Authentication. The app does not save passwords, password hashes, or authentication tokens in localStorage/sessionStorage.
-- Firebase Authentication uses memory-only persistence. Reloading the page requires signing in again. Signed-in lists survive in Firestore.
+- Signup and password reset are handled by Firebase Authentication. The app never saves passwords or password hashes. The Firebase SDK manages authentication state in sessionStorage; application code does not read, copy, or manually store tokens.
+- Firebase Authentication uses `browserSessionPersistence`. Refreshing the same tab restores sign-in, then reloads that account’s private list and profile from Firestore. Sign out clears the Firebase session. Closing a tab normally ends its session; browser session restoration may restore it. Use explicit Sign out on shared devices. Browsers that block session storage may require signing in again. Local preview and GitHub Pages are different origins and have separate sign-ins.
 - Verify the account email before reading or writing its cloud list. The verification link opens Firebase's hosted email-action handler; return to Store Scout and click **I've verified my email**.
 - Account grocery state is kept in memory, not cached persistently on a shared device. Signing out clears it and restores the separate guest workspace.
 - Guest lists are only uploaded when the user clicks **Copy guest list into account**. Existing cloud items are kept and guest items are appended with new IDs. The local guest copy is not deleted.
@@ -86,3 +86,6 @@ Reference: https://firebase.google.com/support/guides/security-checklist#underst
 The optional `state.profile` map contains only `name` (trimmed display name, up to 60 characters), `zip` (five digits), `mode` (light/dark/system), and `accent` (green/blue/purple/orange/pink). Old lists without this map load with light/green defaults and ZIP 77019. Profile settings share the list's ownership and revision checks; no additional public collection is introduced. The updated rules were verified with the local Firestore emulator and published to the existing Firebase database.
 
 Manual profile check: save a name and dark/blue settings, wait for saving, sign out, and verify light/green is restored. Sign into the same account in another browser/device and check the saved name/theme. Test pink as well. Unsaved profile drafts remain in memory; signing out or reloading the cloud copy requires confirmation before discarding them.
+
+
+Session acceptance check: sign in on a regular browser, wait for Saved to your account, then refresh the same tab. Confirm the same account, list, and appearance return. Sign out, refresh again, and confirm the account stays signed out. This uses the Firebase SDK session mechanism; no passwords should be entered into scripts or shared with an assistant.

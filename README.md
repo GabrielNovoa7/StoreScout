@@ -43,7 +43,7 @@ Reliable, permitted retailer price access is still being researched. The Safari/
 
 ## Technology
 
-The current frontend uses HTML, CSS, and vanilla JavaScript. It extends the original project without requiring a framework, package installation, or build step. Browser localStorage provides guest-only persistence. Firebase Authentication uses memory-only sessions; authenticated grocery data stays in memory and is saved in Firestore. Reloading requires signing in again. No application passwords or authentication tokens are persisted in browser storage.
+The current frontend uses HTML, CSS, and vanilla JavaScript. It extends the original project without requiring a framework, package installation, or build step. Browser localStorage provides guest-only persistence. Firebase Authentication manages tab-scoped sign-in state using session persistence: refreshing the same tab keeps you signed in, and Sign out clears the session. Closing the tab normally ends it, though browser session-restore features may restore tabs and their sessions. Store Scout never stores your password. Firebase-managed authentication state is stored in sessionStorage; authenticated grocery data has no persistent offline cache and is loaded from Firestore.
 
 ## Run locally — repository owner or authorized users only
 
@@ -53,14 +53,14 @@ These instructions do not grant permission to use or reproduce the code. See [LI
 
 ## Project structure
 
-| File | Purpose |
-| --- | --- |
-| `index.html` | Application shell and navigation |
-| `style.css` | Responsive visual design and screen layouts |
-| `model.js` | Sample catalog, grocery matching, sorting, state validation, and totals |
-| `script.js` | Screen rendering and browser interactions |
-| `tests/model.test.cjs` | Focused logic tests using Node's built-in test runner |
-| `docs/superpowers/specs/` | Design documentation |
+| File                      | Purpose                                                                 |
+| ------------------------- | ----------------------------------------------------------------------- |
+| `index.html`              | Application shell and navigation                                        |
+| `style.css`               | Responsive visual design and screen layouts                             |
+| `model.js`                | Sample catalog, grocery matching, sorting, state validation, and totals |
+| `script.js`               | Screen rendering and browser interactions                               |
+| `tests/model.test.cjs`    | Focused logic tests using Node's built-in test runner                   |
+| `docs/superpowers/specs/` | Design documentation                                                    |
 
 ## Verification
 
@@ -99,3 +99,11 @@ See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for configuration, session behavior, 
 After verifying your email, open **Account > Profile & appearance** to set an optional display name, a five-digit shopping ZIP, Light/Dark/System mode, and a Green/Blue/Purple/Orange/Pink accent. Light with Green is the default. Click **Save profile & appearance** and wait for **Saved to your account**. These settings use the same private, revision-checked cloud document as your list and load when you sign into the same account on another device. Refresh older open tabs before changing profile settings.
 
 Signing out clears the account appearance and restores the default guest appearance. System mode follows each device's operating-system preference. Display names and ZIP codes are profile information, not authentication credentials. Store coverage remains the 77019 Houston pilot; entering another ZIP does not add live store coverage. The app icon and favicon use an original shopping-bag/check design.
+
+## Product-selection accuracy
+
+Compare keeps every choice tied to the grocery being selected, even if its search text changes. A relevant alternative is not a verified exact cross-store match; the selected product and other relevant options are displayed separately. The pilot catalog has no verified cross-store identifiers.
+
+Loading local or account data removes unrelated product selections and invalid remembered choices while preserving grocery names and quantities. Invalid picks return to **Needs a pick** and are excluded from totals and Shopping. The normalized list is written with the next successful edit/save; merely opening the list does not rewrite its cloud document.
+
+Basil and basil leaves require an explicit fresh/dried choice. Choosing a form updates that grocery's name so the choice can be remembered correctly. Prepared products containing basil do not match the herb. Unsupported groceries such as fish oil remain on the list without a sample product rather than receiving an unrelated match. Matching remains conservative and limited to the sample catalog; it is not a live retailer search.

@@ -6,9 +6,9 @@ window.ScoutFirebase = {
       import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-firestore.js')
     ]);
     const app=appSDK.initializeApp({apiKey:config.apiKey,authDomain:config.authDomain,projectId:config.projectId,appId:config.appId});
-    // Intentionally memory-only: no credentials/session tokens persisted by this app.
-    // A page reload requires sign-in again. Cloud lists survive because Firestore stores them.
-    const auth=authSDK.initializeAuth(app,{persistence:authSDK.inMemoryPersistence});
+    // Firebase manages tab-scoped auth state in sessionStorage; never save passwords ourselves.
+    // Refresh restores the session. Sign out clears it; closing the tab normally ends it.
+    const auth=authSDK.initializeAuth(app,{persistence:authSDK.browserSessionPersistence});
     const db=dbSDK.initializeFirestore(app,{localCache:dbSDK.memoryLocalCache()});
     const current=()=>auth.currentUser;
     async function step(name,operation){
@@ -40,7 +40,14 @@ window.ScoutFirebase = {
     // Read the public password policy before asking the user to enter credentials.
     // This also primes the SDK's policy cache for signup and detects blocked connections early.
     await step('password-policy',()=>authSDK.validatePassword(auth,''));
-    const unsubscribe=authSDK.onAuthStateChanged(auth,user=>onUser(user?{uid:user.uid,email:user.email,emailVerified:user.emailVerified}:null));
+    let unsubscribe;
+    // Wait for the first auth observation so a restored account cannot race guest edits.
+    await new Promise((resolve,reject)=>{
+      unsubscribe=authSDK.onAuthStateChanged(auth,user=>{
+        onUser(user?{uid:user.uid,email:user.email,emailVerified:user.emailVerified}:null);
+        resolve();
+      },reject);
+    });
     return {
       adapter,unsubscribe,
       async login(email,password){await step('sign-in',()=>authSDK.signInWithEmailAndPassword(auth,email,password));},

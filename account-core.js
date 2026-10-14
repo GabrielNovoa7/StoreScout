@@ -42,9 +42,9 @@
     const items=state.items.map(i=>{
       if(!i||typeof i.id!=='string'||!/^[a-zA-Z0-9_-]{1,80}$/.test(i.id)||ids.has(i.id)||typeof i.name!=='string'||!i.name.trim()||i.name.length>100||!Number.isInteger(i.quantity)||i.quantity<1||i.quantity>99)throw new Error('Invalid grocery item.');
       ids.add(i.id);
-      return {id:i.id,name:i.name,quantity:i.quantity,offerId:M.catalog.some(o=>o.id===i.offerId)?i.offerId:null,done:!!i.done};
+      return M.cleanSelection({id:i.id,name:i.name,quantity:i.quantity,offerId:i.offerId,done:i.done});
     });
-    const preferences=Object.fromEntries(Object.entries(state.preferences||{}).filter(([key,id])=>key.length<=100&&M.catalog.some(o=>o.id===id)).slice(-200));
+    const preferences=M.cleanPreferences(state.preferences);
     return {version:1,items,stores:[...new Set(state.stores.filter(s=>M.stores.some(store=>store.id===s)))],preferences,profile:cleanProfile(state.profile)};
   }
   function createSync(adapter,onChange=()=>{}){
