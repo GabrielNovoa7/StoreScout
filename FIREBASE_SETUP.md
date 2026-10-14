@@ -58,6 +58,21 @@ Tests verify account-load races, serialized writes, conflict preservation, passw
 
 Keep the project on Spark and do not attach a billing account or enable a paid upgrade. Free usage has quotas; reaching a limit can interrupt service rather than guarantee unlimited access. Monitor Firebase's usage pages. Email sending also has quotas. Revisit abuse protection (including App Check), account recovery, monitoring, and a dedicated domain before broad public rollout.
 
+## Public browser key and secret-scanning alerts
+
+Firebase's browser API key in `firebase-config.js` is intentionally public. It identifies this Firebase project; it does not grant administrative access or bypass Authentication or Firestore rules. Moving it into a frontend environment variable would not make it secret in the delivered website.
+
+On October 14, 2026, the browser key was restricted in Google Cloud Console to:
+
+- Cloud Firestore API (`firestore.googleapis.com`)
+- Identity Toolkit API (`identitytoolkit.googleapis.com`)
+- Token Service API (`securetoken.googleapis.com`)
+
+Website restrictions allow only `https://gabrielnovoa7.github.io/*`, `http://localhost:5500/*`, `http://127.0.0.1:5500/*`, `https://store-scout-9d930.firebaseapp.com/*`, and `https://store-scout-9d930.web.app/*`. The Firebase origins support hosted verification and password-reset pages. Update this allowlist when changing preview ports or adding a production domain. Website restrictions reduce misuse; they are not a replacement for database rules or abuse protection.
+
+A scanner may still flag this public Google API key. After checking that the alert refers only to this browser config and the restrictions above remain in place, resolve this alert as **False positive** for this intentionally public Firebase client identifier. Explain that it is restricted to the three APIs above and protected by verified-owner Firestore rules. Never suppress all Google-key scanning. If an admin/service-account private key or a key granting access to other services is exposed, handle that separately and rotate/revoke it promptly.
+
+Reference: https://firebase.google.com/support/guides/security-checklist#understand_api_keys
 ## References
 
 - https://firebase.google.com/docs/auth/web/password-auth
