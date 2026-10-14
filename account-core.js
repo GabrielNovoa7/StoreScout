@@ -11,7 +11,12 @@
     if(!/[0-9]/.test(value))issues.push('A number');
     return issues;
   }
-  const empty=()=>({version:1,items:[],stores:['heb','walmart'],preferences:{}});
+  function cleanProfile(value={}){
+    const p={name:'',zip:'77019',mode:'light',accent:'green',...value};
+    if(typeof p.name!=='string'||p.name.trim().length>60||typeof p.zip!=='string'||!/^\d{5}$/.test(p.zip)||!['light','dark','system'].includes(p.mode)||!['green','blue','purple','orange','pink'].includes(p.accent))throw new Error('Enter a name up to 60 characters, a five-digit ZIP, and valid appearance settings.');
+    return {name:p.name.trim(),zip:p.zip,mode:p.mode,accent:p.accent};
+  }
+  const empty=()=>({version:1,items:[],stores:['heb','walmart'],preferences:{},profile:cleanProfile()});
   function passwordChecks(value){
     return [
       {id:'length',label:'At least 9 characters',passed:value.length>=9&&value.length<=128},
@@ -40,7 +45,7 @@
       return {id:i.id,name:i.name,quantity:i.quantity,offerId:M.catalog.some(o=>o.id===i.offerId)?i.offerId:null,done:!!i.done};
     });
     const preferences=Object.fromEntries(Object.entries(state.preferences||{}).filter(([key,id])=>key.length<=100&&M.catalog.some(o=>o.id===id)).slice(-200));
-    return {version:1,items,stores:[...new Set(state.stores.filter(s=>M.stores.some(store=>store.id===s)))],preferences};
+    return {version:1,items,stores:[...new Set(state.stores.filter(s=>M.stores.some(store=>store.id===s)))],preferences,profile:cleanProfile(state.profile)};
   }
   function createSync(adapter,onChange=()=>{}){
     let generation=0, uid=null, state=null, revision=0, dirty=false, status='signed-out',error=null,editVersion=0,running=null;
@@ -73,6 +78,6 @@
     }
     return {open,close,edit,flush,snapshot};
   }
-  const api={passwordIssues,passwordChecks,authErrorMessage,cleanState,empty,createSync};
+  const api={cleanProfile,passwordIssues,passwordChecks,authErrorMessage,cleanState,empty,createSync};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.ScoutAccountCore=api;
 })(typeof window!=='undefined'?window:globalThis);

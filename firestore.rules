@@ -6,6 +6,14 @@ service cloud.firestore {
         && request.auth.uid == uid
         && request.auth.token.email_verified == true;
     }
+    function validProfile(p) {
+      return p is map && p.keys().hasAll(['name', 'zip', 'mode', 'accent'])
+        && p.keys().hasOnly(['name', 'zip', 'mode', 'accent'])
+        && p.name is string && p.name.size() <= 60
+        && p.zip is string && p.zip.matches('^[0-9]{5}$')
+        && p.mode in ['light', 'dark', 'system']
+        && p.accent in ['green', 'blue', 'purple', 'orange', 'pink'];
+    }
     function validList() {
       let d = request.resource.data;
       return d.keys().hasAll(['schema', 'state', 'revision', 'updatedAt'])
@@ -15,7 +23,8 @@ service cloud.firestore {
         && d.updatedAt == request.time
         && d.state is map
         && d.state.keys().hasAll(['version', 'items', 'stores', 'preferences'])
-        && d.state.keys().hasOnly(['version', 'items', 'stores', 'preferences'])
+        && d.state.keys().hasOnly(['version', 'items', 'stores', 'preferences', 'profile'])
+        && (!('profile' in d.state) || validProfile(d.state.profile))
         && d.state.version == 1
         && d.state.items is list && d.state.items.size() <= 200
         && d.state.stores is list && d.state.stores.size() <= 2

@@ -80,3 +80,9 @@ Reference: https://firebase.google.com/support/guides/security-checklist#underst
 - https://firebase.google.com/docs/firestore/security/get-started
 - https://firebase.google.com/docs/firestore/manage-data/transactions
 - https://firebase.google.com/docs/projects/billing/firebase-pricing-plans
+
+## Profile schema
+
+The optional `state.profile` map contains only `name` (trimmed display name, up to 60 characters), `zip` (five digits), `mode` (light/dark/system), and `accent` (green/blue/purple/orange/pink). Old lists without this map load with light/green defaults and ZIP 77019. Profile settings share the list's ownership and revision checks; no additional public collection is introduced. The updated rules were verified with the local Firestore emulator and published to the existing Firebase database.
+
+Manual profile check: save a name and dark/blue settings, wait for saving, sign out, and verify light/green is restored. Sign into the same account in another browser/device and check the saved name/theme. Test pink as well. Unsaved profile drafts remain in memory; signing out or reloading the cloud copy requires confirmation before discarding them.

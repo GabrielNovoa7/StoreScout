@@ -5,11 +5,16 @@
   const config=window.STORE_SCOUT_FIREBASE;
   const configured=!!(config?.enabled&&config.apiKey&&config.projectId&&config.authDomain&&config.appId);
   let provider=null,user=null,connection=configured?'connecting':'not-configured',mode='login';
+  let profileDraft=null;
   let sync=null,hooks=null,feedback='',isError=false,busy=false,timer=null,lastStatus='signed-out',pendingUser;
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const button=(action,label,cls='secondary')=>`<button class="button ${cls}" data-account-action="${action}">${label}</button>`;
   const current=()=>sync?.snapshot()||{status:'signed-out',dirty:false};
-  function refresh(){hooks?.onStatus();}
+  function refresh(){
+    const active=document.activeElement,focused=active?.closest?.('#profile-form')?{id:active.id,name:active.name,value:active.value,start:active.selectionStart,end:active.selectionEnd}:null;
+    hooks?.onStatus();
+    if(focused){const input=focused.id?document.getElementById(focused.id):document.querySelector(`#profile-form input[name="${focused.name}"][value="${focused.value}"]`);input?.focus();if(focused.start!=null)input?.setSelectionRange(focused.start,focused.end);}
+  }
   function message(text,error=false){feedback=text;isError=error;refresh();}
   function errorText(error){
     return Core.authErrorMessage(error,mode);
@@ -17,7 +22,7 @@
   async function onUser(next){
     if(!provider){pendingUser=next;return;}
     const previousUid=user?.uid;
-    user=next;clearTimeout(timer);feedback='';isError=false;
+    user=next;profileDraft=null;clearTimeout(timer);feedback='';isError=false;
     if(!user){sync.close();hooks.onState(hooks.getGuest());refresh();return;}
     // Clear all previous account content immediately, including pending undo state.
     if(previousUid!==user.uid||!user.emailVerified){sync.close();hooks.onState(Core.empty());}
@@ -55,12 +60,14 @@
     const s=current(),selected=user?'Your account':mode==='signup'?'Create your account':mode==='reset'?'Reset your password':'Welcome back.';
     let body='';
     if(user){
-      body=`<div class="signed-in-identity"><span class="account-avatar">${esc(user.email?.charAt(0).toUpperCase()||'Y')}</span><div><strong>${esc(user.email)}</strong><small>${user.emailVerified?'Email verified':'Email verification required'}</small></div></div>`;
+      body=`<div class="signed-in-identity"><span class="account-avatar">${esc((s.state?.profile?.name||user.email)?.charAt(0).toUpperCase()||'Y')}</span><div><strong>${esc(s.state?.profile?.name||user.email)}</strong><small>${esc(user.email)}</small><small>${user.emailVerified?'Email verified':'Email verification required'}</small></div></div>`;
       if(!user.emailVerified){body+=`<div class="account-callout"><h3>Check your email.</h3><p>Open the verification link from Firebase. Then return here and check again to unlock your private cloud list.</p><div class="account-actions">${button('check-email','I’ve verified my email','primary')}${button('resend-email','Resend email')}</div></div>`;}
-      else if(s.status==='loading'){body+='<div class="account-callout"><h3>Opening your list…</h3><p>Edits are paused until your account’s cloud copy is loaded.</p></div>';}
+      else if(s.status==='loading'||s.status==='signed-out'){body+='<div class="account-callout"><h3>Opening your list…</h3><p>Edits are paused until your account’s cloud copy is loaded.</p></div>';}
       else if(s.status==='load-error'){body+=`<div class="account-callout error"><h3>Your list could not be loaded.</h3><p>Nothing has been overwritten. Check your connection and database rules, then retry.</p>${button('reload','Retry loading','primary')}</div>`;}
       else{
         body+=`<div class="account-callout ${s.dirty?'warning':''}"><h3>${esc(label())}</h3><p>${s.status==='conflict'?'Another device changed the cloud list. Your unsaved changes are kept in memory. Download them before loading the newer cloud copy.':s.dirty?'Keep this page open until saving finishes. If a save failed, retry online.':'Your list is available when you sign into this same account on another device. Reopen the account or use Refresh cloud list to load later changes.'}</p><div class="account-actions">${s.dirty&&s.status!=='conflict'?button('retry-save','Save now','primary'):''}${button('reload',s.dirty?'Review cloud reload':'Refresh cloud list')}${button('export','Download my list')}${button('go-list','Go to my list','primary')}</div></div>`;
+        const p=profileDraft||Core.cleanProfile(s.state.profile);
+        body+=`<form id="profile-form" class="account-form profile-form"><div><div class="eyebrow">MAKE IT YOURS</div><h2>Profile & appearance</h2><p>Your settings travel with your account. Save after making changes.</p></div><label for="profile-name">Display name</label><input id="profile-name" class="dialog-input" name="name" autocomplete="nickname" maxlength="60" value="${esc(p.name)}" placeholder="What should we call you?"><label for="profile-zip">Shopping ZIP code</label><input id="profile-zip" class="dialog-input" name="zip" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{5}" maxlength="5" required value="${esc(p.zip)}"><small>Store coverage remains the Houston 77019 pilot.</small><fieldset><legend>Appearance</legend><div class="theme-options">${['light','dark','system'].map(mode=>`<label><input type="radio" name="mode" value="${mode}" ${p.mode===mode?'checked':''}>${mode.charAt(0).toUpperCase()+mode.slice(1)}</label>`).join('')}</div></fieldset><fieldset><legend>Accent color</legend><div class="accent-options">${['green','blue','purple','orange','pink'].map(accent=>`<label class="accent-choice" data-color="${accent}"><input type="radio" name="accent" value="${accent}" ${p.accent===accent?'checked':''}><span class="color-dot" aria-hidden="true"></span>${accent.charAt(0).toUpperCase()+accent.slice(1)}</label>`).join('')}</div></fieldset><p id="profile-status" role="status"></p><button class="button primary" type="submit">Save profile & appearance</button></form>`;
         body+=`<div class="account-import"><h3>Bring your guest list with you.</h3><p>Copy groceries saved in this browser into this account. This uploads that guest list to Firebase. It leaves the local guest copy intact.</p>${button('import','Copy guest list into account')}</div>`;
       }
       body+=`<div class="account-actions end">${button('logout','Sign out')}</div>`;
@@ -109,12 +116,13 @@
     if(!provider||busy)return;
     if(action==='go-list'){hooks.navigate('list');return;}
     if(action==='export'){exportList();return;}
-    if(action==='review-reload'){feedback='';await sync.open(user.uid);return;}
-    if(action==='reload'&&current().dirty){hooks.confirmReload(()=>act('review-reload'),exportList);return;}
-    if(action==='logout'&&current().dirty){hooks.confirmSignout(()=>act('discard-logout'),exportList);return;}
+    if(action==='review-reload'){profileDraft=null;feedback='';await sync.open(user.uid);return;}
+    if(action==='reload'&&(current().dirty||profileDraft)){hooks.confirmReload(()=>act('review-reload'),exportList);return;}
+    if(action==='logout'&&(current().dirty||profileDraft)){hooks.confirmSignout(()=>act('discard-logout'),exportList);return;}
     busy=true;feedback='';refresh();
     try{
       if(action==='logout'||action==='discard-logout')await provider.logout();
+      if(action==='reload'){profileDraft=null;}
       if(action==='reload')await sync.open(user.uid);
       if(action==='retry-save')await sync.flush();
       if(action==='resend-email'){await provider.sendVerification();message('Verification email sent. Check your inbox and spam folder.');}
@@ -126,8 +134,18 @@
       }
     }catch(error){message(errorText(error),true);}finally{busy=false;refresh();}
   }
-  document.addEventListener('submit',event=>{if(event.target.id==='account-form')void submit(event);});
+  document.addEventListener('submit',event=>{
+    if(event.target.id==='account-form')void submit(event);
+    if(event.target.id==='profile-form'){
+      event.preventDefault();const status=document.querySelector('#profile-status');
+      try{const data=new FormData(event.target),profile=Core.cleanProfile(Object.fromEntries(data));const next={...hooks.getState(),profile};profileDraft=null;save(next);hooks.onState(next);refresh();}
+      catch(error){status.textContent=error.message;}
+    }
+  });
+  const captureProfile=event=>{const form=event.target.closest?.('#profile-form');if(form)profileDraft=Object.fromEntries(new FormData(form));};
+  document.addEventListener('change',captureProfile);
   document.addEventListener('input',event=>{
+    captureProfile(event);
     if(event.target.id!=='account-password'||mode!=='signup')return;
     Core.passwordChecks(event.target.value).forEach(check=>{
       const row=document.querySelector(`[data-requirement="${check.id}"]`);if(!row)return;
@@ -139,6 +157,6 @@
     });
   });
   document.addEventListener('click',event=>{const target=event.target.closest('[data-account-action]');if(target)void act(target.dataset.accountAction);});
-  window.addEventListener('beforeunload',event=>{if(current().dirty){event.preventDefault();event.returnValue='';}});
+  window.addEventListener('beforeunload',event=>{if(current().dirty||profileDraft){event.preventDefault();event.returnValue='';}});
   window.ScoutAccount={init,save,render,label,user:()=>user,locked:()=>!!user&&(!user.emailVerified||!current().state),dirty:()=>current().dirty};
 })();

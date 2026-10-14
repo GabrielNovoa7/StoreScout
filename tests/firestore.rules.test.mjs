@@ -31,3 +31,11 @@ test('new lists cannot skip revisions or write at unapproved paths',async()=>{
   await assertFails(setDoc(doc(db,'users/carol/lists/other'),valid(1)));
   await assertFails(setDoc(doc(db,'public/leak'),valid(1)));
 });
+test('profiles accept allowed themes but reject unexpected fields and invalid values',async()=>{
+  const ref=doc(env.authenticatedContext('profile-owner',{email_verified:true}).firestore(),'users/profile-owner/lists/main');
+  const profile={name:'Sam',zip:'77019',mode:'dark',accent:'pink'};
+  const payload={...valid(1),state:{...valid(1).state,profile}};
+  await assertSucceeds(setDoc(ref,payload));
+  for(const bad of [{...profile,password:'no'},{...profile,accent:'red'},{...profile,zip:'x'},{...profile,name:'a'.repeat(61)}])await assertFails(setDoc(ref,{...valid(2),state:{...payload.state,profile:bad}}));
+  await assertFails(getDoc(doc(env.authenticatedContext('outsider',{email_verified:true}).firestore(),'users/profile-owner/lists/main')));
+});

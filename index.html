@@ -7,9 +7,12 @@
   <meta name="theme-color" content="#174e43">
   <meta name="description" content="Your grocery list. A little smarter. Compare products and plan your next grocery trip with Store Scout.">
   <title>Store Scout — Your list, a little smarter</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%23174e43'/%3E%3Ctext x='8' y='29' font-size='27'%3E✳%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="theme.css">
+  <script defer src="theme.js"></script>
   <script defer src="model.js"></script>
   <script defer src="firebase-config.js"></script>
   <script defer src="account-core.js"></script>
@@ -20,14 +23,14 @@
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <aside class="sidebar">
-    <a class="brand" href="#list" aria-label="Store Scout home"><span class="brand-icon">✳</span><span>store<span class="brand-light">scout</span><small>A LITTLE SMARTER.</small></span></a>
+    <a class="brand" href="#list" aria-label="Store Scout home"><span class="brand-icon"><img src="icon.svg" alt="" width="38" height="38"></span><span>store<span class="brand-light">scout</span><small>A LITTLE SMARTER.</small></span></a>
     <p class="nav-label">YOUR EVERYDAY SHOP</p>
     <nav id="desktop-nav" aria-label="Main navigation"></nav>
     <div class="sidebar-tip"><span class="tip-icon">✦</span><strong>Less planning.<br>More living.</strong><p>Your usual groceries,<br>one thoughtful list.</p><span class="tip-line"></span></div>
     <button class="sidebar-bottom" data-action="navigate" data-view="account"><span class="avatar">Y</span><span><strong id="workspace-label">Guest workspace</strong><small id="workspace-status">Saved on this device</small></span><span class="local-dot"></span></button>
   </aside>
   <div class="workspace">
-    <header class="topbar"><a href="#list" class="mobile-brand">✳ store<strong>scout</strong></a><div class="breadcrumb">Your grocery companion <span>/</span> <strong id="breadcrumb">My List</strong></div><button class="location-button" data-action="navigate" data-view="stores"><span id="location-icon"></span> Houston, TX <span class="zip">77019</span><span class="chevron">⌄</span></button><button class="account-button" data-action="navigate" data-view="account">Sign in</button></header>
+    <header class="topbar"><a href="#list" class="mobile-brand"><img src="icon.svg" alt="" width="28" height="28"> store<strong>scout</strong></a><div class="breadcrumb">Your grocery companion <span>/</span> <strong id="breadcrumb">My List</strong></div><button class="location-button" data-action="navigate" data-view="stores"><span id="location-icon"></span> Houston, TX <span class="zip">77019</span><span class="chevron">⌄</span></button><button class="account-button" data-action="navigate" data-view="account">Sign in</button></header>
     <main id="main" tabindex="-1"></main>
     <footer class="page-footer"><span>Made for your everyday groceries.</span><span><i></i> Houston pilot <b>·</b> GUI preview</span></footer>
   </div>

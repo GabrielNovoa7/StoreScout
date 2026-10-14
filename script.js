@@ -76,7 +76,7 @@
   }
   function updateAccountChrome(){
     document.querySelector('.account-button').textContent=Account.user()?'Account':'Sign in';
-    document.querySelector('#workspace-label').textContent=Account.user()?'Your account':'Guest workspace';
+    document.querySelector('#workspace-label').textContent=Account.user()?(state.profile?.name||'Your account'):'Guest workspace';
     document.querySelector('#workspace-status').textContent=Account.label();
     document.querySelectorAll('.cloud-save-status').forEach(el=>el.textContent=storageLabel());
   }
@@ -94,7 +94,7 @@
     if(action==='add-dialog')openDialog(`<span class="dialog-symbol">${icon('plus')}</span><span class="eyebrow">SOMETHING FOR YOUR NEXT SHOP</span><h2 id="dialog-title">What’s on your list?</h2><p>Start with a grocery. Pick your favorite product next.</p><form id="add-form"><label class="field-label" for="new-item">Grocery item</label><input class="dialog-input" id="new-item" name="grocery" placeholder="e.g. fresh basil" maxlength="100" required autofocus><button class="button primary full" type="submit">Add to my list ${icon('plus')}</button></form>`);
     if(action==='close-dialog')dialog.close();
     if(action==='sync')openDialog(`<div class="reminders-icon"><span></span><span></span><span></span></div><span class="eyebrow">APPLE REMINDERS</span><h2 id="dialog-title">Your routine stays yours.</h2><p>The planned Shortcut will read your chosen Reminders list and securely send it to your Store Scout account.</p><ol class="setup-steps"><li><span>1</span><div><strong>Connect your account</strong><p>Secure account pairing is coming with the backend.</p></div></li><li><span>2</span><div><strong>Install the prebuilt Shortcut</strong><p>Choose your usual shopping list and grant access on your iPhone.</p></div></li><li><span>3</span><div><strong>Tap to sync when you’re ready</strong><p>The Safari and Home Screen handoff still needs an iPhone test.</p></div></li></ol><div class="dialog-note">Not connected. This GUI preview cannot read or change your Reminders.</div><button class="button primary full" data-action="close-dialog">Got it</button>`);
-    if(action==='about')openDialog(`<span class="dialog-symbol">✳</span><h2 id="dialog-title">A little smarter, together.</h2><p>This is Store Scout’s first interactive GUI. Your list and picks are saved in this browser, without an account.</p><div class="dialog-note">Prices, availability, promotions, and locations are illustrative. Apple sync, accounts, and live retailer feeds are not connected.</div><button class="button primary full" data-action="close-dialog">Back to my list</button>`);
+    if(action==='about')openDialog(`<span class="dialog-symbol">✳</span><h2 id="dialog-title">A little smarter, together.</h2><p>This is Store Scout’s first interactive GUI. Use a local guest list or sign in to save a private list across devices.</p><div class="dialog-note">Prices, availability, promotions, and locations are illustrative. Accounts and private cloud lists are connected. Apple sync and live retailer feeds are not connected.</div><button class="button primary full" data-action="close-dialog">Back to my list</button>`);
     if(action==='filter'){filter=button.dataset.filter;render();}
     if(action==='quantity'&&item){item.quantity=Math.min(99,Math.max(1,item.quantity+Number(button.dataset.delta)));save();render();}
     if(action==='remove'&&item){removed={item,index:state.items.indexOf(item)};state.items=state.items.filter(i=>i.id!==id);save();render();notify(`${item.name} removed.`,true);}
@@ -120,7 +120,7 @@
     getState:()=>state,
     getGuest:readGuest,
     onState:next=>{
-      state=next;activeId=null;removed=null;compareQuery='';listQuery='';filter='all';
+      state=next;window.ScoutTheme?.apply(Account.user()?next.profile:null);activeId=null;removed=null;compareQuery='';listQuery='';filter='all';
       clearTimeout(notify.timer);const toast=document.querySelector('#toast');toast.classList.remove('show');toast.textContent='';
     },
     onStatus:()=>{

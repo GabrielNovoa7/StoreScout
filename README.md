@@ -93,3 +93,9 @@ See [LICENSE](LICENSE) for the full notice. Request permission from the reposito
 ## Firebase setup and security tests
 
 See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for configuration, session behavior, cloud conflict handling, free-plan limits, and manual acceptance checks. Optional `npm ci`, `npm test`, and `npm run test:rules` commands run the logic and local emulator security tests. No runtime build step is needed.
+
+## Profile and appearance
+
+After verifying your email, open **Account > Profile & appearance** to set an optional display name, a five-digit shopping ZIP, Light/Dark/System mode, and a Green/Blue/Purple/Orange/Pink accent. Light with Green is the default. Click **Save profile & appearance** and wait for **Saved to your account**. These settings use the same private, revision-checked cloud document as your list and load when you sign into the same account on another device. Refresh older open tabs before changing profile settings.
+
+Signing out clears the account appearance and restores the default guest appearance. System mode follows each device's operating-system preference. Display names and ZIP codes are profile information, not authentication credentials. Store coverage remains the 77019 Houston pilot; entering another ZIP does not add live store coverage. The app icon and favicon use an original shopping-bag/check design.
