@@ -1,26 +1,36 @@
-/* Store Scout GUI preview. No retailer or Apple requests are made. */
+/* Store Scout frontend. Retailer data is illustrative; accounts use Firebase when configured. */
 (() => {
   'use strict';
   const M = window.Scout;
+  const Account = window.ScoutAccount;
   const KEY = 'store-scout-gui-v1';
   let storageOK = true, state;
   try { state=M.restore(localStorage.getItem(KEY)); } catch { state=M.initial(); storageOK=false; }
   let view='list', filter='all', listQuery='', compareQuery='', compareSort='price', activeId=null, removed=null;
+  let renderedUid=null,renderedLocked=false;
   const main=document.querySelector('#main');
   const dialog=document.querySelector('#dialog');
   const money=value=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(value);
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const paths={list:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v4H9zM9 11h6M9 15h6"/>',compare:'<path d="M5 20V10m7 10V4m7 16v-7M3 20h18"/>',shopping:'<path d="M5 8h14l1 13H4L5 8zM8 8V6a4 4 0 0 1 8 0v2"/>',stores:'<path d="M3 9l2-6h14l2 6M4 10v11h16V10M9 21v-7h6v7M3 9c0 4 4 4 4 0 0 4 5 4 5 0 0 4 5 4 5 0 0 4 4 4 4 0"/>',pin:'<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="2.5"/>',search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',plus:'<path d="M12 5v14M5 12h14"/>',arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',check:'<path d="m5 12 4 4L19 6"/>',sync:'<path d="M20 8a8 8 0 0 0-14-3L3 8m0-5v5h5m-4 8a8 8 0 0 0 14 3l3-3m0 5v-5h-5"/>',close:'<path d="m6 6 12 12M6 18 18 6"/>',trash:'<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',leaf:'<path d="M5 19C0 6 13 4 21 3c-1 9-3 21-16 16zm0 0L16 8"/>',spark:'<path d="m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z"/>'};
   const icon=(name,cls='')=>`<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.list}</svg>`;
-  const names={list:'My List',compare:'Compare',shopping:'Shopping',stores:'Stores'};
+  const names={list:'My List',compare:'Compare',shopping:'Shopping',stores:'Stores',account:'Account'};
   const offerFor=item=>M.catalog.find(o=>o.id===item.offerId);
   const storeFor=id=>M.stores.find(s=>s.id===id);
   const storeBadge=id=>`<span class="store-mark ${id}">${esc(storeFor(id).short)}</span>`;
-  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch{storageOK=false;}}
+  function readGuest(){try{return M.restore(localStorage.getItem(KEY));}catch{return M.initial();}}
+  function save(){
+    if(Account.user()){
+      try{Account.save(state);}catch{notify('Could not save these changes. Visit Account to check your connection.');}
+      return;
+    }
+    try{localStorage.setItem(KEY,JSON.stringify(state));}catch{storageOK=false;}
+  }
   function notify(message,undo=false){const el=document.querySelector('#toast');el.innerHTML=`${esc(message)}${undo?'<button data-action="undo">Undo</button>':''}`;el.classList.add('show');clearTimeout(notify.timer);notify.timer=setTimeout(()=>el.classList.remove('show'),4500);}
   function navigate(next){if(!names[next])next='list';view=next;window.location.hash=next;render();window.scrollTo({top:0,behavior:'instant'});}
-  function nav(){const html=Object.entries(names).map(([key,name])=>`<a href="#${key}" class="nav-item ${view===key?'active':''}" ${view===key?'aria-current="page"':''}>${icon(key)}<span>${name}</span>${key==='list'?`<span class="nav-count">${state.items.length}</span>`:''}</a>`).join('');document.querySelector('#desktop-nav').innerHTML=html;document.querySelector('#mobile-nav').innerHTML=html;document.querySelector('#breadcrumb').textContent=names[view];}
-  const demo=()=>`<div class="demo-note"><span class="demo-label">PREVIEW</span> Sample prices & illustrative store locations. ${storageOK?'Your list is saved on this device.':'Browser storage unavailable; changes last for this session.'}</div>`;
+  function nav(){const html=Object.entries(names).filter(([key])=>key!=='account').map(([key,name])=>`<a href="#${key}" class="nav-item ${view===key?'active':''}" ${view===key?'aria-current="page"':''}>${icon(key)}<span>${name}</span>${key==='list'?`<span class="nav-count">${state.items.length}</span>`:''}</a>`).join('');document.querySelector('#desktop-nav').innerHTML=html;document.querySelector('#mobile-nav').innerHTML=html;document.querySelector('#breadcrumb').textContent=names[view];}
+  const storageLabel=()=>Account.user()?Account.label():storageOK?'Guest list saved on this device.':'Browser storage unavailable; changes last for this session.';
+  const demo=()=>`<div class="demo-note"><span class="demo-label">PREVIEW</span> Sample prices & illustrative store locations. <span class="cloud-save-status" role="status">${esc(storageLabel())}</span></div>`;
   function heading(eyebrow,title,description,action=''){return `<div class="page-heading"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${description}</p></div>${action}</div>`;}
   function groceryArt(){return `<div class="grocery-art" aria-hidden="true"><span class="art-circle"></span><div class="floating-leaf leaf-one">✦</div><div class="floating-leaf leaf-two">✧</div><span class="art-bread">🥖</span><span class="art-leaves">🥬</span><span class="art-carrot">🥕</span><span class="art-milk">🥛</span><div class="paper-bag"><span class="bag-handle"></span><span class="bag-logo">✳</span><span>GOOD THINGS<br>IN STORE.</span></div><span class="art-tomato">🍅</span><span class="art-avocado">🥑</span><div class="art-sticker">${icon('check')} A smarter shop</div></div>`;}
   function listPage(){
@@ -57,9 +67,21 @@
     ${pending.length?`<section class="pending-panel"><span class="stat-icon peach">${icon('list')}</span><div><h3>A few choices before you go.</h3><p>${pending.map(i=>esc(i.name)).join(' · ')}</p></div><button class="button secondary" data-action="compare-item" data-id="${esc(pending[0].id)}">Finish picking ${icon('arrow')}</button></section>`:''}${demo()}`;}
   function storesPage(){return heading('YOUR NEIGHBORHOOD. YOUR CHOICES.','Familiar stores, smarter stops.','Start close to home. Keep the stores that work for you.')+
     `<section class="area-card"><span class="area-icon">${icon('pin')}</span><div><span class="eyebrow">YOUR PILOT AREA</span><h2>Houston, Texas <span>77019</span></h2><p>Our first neighborhood. More places to come.</p></div><span class="pill light">In-store shopping</span></section><div class="results-heading"><h2>Your stores <span class="count-bubble">${state.stores.length} enabled</span></h2><span>Choose stores to include in comparisons</span></div><div class="stores-grid">${M.stores.map(s=>`<article class="store-card"><div class="store-visual ${s.id}">${storeBadge(s.id)}<span>YOUR EVERYDAY ESSENTIALS</span></div><div class="store-card-body"><div class="store-name-line"><h2>${s.name}</h2><button class="toggle ${state.stores.includes(s.id)?'enabled':''}" role="switch" aria-checked="${state.stores.includes(s.id)}" aria-label="Include ${s.name} in comparisons" data-action="toggle-store" data-store="${s.id}"><span></span></button></div><p>Houston pilot · illustrative location</p><div class="store-facts"><span>${icon('shopping')} In-store</span><span>${M.catalog.filter(o=>o.storeId===s.id).length} sample products</span></div><div class="coverage-note"><strong>Sample catalog available</strong><p>Live prices and availability aren’t connected. The exact pilot location is still to be verified.</p></div><button class="button secondary full" data-action="browse-store" data-store="${s.id}">Browse sample products ${icon('arrow')}</button></div></article>`).join('')}</div><section class="future-card">${icon('leaf')}<div><h3>Starting small. Shopping thoughtfully.</h3><p>H-E-B and Walmart are our first pilot retailers. Pickup, delivery, and more stores will get their own verified coverage later.</p></div></section>${demo()}`;}
-  function render(){nav();main.innerHTML=({list:listPage,compare:comparePage,shopping:shoppingPage,stores:storesPage}[view])();document.querySelector('#location-icon').innerHTML=icon('pin');}
+  function render(){
+    nav();
+    main.innerHTML=(view==='account'||Account.locked())?Account.render():({list:listPage,compare:comparePage,shopping:shoppingPage,stores:storesPage}[view])();
+    document.querySelector('#location-icon').innerHTML=icon('pin');
+    updateAccountChrome();
+    renderedUid=Account.user()?.uid||null;renderedLocked=Account.locked();
+  }
+  function updateAccountChrome(){
+    document.querySelector('.account-button').textContent=Account.user()?'Account':'Sign in';
+    document.querySelector('#workspace-label').textContent=Account.user()?'Your account':'Guest workspace';
+    document.querySelector('#workspace-status').textContent=Account.label();
+    document.querySelectorAll('.cloud-save-status').forEach(el=>el.textContent=storageLabel());
+  }
   function openDialog(content){document.querySelector('#dialog-content').innerHTML=`<button class="dialog-close icon-button" data-action="close-dialog" aria-label="Close dialog">${icon('close')}</button>${content}`;dialog.showModal();}
-  function addItem(name){name=name.trim();if(!name)return;const preferred=state.preferences[M.normalize(name)];const known=M.catalog.find(o=>o.id===preferred&&state.stores.includes(o.storeId)&&o.available!==false);state.items.push({id:crypto.randomUUID(),name:name.slice(0,100),quantity:1,offerId:known?.id||null,done:false});save();dialog.close();filter='all';listQuery='';render();notify(known?'Added with your remembered product.':'Added to your list.');}
+  function addItem(name){name=name.trim();if(!name)return;if(state.items.length>=200){notify('This pilot supports up to 200 grocery items per list.');return;}const preferred=state.preferences[M.normalize(name)];const known=M.catalog.find(o=>o.id===preferred&&state.stores.includes(o.storeId)&&o.available!==false);state.items.push({id:crypto.randomUUID(),name:name.slice(0,100),quantity:1,offerId:known?.id||null,done:false});save();dialog.close();filter='all';listQuery='';render();notify(known?'Added with your remembered product.':'Added to your list.');}
   document.addEventListener('submit',event=>{if(['quick-add','add-form','compare-form'].includes(event.target.id)){event.preventDefault();const data=new FormData(event.target);if(event.target.id==='compare-form'){compareQuery=String(data.get('query')).trim();render();}else addItem(String(data.get('grocery')));}});
   document.addEventListener('input',event=>{if(event.target.id==='list-search'){const start=event.target.selectionStart;listQuery=event.target.value;render();const input=document.querySelector('#list-search');input.focus();input.setSelectionRange(start,start);}});
   document.addEventListener('change',event=>{if(event.target.id==='sort'){compareSort=event.target.value;render();}if(event.target.dataset.checkId){const item=state.items.find(i=>i.id===event.target.dataset.checkId);if(item){item.done=event.target.checked;save();render();}}});
@@ -87,11 +109,34 @@
       const offer=M.catalog.find(o=>o.id===button.dataset.offer);if(!offer||offer.available===false||!state.stores.includes(offer.storeId))return;
       const active=state.items.find(i=>i.id===activeId);
       if(active){active.offerId=offer.id;active.done=false;state.preferences[M.normalize(active.name)]=offer.id;notify(`Your ${active.name.toLowerCase()} pick is saved.`);}
-      else {state.items.push({id:crypto.randomUUID(),name:offer.name,quantity:1,offerId:offer.id,done:false});state.preferences[M.normalize(offer.name)]=offer.id;notify('Product added to your list.');}
+      else {if(state.items.length>=200){notify('This pilot supports up to 200 grocery items per list.');return;}state.items.push({id:crypto.randomUUID(),name:offer.name,quantity:1,offerId:offer.id,done:false});state.preferences[M.normalize(offer.name)]=offer.id;notify('Product added to your list.');}
       save();render();
     }
   });
   dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
   window.addEventListener('hashchange',()=>{view=names[location.hash.slice(1)]?location.hash.slice(1):'list';render();});
   view=names[location.hash.slice(1)]?location.hash.slice(1):'list';render();
+  void Account.init({
+    getState:()=>state,
+    getGuest:readGuest,
+    onState:next=>{
+      state=next;activeId=null;removed=null;compareQuery='';listQuery='';filter='all';
+      clearTimeout(notify.timer);const toast=document.querySelector('#toast');toast.classList.remove('show');toast.textContent='';
+    },
+    onStatus:()=>{
+      if(view==='account'||Account.locked()||renderedUid!==(Account.user()?.uid||null)||renderedLocked!==Account.locked())render();
+      else updateAccountChrome();
+    },
+    navigate,
+    confirmReload:(reload,download)=>{
+      openDialog('<h2 id="dialog-title">Keep a copy before reloading.</h2><p>Loading the cloud copy replaces the unsaved list currently in this tab. Download your current list first if you want to keep those edits.</p><div class="account-actions"><button class="button secondary" id="export-before-reload">Download current list</button><button class="button primary" id="confirm-cloud-reload">Load cloud copy</button></div>');
+      document.querySelector('#export-before-reload').addEventListener('click',download);
+      document.querySelector('#confirm-cloud-reload').addEventListener('click',()=>{dialog.close();reload();});
+    },
+    confirmSignout:(logout,download)=>{
+      openDialog('<h2 id="dialog-title">Some changes are not saved.</h2><p>Download a copy before signing out if you want to keep your unsaved edits. Signing out will clear them from this tab.</p><div class="account-actions"><button class="button secondary" id="export-before-signout">Download current list</button><button class="button primary" id="confirm-signout">Discard unsaved edits and sign out</button></div>');
+      document.querySelector('#export-before-signout').addEventListener('click',download);
+      document.querySelector('#confirm-signout').addEventListener('click',()=>{dialog.close();logout();});
+    }
+  });
 })();

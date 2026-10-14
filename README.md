@@ -1,6 +1,6 @@
 # Store Scout
 
-**Version 2 — interactive GUI preview**
+**Version 2.1 — Firebase accounts and cloud-list integration**
 
 Store Scout is a mobile-first grocery-shopping web app in development. Its goal is to make grocery shopping cheaper and require less work by connecting the shopping list people already use with product selection, price comparison, and shopping checklists organized by store.
 
@@ -20,13 +20,16 @@ This is an ongoing learning and portfolio project. My aim is to understand the d
 - **Shopping:** check off selected products grouped by illustrative H-E-B and Walmart pilot locations.
 - **Stores:** manage the retailers included in comparisons.
 - **Responsive layout:** desktop navigation and phone-friendly bottom navigation.
-- **Local persistence:** shopping lists, product choices, store preferences, and shopping progress are saved in this browser.
+- **Guest persistence:** guest lists and product choices are saved in this browser.
+- **Accounts and cloud lists:** Firebase email/password signup, verification, sign-in, reset, and sign-out; private lists accessible from the same account on multiple devices.
+- **Password requirements:** 9–128 characters with uppercase, lowercase, and a number, enforced in the form and Firebase policy.
+- **Cloud safeguards:** verified-account access, autosave status, conflict detection, explicit guest import, and list download.
 
 ## Current limitations
 
 **Prices, availability, promotions, and store locations are sample data, not verified local in-store offers.**
 
-The Apple Reminders button currently explains the planned integration. It does not read or change Reminders. There are no backend accounts or cross-device synchronization yet. The app is a browser-based GUI preview; installable/offline PWA support is not implemented.
+The Apple Reminders button currently explains the planned integration. It does not read or change Reminders. Firebase Authentication and Firestore provide the account and cloud-list integration. The real signup/email/login flow must be verified after project configuration; see [FIREBASE_SETUP.md](FIREBASE_SETUP.md). The app is a browser-based GUI preview; installable/offline PWA support is not implemented.
 
 The intended future workflow is:
 
@@ -40,7 +43,7 @@ Reliable, permitted retailer price access is still being researched. The Safari/
 
 ## Technology
 
-The current frontend uses HTML, CSS, and vanilla JavaScript. It extends the original project without requiring a framework, package installation, or build step. Browser localStorage provides device-local persistence. Future backend choices will be made as account, sync, and retailer integration requirements are validated.
+The current frontend uses HTML, CSS, and vanilla JavaScript. It extends the original project without requiring a framework, package installation, or build step. Browser localStorage provides guest-only persistence. Firebase Authentication uses memory-only sessions; authenticated grocery data stays in memory and is saved in Firestore. Reloading requires signing in again. No application passwords or authentication tokens are persisted in browser storage.
 
 ## Run locally — repository owner or authorized users only
 
@@ -64,7 +67,7 @@ These instructions do not grant permission to use or reproduce the code. See [LI
 With Node.js installed:
 
 ```sh
-node --test tests/model.test.cjs
+node --test tests/*.test.cjs
 node --check script.js
 node --check model.js
 ```
@@ -73,7 +76,7 @@ Browser verification covers adding groceries, choosing products, shopping checkl
 
 ## Development direction
 
-Build incrementally: refine the GUI, add accounts and backend persistence, validate secure Reminders synchronization, and integrate permitted retailer data sources. More retailers, pickup and delivery, and trip optimization are future possibilities.
+Build incrementally: verify and refine account syncing, validate secure Reminders synchronization, and integrate permitted retailer data sources. More retailers, pickup and delivery, and trip optimization are future possibilities.
 
 GroceryChop provides visual inspiration for comparison controls and navigation. Store Scout has its own identity and focuses on Reminders synchronization, remembered product choices, and store-organized shopping.
 
@@ -86,3 +89,7 @@ This project is **not offered under an open-source or free-software license**. N
 Public visibility is not permission to reuse the code. GitHub's terms allow viewing and forking public repositories on GitHub; those platform rights do not constitute a general license to reuse this project. Third-party materials, if any, remain subject to their respective rights and terms.
 
 See [LICENSE](LICENSE) for the full notice. Request permission from the repository owner before reusing any part of the project.
+
+## Firebase setup and security tests
+
+See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for configuration, session behavior, cloud conflict handling, free-plan limits, and manual acceptance checks. Optional `npm ci`, `npm test`, and `npm run test:rules` commands run the logic and local emulator security tests. No runtime build step is needed.
