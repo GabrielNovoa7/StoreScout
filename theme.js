@@ -9,9 +9,11 @@
     const dark=selected.mode==='dark'||selected.mode==='system'&&media.matches;
     const root=document.documentElement;
     root.dataset.theme=dark?'dark':'light';root.dataset.accent=selected.accent;
+    const hue=({green:155,blue:218,purple:271,orange:25,pink:333})[selected.accent];
+    root.style.setProperty('--accent-hue',hue);
     root.style.setProperty('--green',colors[selected.accent][dark?1:0]);
     root.style.setProperty('--deep',colors[selected.accent][dark?1:0]);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#141a19':'#f8f9f5');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'hsl('+hue+' 35% 14%)':'hsl('+hue+' 32% 90%)');
   }
   media.addEventListener('change',()=>{if(selected.mode==='system')apply(selected);});
   window.ScoutTheme={apply};apply(null);

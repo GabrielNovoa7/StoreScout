@@ -21,3 +21,52 @@ body,.sidebar,.topbar,.mobile-nav,dialog,.account-panel,.product-card,.shopping-
 :root[data-theme="dark"] .light,:root[data-theme="dark"] .area-icon,:root[data-theme="dark"] .art-sticker,:root[data-theme="dark"] .reminders-icon{background:var(--white);color:var(--ink)}
 :root[data-theme="dark"] .store-visual{background:var(--mint)}
 :root[data-theme="dark"] .needs-label,:root[data-theme="dark"] .store-warning{background:var(--surface-soft);color:#ffd8a0}
+
+/* Accent colors shape the whole workspace, from navigation to content surfaces. */
+:root{
+  --accent-hue:155;
+  --shell:hsl(var(--accent-hue) 32% 90%);
+  --white:hsl(var(--accent-hue) 30% 97%);
+  --canvas:hsl(var(--accent-hue) 20% 94%);
+  --line:hsl(var(--accent-hue) 22% 81%);
+  --ink:hsl(var(--accent-hue) 26% 18%);
+  --muted:hsl(var(--accent-hue) 15% 36%);
+}
+:root[data-theme="dark"]{
+  --shell:hsl(var(--accent-hue) 35% 14%);
+  --white:hsl(var(--accent-hue) 24% 18%);
+  --canvas:hsl(var(--accent-hue) 22% 10%);
+  --surface-soft:hsl(var(--accent-hue) 25% 22%);
+  --line:hsl(var(--accent-hue) 20% 32%);
+  --ink:hsl(var(--accent-hue) 25% 94%);
+  --muted:hsl(var(--accent-hue) 18% 76%);
+}
+.sidebar,.topbar,.mobile-nav{background:var(--shell);border-color:var(--line)}
+.sidebar{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.sidebar>*{flex-shrink:0}
+.sidebar-note{margin:24px 8px 20px;padding:15px;border:1px solid var(--line);border-radius:12px;background:var(--mint)}
+.sidebar-note strong{font-size:12px;color:var(--ink)}
+.sidebar-note p{font-size:11px;line-height:1.7;color:var(--muted);margin:6px 0 0}
+.account-panel,.list-panel,.shopping-store,.store-card,.product-card{background:var(--white);border-color:var(--line)}
+.account-callout,.trip-summary,.area-card{background:var(--mint);border-color:var(--line)}
+.mobile-brand{display:none}
+@media(max-width:740px){.mobile-brand{display:flex}}
+
+/* Summary badges share the selected palette, including their dark surfaces. */
+.stat{background:var(--white);border-color:var(--line);color:var(--ink)}
+.stat-icon.mint,.stat-icon.peach,.stat-icon.lavender{background:var(--mint);color:var(--green)}
+.compare-search-card{background:var(--white);border-color:var(--line)}
+.sort-label select{background:var(--surface-soft);color:var(--ink);border-color:var(--line)}
+/* Reminders keeps its own neutral tile and Apple-style blue/orange/red dots. */
+:root .reminders-icon{background:#fff;border-color:#d1d1d6;color:#3a3a3c;box-shadow:0 2px 4px #00000012}
+:root[data-theme="dark"] .reminders-icon{background:#252527;border-color:#48484a;color:#f2f2f7}
+:root .reminders-icon span{background:#d1d1d6}
+:root[data-theme="dark"] .reminders-icon span{background:#636366}
+:root .reminders-icon span:before{border:0;background:#007aff;width:5px;height:5px;top:-1px}
+:root .reminders-icon span:nth-child(2):before{background:#ff9500}
+:root .reminders-icon span:nth-child(3):before{background:#ff3b30}
+.compare-explainer{background:var(--mint);border:1px solid var(--line);border-radius:14px;padding:24px;gap:18px;align-items:flex-start}
+.compare-explainer>.icon{flex-shrink:0;width:24px;height:24px;margin:2px 0 0;color:var(--green)}
+.compare-explainer strong{color:var(--ink)}
+.compare-explainer p{color:var(--muted);line-height:1.8;margin-bottom:0}
+@media(max-width:480px){.compare-explainer{padding:18px;gap:12px}}
