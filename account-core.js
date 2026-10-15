@@ -16,7 +16,7 @@
     if(typeof p.name!=='string'||p.name.trim().length>60||typeof p.zip!=='string'||!/^\d{5}$/.test(p.zip)||!['light','dark','system'].includes(p.mode)||!['green','blue','purple','orange','pink'].includes(p.accent))throw new Error('Enter a name up to 60 characters, a five-digit ZIP, and valid appearance settings.');
     return {name:p.name.trim(),zip:p.zip,mode:p.mode,accent:p.accent};
   }
-  const empty=()=>({version:1,items:[],stores:['kroger','heb','walmart'],preferences:{},profile:cleanProfile()});
+  const empty=()=>({version:1,items:[],stores:['kroger','sellers','heb','walmart'],preferences:{},profile:cleanProfile()});
   function passwordChecks(value){
     return [
       {id:'length',label:'At least 9 characters',passed:value.length>=9&&value.length<=128},

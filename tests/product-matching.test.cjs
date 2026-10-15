@@ -163,7 +163,7 @@ test('coming-soon stores are hidden from comparisons and shopping but keep saved
  assert.match(h.html(),/Kroger · 1 gal · Qty 1/);assert.doesNotMatch(h.html(),/<h2>(Walmart|H-E-B)<\/h2>/);
  assert.match(h.html(),/1 still need a product/);
  h.click('navigate',{view:'stores'});
- assert.match(h.html(),/Coming soon/);assert.match(h.html(),/H-E-B<\/h3>/);assert.match(h.html(),/Walmart<\/h3>/);assert.match(h.html(),/Also covers Ralphs/);
+ assert.match(h.html(),/Coming soon/);assert.match(h.html(),/H-E-B<\/h3>/);assert.match(h.html(),/Walmart<\/h3>/);assert.doesNotMatch(h.html(),/Sellers Bros\.<\/h3>/);assert.match(h.html(),/<h2>Sellers Bros\.<\/h2>/);assert.match(h.html(),/Also covers Ralphs/);
  h.click('toggle-store',{store:'heb'});assert.ok(h.state().stores.includes('heb'));
  assert.equal(h.state().items[0].offerId,'eggs-w');
 });
@@ -185,4 +185,15 @@ test('photo barcodes convert Kroger UPCs and reject invalid codes',()=>{
  assert.equal(P.barcodeFor({retailer:'walmart',upc:'041390001055'}),'041390001055');
  assert.equal(P.barcodeFor({retailer:'walmart',upc:'041390001054'}),null);
  assert.equal(M.cleanLive({...krogerMilk,image:'https://evil.example/x.jpg'}).image,null);
+});
+
+test('an empty weekly-ad search explains that the ad only lists sale items',async()=>{
+ const retailers={enabled:true,available:id=>id==='kroger'||id==='sellers',async locations(){return [];},
+  async search(id,q,opts,onProduct){if(id==='kroger')onProduct(krogerMilk);}};
+ const h=uiHarness([],{retailers,stores:['kroger','sellers'],realStatus:true});
+ h.click('navigate',{view:'compare'});h.search('milk');await settle();
+ assert.match(h.html(),/Sellers Bros\.: no “milk” in this week’s ad/);
+ const only=uiHarness([],{retailers,stores:['sellers'],realStatus:true});
+ only.click('navigate',{view:'compare'});only.search('eggs');await settle();
+ assert.match(only.html(),/No “eggs” in this week’s Sellers Bros\. ad/);
 });

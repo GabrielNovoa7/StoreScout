@@ -9,6 +9,7 @@
       family: ["Ralphs", "King Soopers", "Fred Meyer", "Fry's", "Harris Teeter", "Smith's", "QFC", "Dillons", "Mariano's", "Food 4 Less"] },
     { id: "heb", name: "H-E-B", label: "H-E-B", short: "H", color: "#df4c4c", domain: "heb.com", live: false, status: "coming-soon" },
     { id: "walmart", name: "Walmart", label: "Walmart", short: "W", color: "#3274bb", domain: "walmart.com", live: false, status: "coming-soon" },
+    { id: "sellers", name: "Sellers Bros.", label: "Sellers Bros.", short: "S", color: "#c8102e", domain: "sellersbros.com", live: true, status: "active", pricing: "weekly-ad" },
   ];
   const liveStoreIds = () => stores.filter((s) => s.live).map((s) => s.id);
   const products = [
@@ -365,6 +366,8 @@
       regularPrice: Number.isFinite(regular) && regular > 0 ? regular : null,
       locationId: liveText(value.locationId, 80),
       available: typeof value.available === "boolean" ? value.available : null,
+      deal: liveText(value.deal, 40),
+      note: liveText(value.note, 160),
       image:
         typeof value.image === "string" &&
         /^https:\/\/images\.openfoodfacts\.org\/images\/products\/[A-Za-z0-9/._-]+\.(jpg|jpeg|png|webp)$/.test(value.image)
@@ -481,7 +484,7 @@
   function initial() {
     return {
       version: 1,
-      stores: ["kroger", "heb", "walmart"],
+      stores: ["kroger", "sellers", "heb", "walmart"],
       locations: {},
       items: [
         { id: "i1", name: "Eggs", quantity: 1, offerId: "eggs-w", done: false },

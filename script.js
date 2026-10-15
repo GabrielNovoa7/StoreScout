@@ -22,6 +22,7 @@
     liveStatus = "",
     liveBrand = "",
     liveSaleOnly = false,
+    liveNotes = [],
     locationResults = {},
     locationStatus = "",
     areaZip = "",
@@ -128,6 +129,7 @@
   const storeWhere = (id) => {
     const store = storeFor(id), loc = locationFor(id);
     if (loc) return `${loc.name}${loc.address ? ` · ${loc.address}` : ""}`;
+    if (store?.pricing === "weekly-ad") return "Weekly ad prices · all stores";
     return store?.live ? `Nearest store to ${shopZip()}` : "Sample prices · live prices coming soon";
   };
   function readGuest() {
@@ -187,13 +189,17 @@
         ? "Guest list saved on this device."
         : "Browser storage unavailable; changes last for this session.";
   function priceNote() {
-    const live = activeStores().filter((s) => s.live).map((s) => s.name);
+    const live = activeStores().filter((s) => s.live && s.pricing !== "weekly-ad").map((s) => s.name);
+    const ads = activeStores().filter((s) => s.pricing === "weekly-ad").map((s) => s.name);
     const sample = activeStores().filter((s) => !s.live).map((s) => s.name);
     const soon = comingSoon().map((s) => s.name);
+    const names = (list) =>
+      list.length > 1 ? `${list.slice(0, -1).join(", ")} and ${list.at(-1)}` : list[0];
     return [
-      live.length ? `${live.join(", ")} prices are live.` : "",
-      sample.length ? `${sample.join(", ")} ${sample.length > 1 ? "show" : "shows"} sample prices.` : "",
-      soon.length ? `${soon.join(" and ")} coming soon.` : "",
+      live.length ? `${names(live)} prices are live.` : "",
+      ads.length ? `${names(ads)} ${ads.length > 1 ? "show" : "shows"} weekly ad prices.` : "",
+      sample.length ? `${names(sample)} ${sample.length > 1 ? "show" : "shows"} sample prices.` : "",
+      soon.length ? `${names(soon)} ${soon.length > 1 ? "are" : "is"} coming soon.` : "",
     ].filter(Boolean).join(" ");
   }
   const demo = () =>
@@ -291,7 +297,7 @@
     const selected = active?.offerId === p.id;
     const promo = p.regularPrice && p.regularPrice > p.price;
     const unit = M.unitPrice(p);
-    return `<article class="${selected ? "live-selected" : ""}${p.image ? " has-photo" : ""}">${p.image ? `<div class="live-photo-frame">${photo(p.image, "live-photo")}</div>` : ""}<div class="live-info"><strong>${esc(p.name)}</strong><span class="live-store">${storeBadge(p.retailer)} ${esc(p.brand || storeFor(p.retailer)?.name || "")} · ${esc(p.size || "size unavailable")}</span><small>${promo ? "On sale · " : ""}${p.available === true ? "Fulfillment offered · shelf stock unverified" : "Shelf stock unverified"} · fetched ${esc(new Date(p.fetchedAt).toLocaleTimeString())}</small></div><div class="live-buy"><b>${money(p.price)}${promo ? ` <s>${money(p.regularPrice)}</s>` : ""}${unit ? `<em>${money(unit.value)} / ${esc(unit.unit)}</em>` : ""}</b><button class="button ${selected ? "secondary" : "primary"}" data-action="select-live" data-live="${esc(p.id)}">${icon(selected ? "check" : "plus")} ${selected ? "Selected" : active ? "Choose" : "Add to list"}</button></div></article>`;
+    return `<article class="${selected ? "live-selected" : ""}${p.image ? " has-photo" : ""}">${p.image ? `<div class="live-photo-frame">${photo(p.image, "live-photo")}</div>` : ""}<div class="live-info"><strong>${esc(p.name)}</strong><span class="live-store">${storeBadge(p.retailer)} ${esc(p.brand || storeFor(p.retailer)?.name || "")} · ${esc(p.size || "size unavailable")}</span><small>${p.deal ? `<span class="deal-tag">${esc(p.deal)}</span> ` : ""}${p.note ? esc(p.note) : `${promo ? "On sale · " : ""}${p.available === true ? "Fulfillment offered · shelf stock unverified" : "Shelf stock unverified"} · fetched ${esc(new Date(p.fetchedAt).toLocaleTimeString())}`}</small></div><div class="live-buy"><b>${money(p.price)}${p.size === "per lb" ? "<i>/lb</i>" : ""}${promo ? ` <s>${money(p.regularPrice)}</s>` : ""}${unit ? `<em>${money(unit.value)} / ${esc(unit.unit)}</em>` : ""}</b><button class="button ${selected ? "secondary" : "primary"}" data-action="select-live" data-live="${esc(p.id)}">${icon(selected ? "check" : "plus")} ${selected ? "Selected" : active ? "Choose" : "Add to list"}</button></div></article>`;
   }
   function liveSection(active) {
     if (!liveStatus || !liveStores().some((s) => isOn(s.id))) return "";
@@ -312,7 +318,8 @@
     const filters = enabled.length
       ? `<div class="live-filters"><label>Brand <select id="live-brand" aria-label="Filter by brand"><option value="">All brands (${enabled.length})</option>${brands.map((b) => `<option value="${esc(b)}" ${liveBrand === b ? "selected" : ""}>${esc(b)}</option>`).join("")}</select></label><label class="live-sale"><input type="checkbox" id="live-sale" ${liveSaleOnly ? "checked" : ""}> On sale only</label><button class="text-button" data-action="navigate" data-view="stores">Change store ${icon("arrow")}</button></div>`
       : "";
-    return `<section class="live-panel"><div class="results-heading"><h2>${esc(liveStatus)} ${enabled.length ? `<span class="count-bubble">${shown.length}</span>` : ""}</h2><span>${esc(where)}</span></div>${filters}${shown.length ? `<div class="live-results">${shown.map((p) => liveCard(p, active)).join("")}</div>` : enabled.length ? '<p class="no-alternatives">No live products match these filters.</p>' : ""}</section>`;
+    const notes = liveNotes.length && enabled.length ? `<ul class="live-notes">${liveNotes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : "";
+    return `<section class="live-panel"><div class="results-heading"><h2>${esc(liveStatus)} ${enabled.length ? `<span class="count-bubble">${shown.length}</span>` : ""}</h2><span>${esc(where)}</span></div>${notes}${filters}${shown.length ? `<div class="live-results">${shown.map((p) => liveCard(p, active)).join("")}</div>` : enabled.length ? '<p class="no-alternatives">No live products match these filters.</p>' : ""}</section>`;
   }
   let liveRun = 0;
   async function attachPhotos(run) {
@@ -329,6 +336,7 @@
     const targets = liveStores().filter((s) => isOn(s.id));
     liveBrand = "";
     liveSaleOnly = false;
+    liveNotes = [];
     if (!targets.length || term.length < 2) {
       liveProducts = [];
       liveStatus = "";
@@ -362,10 +370,17 @@
     );
     if (!current()) return;
     void attachPhotos(run);
+    // Weekly ads only list sale items, so say so instead of showing nothing.
+    const adMisses = targets.filter(
+      (s, n) => s.pricing === "weekly-ad" && results[n].status === "fulfilled" && !liveProducts.some((p) => p.retailer === s.id),
+    );
+    liveNotes = adMisses.map((s) => `${s.name}: no “${term}” in this week’s ad. Weekly ads only list items on sale.`);
     if (!liveProducts.length)
       liveStatus = results.some((r) => r.status === "rejected")
         ? `Live ${names} prices are temporarily unavailable.`
-        : `${names} returned no products for this search.`;
+        : adMisses.length === targets.length
+          ? `No “${term}” in this week’s ${names} ad.`
+          : `${names} returned no products for this search.`;
     render();
   }
   function productCard(o, active) {
@@ -426,7 +441,7 @@
       : live
         ? `<strong>No store chosen</strong><small>Using the nearest store to ${esc(shopZip())}</small>`
         : "<strong>Location search coming soon</strong><small>Available once live prices are connected</small>";
-    return `<article class="store-card"><div class="store-visual ${esc(s.id)}">${storeBadge(s.id)}<span>${live ? "LIVE PRICES" : "SAMPLE PRICES"}</span></div><div class="store-card-body"><div class="store-name-line"><h2>${esc(s.name)}</h2><button class="toggle ${on ? "enabled" : ""}" role="switch" aria-checked="${on}" aria-label="Include ${esc(s.name)} in comparisons" data-action="toggle-store" data-store="${esc(s.id)}"><span></span></button></div><div class="store-location">${icon("pin")}<span>${where}</span>${loc ? `<button class="text-button" data-action="clear-location" data-store="${esc(s.id)}">Use nearest</button>` : ""}</div>${s.family?.length ? `<p class="store-family">Also covers ${esc(s.family.join(", "))}</p>` : ""}<div class="store-facts"><span>${icon("spark")} ${live ? "Live prices" : "Sample prices"}</span><span>${live ? "Official retailer API" : `${samples} sample products`}</span></div>${live ? locationList(s) : ""}<button class="button secondary full" data-action="browse-store" data-store="${esc(s.id)}">${live ? "Search products" : "Browse sample products"} ${icon("arrow")}</button></div></article>`;
+    return `<article class="store-card"><div class="store-visual ${esc(s.id)}">${storeBadge(s.id)}<span>${s.pricing === "weekly-ad" ? "WEEKLY AD" : live ? "LIVE PRICES" : "SAMPLE PRICES"}</span></div><div class="store-card-body"><div class="store-name-line"><h2>${esc(s.name)}</h2><button class="toggle ${on ? "enabled" : ""}" role="switch" aria-checked="${on}" aria-label="Include ${esc(s.name)} in comparisons" data-action="toggle-store" data-store="${esc(s.id)}"><span></span></button></div><div class="store-location">${icon("pin")}<span>${where}</span>${loc ? `<button class="text-button" data-action="clear-location" data-store="${esc(s.id)}">Use nearest</button>` : ""}</div>${s.family?.length ? `<p class="store-family">Also covers ${esc(s.family.join(", "))}</p>` : ""}<div class="store-facts"><span>${icon("spark")} ${s.pricing === "weekly-ad" ? "Weekly ad prices" : live ? "Live prices" : "Sample prices"}</span><span>${s.pricing === "weekly-ad" ? "Updated each week" : live ? "Official retailer API" : `${samples} sample products`}</span></div>${live ? locationList(s) : ""}<button class="button secondary full" data-action="browse-store" data-store="${esc(s.id)}">${live ? "Search products" : "Browse sample products"} ${icon("arrow")}</button></div></article>`;
   }
   function storesPage() {
     const searchable = liveStores();

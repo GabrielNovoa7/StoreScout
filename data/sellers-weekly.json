@@ -1,0 +1,2325 @@
+{
+ "retailer": "sellers",
+ "source": "https://sellersbros.com/weekly-ad",
+ "adFiles": [
+  "https://sellersbros.com/s/SellersInStoreWeb_1014.pdf",
+  "https://sellersbros.com/s/SellersMailerWeb_1014.pdf"
+ ],
+ "validFrom": "2026-10-14",
+ "validTo": "2026-10-20",
+ "fetchedAt": "2026-10-15T09:52:12+00:00",
+ "stores": [
+  {
+   "id": "sb-8011-elvera",
+   "name": "Sellers Bros. - 8011 Elvera",
+   "address": "8011 Elvera, Houston, TX 77012",
+   "zip": "77012",
+   "phone": "(713) 649-8294"
+  },
+  {
+   "id": "sb-402-edgebrook",
+   "name": "Sellers Bros. - 402 Edgebrook",
+   "address": "402 Edgebrook, Houston, TX 77034",
+   "zip": "77034",
+   "phone": "(713) 947-6058"
+  },
+  {
+   "id": "sb-1523-little-york",
+   "name": "Sellers Bros. - 1523 Little York",
+   "address": "1523 Little York, Houston, TX 77093",
+   "zip": "77093",
+   "phone": "(346) 571-2107"
+  },
+  {
+   "id": "sb-2311-strawberry",
+   "name": "Sellers Bros. - 2311 Strawberry",
+   "address": "2311 Strawberry, Pasadena, TX 77502",
+   "zip": "77502",
+   "phone": "(713) 944-1150"
+  },
+  {
+   "id": "sb-9494-hammerly",
+   "name": "Sellers Bros. - 9494 Hammerly",
+   "address": "9494 Hammerly, Houston, TX 77080",
+   "zip": "77080",
+   "phone": "(713) 465-5767"
+  },
+  {
+   "id": "sb-3337-telephone",
+   "name": "Sellers Bros. - 3337 Telephone",
+   "address": "3337 Telephone, Houston, TX 77023",
+   "zip": "77023",
+   "phone": "(713) 928-6196"
+  },
+  {
+   "id": "sb-10901-market-street",
+   "name": "Sellers Bros. - 10901 Market Street",
+   "address": "10901 Market Street, Jacinto City, TX 77029",
+   "zip": "77029",
+   "phone": "(713) 455-0979"
+  },
+  {
+   "id": "sb-5900-renwick",
+   "name": "Sellers Bros. - 5900 Renwick",
+   "address": "5900 Renwick, Houston, TX 77081",
+   "zip": "77081",
+   "phone": "(713) 663-7750"
+  },
+  {
+   "id": "sb-1050-federal",
+   "name": "Sellers Bros. - 1050 Federal",
+   "address": "1050 Federal, Houston, TX 77015",
+   "zip": "77015",
+   "phone": "(713) 455-0603"
+  },
+  {
+   "id": "sb-601-n-cesar-chavez",
+   "name": "Sellers Bros. - 601 N. Cesar Chavez",
+   "address": "601 N. Cesar Chavez, Houston, TX 77011",
+   "zip": "77011",
+   "phone": "(713) 490-2371"
+  }
+ ],
+ "products": [
+  {
+   "name": "Turkey Ham",
+   "details": "La Michoacana",
+   "price": 4.19,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "0503a24aafc5"
+  },
+  {
+   "name": "Cooked Ham",
+   "details": "El Mexicano",
+   "price": 3.89,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "540c22364108"
+  },
+  {
+   "name": "Muenster",
+   "details": "",
+   "price": 5.19,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "cf7b4b8e6ccf"
+  },
+  {
+   "name": "Oaxaca",
+   "details": "",
+   "price": 5.29,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "4e5e12648472"
+  },
+  {
+   "name": "Xtra Liquid Laundry Detergent",
+   "details": "Select Varieties · 136.5-139.2 oz. • Detergente",
+   "price": 8.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "8f387371b654"
+  },
+  {
+   "name": "Red or Green",
+   "details": "16 oz. Pkg. Sweet",
+   "price": 1.97,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "fbf445f89f00"
+  },
+  {
+   "name": "Marinated Beef Taco Meat",
+   "details": "",
+   "price": 1.77,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "ce899bdb0c71"
+  },
+  {
+   "name": "Beef Soup Mix",
+   "details": "Family Pack • Extra Meaty",
+   "price": 4.97,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "6e4d928d46a1"
+  },
+  {
+   "name": "Grapes",
+   "details": "",
+   "price": 1.97,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "7b42afb531b0"
+  },
+  {
+   "name": "Avocados",
+   "details": "",
+   "price": 1.67,
+   "deal": "3 for $5.00",
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "64aae16bb548"
+  },
+  {
+   "name": "Tilapia Fillets",
+   "details": "Amigos",
+   "price": 6.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "0dfea3e834a1"
+  },
+  {
+   "name": "Nescafé Clásico Instant Coffee",
+   "details": "Dark Roast • 7 oz.",
+   "price": 16.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "ac8651fb8b23"
+  },
+  {
+   "name": "Frito Lay Fritos, Lay’s or Kettle",
+   "details": "Select Varieties • 3.53-10.75 oz. • Botanas",
+   "price": 2.49,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "3823e8835a13"
+  },
+  {
+   "name": "Sea Best Tilapia Fillets",
+   "details": "16 oz. Pkg.",
+   "price": 4.39,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "3ee1c3a88598"
+  },
+  {
+   "name": "Whole Chicken",
+   "details": "",
+   "price": 1.29,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "d8eec17789e8"
+  },
+  {
+   "name": "Peeled Cooked Shrimp",
+   "details": "Sea Best • 70/90 ct. · 16 oz. Pkg.",
+   "price": 7.59,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "46455f889a0f"
+  },
+  {
+   "name": "Buffalo Chicken Wings",
+   "details": "Alitas Estilo Buffalo",
+   "price": 3.99,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "6c054f04c1c5"
+  },
+  {
+   "name": "Goya Beans Goya Canilla Parboiled Rice",
+   "details": "",
+   "price": 2.5,
+   "deal": "2 for $5.00",
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "6186cbb9c4b9"
+  },
+  {
+   "name": "Pepsi Soft Drinks or Starbucks Frappuccino Coffee",
+   "details": "Select Varieties 12 Pack 12 oz. Cans or 8 Pack 12 oz. Btls. · Refrescos",
+   "price": 5.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "9eb0d9645deb"
+  },
+  {
+   "name": "Pork Finger Ribs",
+   "details": "Family Pack",
+   "price": 3.49,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "fd9d48f1e941"
+  },
+  {
+   "name": "Sea Best Flounder Fillets",
+   "details": "16 oz. Pkg.",
+   "price": 5.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "fadbec328497"
+  },
+  {
+   "name": "Chicken Milanesa",
+   "details": "Family Pack",
+   "price": 2.49,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "dd998d255f95"
+  },
+  {
+   "name": "Pork Taco Meat",
+   "details": "Family Pack",
+   "price": 2.99,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "4723e95b854d"
+  },
+  {
+   "name": "6-Stem Rose Bouquet",
+   "details": "w/Gyp and Green",
+   "price": 8.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "e5e1a09e5a27"
+  },
+  {
+   "name": "Sea Best Cooked Octopus Pieces",
+   "details": "16 oz. Pkg.",
+   "price": 7.59,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "9e2a889096fe"
+  },
+  {
+   "name": "Rotisserie Chicken",
+   "details": "",
+   "price": 4.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "e46ea7a741dd"
+  },
+  {
+   "name": "La Michoacana Guacamole",
+   "details": "16 oz. Tub",
+   "price": 4.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "98444eb9ac6d"
+  },
+  {
+   "name": "Modelo Especial, Dos Equis, Pacifico Clara or Victoria",
+   "details": "12 Pack 12 oz. Cans",
+   "price": 4.97,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "69717443e11b"
+  },
+  {
+   "name": "Limes",
+   "details": "",
+   "price": 0.11,
+   "deal": "18 for $1.99",
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "6ad67a558ccb"
+  },
+  {
+   "name": "Chicken Breast",
+   "details": "Family Pack • Boneless",
+   "price": 1.77,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "db4115b31164"
+  },
+  {
+   "name": "Regular Ground Beef",
+   "details": "Family Pack • 73/27",
+   "price": 2.97,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "90f687e8e0ab"
+  },
+  {
+   "name": "Coffee Mate Creamer Original 22 oz.",
+   "details": "",
+   "price": 4.77,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "377f680429b6"
+  },
+  {
+   "name": "Register your child to participate in our Day of the Dead Coloring Book Contest. Request your coloring book inside the store (while supplies last) or visit our website to download a copy. Registration",
+   "details": "",
+   "price": 17.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "In-store ad",
+   "productId": "5d2b1a26baf8"
+  },
+  {
+   "name": "John Soules Cooked Chicken",
+   "details": "Tenders or · Patties",
+   "price": 4.39,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "b766a0e3b706"
+  },
+  {
+   "name": "Bar-S Turkey Bologna",
+   "details": "12 oz. Pkg.",
+   "price": 2.69,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "9a6344980630"
+  },
+  {
+   "name": "La Michoacana Red Hot Links",
+   "details": "28 oz.",
+   "price": 6.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "f63c2391fc2c"
+  },
+  {
+   "name": "El Mexicano Oaxaca",
+   "details": "10 oz. Pkg.",
+   "price": 3.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "33667bf100c1"
+  },
+  {
+   "name": "Chicken or Turkey Franks",
+   "details": "7 oz. Pkg.",
+   "price": 1.89,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "cd2e7eab120c"
+  },
+  {
+   "name": "El Mexicano Cremoso",
+   "details": "10 oz. Pkg.",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "93d6eaa21bba"
+  },
+  {
+   "name": "Eckrich Smok-y Links",
+   "details": "Regular or · Cheese",
+   "price": 3.29,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "a95609c84eff"
+  },
+  {
+   "name": "Sugardale Hot Dogs",
+   "details": "12 oz. Pkg.",
+   "price": 1.19,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "aee82b066ae3"
+  },
+  {
+   "name": "Eckrich Sausage Links",
+   "details": "Jalapeño & Cheddar, · Cheddar or Smoked",
+   "price": 4.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "cb655da9ab9a"
+  },
+  {
+   "name": "Cacique Oaxaca",
+   "details": "10 oz. Pkg.",
+   "price": 3.49,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "f3393a7c9312"
+  },
+  {
+   "name": "Cacique Crema Mexicana, Agria, Salvadoreña or",
+   "details": "15 oz. Jar",
+   "price": 3.69,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "b83c559bb5db"
+  },
+  {
+   "name": "Mexicano Panela",
+   "details": "10 oz. Pkg.",
+   "price": 3.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "dabfd3ecc49c"
+  },
+  {
+   "name": "Cacique Fresco",
+   "details": "10 oz. Pkg.",
+   "price": 2.69,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "ac3777ea2b92"
+  },
+  {
+   "name": "Cacique Ranchero Fresco",
+   "details": "Kilo Pkg.",
+   "price": 2.19,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "31e3f146cb4e"
+  },
+  {
+   "name": "Oscar Mayer Ham & Turkey Sub Kits",
+   "details": "Regular or Honey · 16 oz. Pkg.",
+   "price": 1.29,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "c58055db3560"
+  },
+  {
+   "name": "Bar-S Turkey Franks",
+   "details": "16 oz. Pkg",
+   "price": 2.59,
+   "deal": null,
+   "unit": "pkg",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "260eae9f5e46"
+  },
+  {
+   "name": "Earl Campbell's Smoked Rope Sausage",
+   "details": "All Varieties · 13 oz. Pkg.",
+   "price": 1.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "e9b907581cc5"
+  },
+  {
+   "name": "Norteñita Mexican Blend",
+   "details": "8.1 oz. Btl.",
+   "price": 3.39,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "667e1f2a679c"
+  },
+  {
+   "name": "John Soules Chicken Fajita Strips",
+   "details": "Cooked or Grilled · 6 oz. Pkg.",
+   "price": 5.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "0130c44af0dd"
+  },
+  {
+   "name": "Johnsonville Italian Sausage",
+   "details": "Hot or Mild · 19 oz. Tray",
+   "price": 6.59,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "5f06ca8803a2"
+  },
+  {
+   "name": "Mama Julia Fresco",
+   "details": "16 oz. Pkg.",
+   "price": 4.29,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "474709e231f6"
+  },
+  {
+   "name": "Oscar Mayer Fun Pack Lunchables",
+   "details": "All Varieties · 8-12.2 oz. Pkg.",
+   "price": 2.69,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "6770ebcd63be"
+  },
+  {
+   "name": "El Mexicano Crema Mexicana, Salvadoreña or Oaxaqueña",
+   "details": "15 oz. Jar",
+   "price": 3.19,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "3586e76650c3"
+  },
+  {
+   "name": "Smithfield Anytime Boneless Pork Chops",
+   "details": "11.5 oz. Pkg.",
+   "price": 3.29,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "8f0ee94eddf1"
+  },
+  {
+   "name": "Smithfield Anytime Bone In Pork Chops",
+   "details": "17 oz. Pkg.",
+   "price": 6.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "1d5cf491ae58"
+  },
+  {
+   "name": "Bar-S Bologna",
+   "details": "All Meat, · Chicken,",
+   "price": 1.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "cfa4816596a9"
+  },
+  {
+   "name": "Eckrich Smoked Sausage",
+   "details": "All Varieties • 13-14 oz. Pkg.",
+   "price": 3.69,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "c25a9804d45c"
+  },
+  {
+   "name": "Lee Brand Bacon Ends and Pieces",
+   "details": "32 oz. Pkg.",
+   "price": 5.69,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "6fb2d1120616"
+  },
+  {
+   "name": "Mama Julia Chorizo Chub",
+   "details": "8 oz. Pkg.",
+   "price": 1.49,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "9c3fd6449b69"
+  },
+  {
+   "name": "John Morrell Smoked Bacon",
+   "details": "Regular or Applewood · 12 oz. Pkg.",
+   "price": 2.19,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "545ebfcffbf8"
+  },
+  {
+   "name": "El Mexicano Pork or Beef Chorizo",
+   "details": "9 oz. Pkg.",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "In-store ad",
+   "productId": "f8bf0204f82e"
+  },
+  {
+   "name": "Nature's Own",
+   "details": "100% Whole Wheat,",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "9997088323a6"
+  },
+  {
+   "name": "Cream Bars",
+   "details": "Select Varieties • 6 ct.",
+   "price": 1.88,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "3cd99d740742"
+  },
+  {
+   "name": "or Bread",
+   "details": "Select Varieties • 8-10 oz.",
+   "price": 4.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "dc23c5ef602f"
+  },
+  {
+   "name": "Isadora Refried Beans",
+   "details": "Select Varieties · 15.2 oz.",
+   "price": 22.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "d537dca43abb"
+  },
+  {
+   "name": "Flour",
+   "details": "5 Lbs.",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "4ae1050e8c7f"
+  },
+  {
+   "name": "Progresso",
+   "details": "Chicken or Beef",
+   "price": 3.49,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "3919b7c77457"
+  },
+  {
+   "name": "Kellogg's Eggo Waffles",
+   "details": "Select Varieties · 24 ct.",
+   "price": 1.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "33d3e04a7d49"
+  },
+  {
+   "name": "Gebhardt Refried Beans",
+   "details": "Select Varieties · 16 oz.",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "0aa7a64d0c9e"
+  },
+  {
+   "name": "La Lechera Condensed Milk",
+   "details": "Original or Fat Free · 14 oz.",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "03ad6d3a5f40"
+  },
+  {
+   "name": "José Olé",
+   "details": "Select Varieties",
+   "price": 5.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "4bc03955cde5"
+  },
+  {
+   "name": "Ritz Crackers",
+   "details": "Select Varieties · 8.8-13.7 oz.",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "1834956c21aa"
+  },
+  {
+   "name": "Electrolit Electrolyte Beverages",
+   "details": "Select Varieties · 6 Pack 12 oz. Btls.",
+   "price": 1.67,
+   "deal": "3 for $5.00",
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "d68a0d3dc645"
+  },
+  {
+   "name": "Tostitos",
+   "details": "Select Varieties",
+   "price": 2.5,
+   "deal": "2 for $5.00",
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "4f4e366b334c"
+  },
+  {
+   "name": "Oak Farms",
+   "details": "Select Varieties",
+   "price": 2.5,
+   "deal": "2 for $5.00",
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "d0298f1311dd"
+  },
+  {
+   "name": "Skippy or Jif Peanut",
+   "details": "Select Varieties",
+   "price": 8.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "46660ac14507"
+  },
+  {
+   "name": "Mrs Baird's Grab 'N Go Donuts",
+   "details": "Select Varieties · 9-9.5 oz.",
+   "price": 1.49,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "7c48d2fc7fc8"
+  },
+  {
+   "name": "Mexico Hot Sauce",
+   "details": "Red, Green or Xtra Hot · 4.5-5 oz.",
+   "price": 5.69,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "ad151bee38bb"
+  },
+  {
+   "name": "Maruchan Ramen Noodles",
+   "details": "Select Varieties · 12 Pack",
+   "price": 4.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "5e8d79f15145"
+  },
+  {
+   "name": "Nestle",
+   "details": "Select Varieties",
+   "price": 3.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "a53f5542627d"
+  },
+  {
+   "name": "Fritos Can Dips",
+   "details": "Select Varieties · 8.5-9 oz.",
+   "price": 1.5,
+   "deal": "2 for $3.00",
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "5b9f9c1dc61f"
+  },
+  {
+   "name": "Zuko Drink Mixes",
+   "details": "Select Varieties · 14.1 oz.",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "5523d9c4c068"
+  },
+  {
+   "name": "StarKist Tuna Pouch",
+   "details": "Select Varieties · 2.6 oz.",
+   "price": 2.5,
+   "deal": "2 for $5.00",
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "5d07353292b2"
+  },
+  {
+   "name": "Hostess Snacks",
+   "details": "Select Varieties · 6-10 ct.",
+   "price": 2.29,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "730b558b6160"
+  },
+  {
+   "name": "Shredded",
+   "details": "Select Varieties",
+   "price": 4.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "8c3564b3f912"
+  },
+  {
+   "name": "Tai Pei Entrees",
+   "details": "Select Varieties · 9.5-11 oz.",
+   "price": 3.49,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "02387979a36c"
+  },
+  {
+   "name": "Nestlé Abuelita Tablets",
+   "details": "19 oz.",
+   "price": 3.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "97bbc7876836"
+  },
+  {
+   "name": "Maggi Chicken Bouillon",
+   "details": "35.2 oz.",
+   "price": 2.79,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "689007a67172"
+  },
+  {
+   "name": "Mt. Olive Pickles",
+   "details": "Select Varieties · 80 oz.",
+   "price": 2.5,
+   "deal": "2 for $5.00",
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "a63fdc3e2f6e"
+  },
+  {
+   "name": "Simply Orange Juice",
+   "details": "Select Varieties · 76 oz.",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "fe0b8e35f021"
+  },
+  {
+   "name": "Mexican Coca-Cola, Fanta Orange or Sprite",
+   "details": "500 ml. Glass Btl.",
+   "price": 5.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "6ca7088a3613"
+  },
+  {
+   "name": "Birds Eye Vegetables",
+   "details": "Select Varieties · 10 oz.",
+   "price": 5.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "94b6b19e85fd"
+  },
+  {
+   "name": "Imperial Sugar Morton Salt",
+   "details": "2 Lbs. · Plain or Iodized • 26 oz.",
+   "price": 9.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "ab2dd2d8b15d"
+  },
+  {
+   "name": "Gamesa Marias Cookies",
+   "details": "19.75 oz.",
+   "price": 2.49,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "a6c61ec79c51"
+  },
+  {
+   "name": "Marinela Cookies",
+   "details": "Select Varieties · 8 ct.",
+   "price": 1.79,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "2baa72fc1ac2"
+  },
+  {
+   "name": "Classics",
+   "details": "Select Varieties",
+   "price": 3.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "386d686f8b6c"
+  },
+  {
+   "name": "Nursery Purified Water",
+   "details": "Gallon",
+   "price": 5.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "b3b345e1e887"
+  },
+  {
+   "name": "Super Lucky Elephant Jasmine Rice",
+   "details": "5 Lbs.",
+   "price": 2.0,
+   "deal": "2 for $4.00",
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "83cbbfea925c"
+  },
+  {
+   "name": "Chocolate",
+   "details": "19 oz.",
+   "price": 4.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "b2c4c61cb4c9"
+  },
+  {
+   "name": "Breeze",
+   "details": "96 oz.",
+   "price": 1.09,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "68721b6be89f"
+  },
+  {
+   "name": "Barrilitos Soda",
+   "details": "Select Varieties · 12 oz. Btl.",
+   "price": 2.69,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "17d9bc81c32f"
+  },
+  {
+   "name": "Act II Microwave Popcorn",
+   "details": "Select Varieties • 3 ct.",
+   "price": 4.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "0da53444ec2b"
+  },
+  {
+   "name": "All Purpose Enriched Wheat",
+   "details": "5 Lbs.",
+   "price": 1.25,
+   "deal": "4 for $5.00",
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "7fee5b6b1282"
+  },
+  {
+   "name": "Lombardi Extra Virgin Olive Oil",
+   "details": "2 Ltrs.",
+   "price": 2.0,
+   "deal": "2 for $4.00",
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "3bf05ac14e17"
+  },
+  {
+   "name": "Cereal",
+   "details": "Select Varieties · 30-37 oz.",
+   "price": 1.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "fd2ee0b86c2f"
+  },
+  {
+   "name": "Furlani Texas Toast Weight Watchers Smart Ones Entrees",
+   "details": "Select Varieties • 8-10 oz. · Select Varieties • 9-10.25 oz.",
+   "price": 1.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "0d685287c874"
+  },
+  {
+   "name": "Pearl Milling Pancake Mix",
+   "details": "Select Varieties · 32 oz.",
+   "price": 3.89,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "b038acc9596e"
+  },
+  {
+   "name": "Lindo Habanero",
+   "details": "Red, Green or Xtra Hot",
+   "price": 1.59,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "ee56b60b3a9f"
+  },
+  {
+   "name": "Frozen",
+   "details": "Select Varieties",
+   "price": 1.5,
+   "deal": "2 for $3.00",
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "209da2fcceec"
+  },
+  {
+   "name": "El Mexicano Drinkable Yogurt",
+   "details": "Select Varieties • 7 oz.",
+   "price": 1.39,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "86863cc9c3fa"
+  },
+  {
+   "name": "Planet Oat Milk or Creamer",
+   "details": "Select Varieties • 52 oz. · Select Varieties • 32 oz.",
+   "price": 6.49,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "05986898d263"
+  },
+  {
+   "name": "Tomatoes Kraft Grated Parmesan Cheese",
+   "details": "Select Varieties • 14.5-15 oz. · 8 oz.",
+   "price": 2.0,
+   "deal": "2 for $4.00",
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "ab31b495f03a"
+  },
+  {
+   "name": "Chung’s Egg Rolls",
+   "details": "Select Varieties • 10-12 oz.",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "c980f384016c"
+  },
+  {
+   "name": "Jumex Nectars",
+   "details": "",
+   "price": 3.49,
+   "deal": null,
+   "unit": "each",
+   "page": 3,
+   "source": "In-store ad",
+   "productId": "85e841e670ba"
+  },
+  {
+   "name": "NyQuil or DayQuil",
+   "details": "Select Varieties · 8 oz. Liquid",
+   "price": 7.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "27f92c22cb0f"
+  },
+  {
+   "name": "Gatorade Sports Drinks Monster Energy Drinks",
+   "details": "Select Varieties · 8 Pack 20 oz. Btls. · 4 Pack 16 oz. Cans",
+   "price": 1.67,
+   "deal": "3 for $5.00",
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "07e31fc0ef8e"
+  },
+  {
+   "name": "Dr Pepper, Squirt or Sunkist Soft Drinks",
+   "details": "Select Varieties · 10 Pack 7.5 oz. Mini Cans",
+   "price": 1.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "18fc8a6eac23"
+  },
+  {
+   "name": "Busch Light",
+   "details": "30 Pack 12 oz. Cans",
+   "price": 21.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "1386bfc61a06"
+  },
+  {
+   "name": "Seedless Watermelons",
+   "details": "",
+   "price": 5.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "1393eb738a16"
+  },
+  {
+   "name": "Rockstar Energy Drinks",
+   "details": "Select Varieties · 16 oz. Can",
+   "price": 1.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "eac32628a24e"
+  },
+  {
+   "name": "Purina One Can Dog Food",
+   "details": "Select Varieties · 13 oz.",
+   "price": 4.89,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "e937f91f0190"
+  },
+  {
+   "name": "Snapple Drinks",
+   "details": "Select Varieties · 64 oz. Btl.",
+   "price": 10.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "e47b4c1e2f9d"
+  },
+  {
+   "name": "Friskies Cat Food",
+   "details": "Select Varieties · 5.5 oz.",
+   "price": 1.5,
+   "deal": "2 for $3.00",
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "4bbcb1ec5aee"
+  },
+  {
+   "name": "Glade Candles",
+   "details": "Assorted Scents · 4.8 oz.",
+   "price": 3.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "66e9e3853416"
+  },
+  {
+   "name": "Dove Men's Face & Body Wash",
+   "details": "Select Varieties • 13.5 oz.",
+   "price": 3.79,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "53be2e0199a2"
+  },
+  {
+   "name": "Gold Peak Tea",
+   "details": "Select Varieties · 6 Pack 16.9 oz. Btls.",
+   "price": 6.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "6d2b22772b2e"
+  },
+  {
+   "name": "Brut Splash On Lotion",
+   "details": "3.5 oz.",
+   "price": 2.29,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "eea4937e2fb1"
+  },
+  {
+   "name": "Value Star Foam Plates",
+   "details": "35 ct.",
+   "price": 4.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "d1c751c702ce"
+  },
+  {
+   "name": "Alani Energy Drinks Ghost Energy Drinks Body Armor Flash IV",
+   "details": "Select Varieties 12 oz. Can · Select Varieties 16 oz. Can · Select Varieties 20 oz. Btl.",
+   "price": 1.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "e4c88399b9f9"
+  },
+  {
+   "name": "Nexium Acid Reducer",
+   "details": "14 ct.",
+   "price": 4.19,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "8c85cab1cdc4"
+  },
+  {
+   "name": "Core Water",
+   "details": "30.4 oz.",
+   "price": 1.5,
+   "deal": "2 for $3.00",
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "83575fe1c813"
+  },
+  {
+   "name": "Bud Light or Michelob Ultra",
+   "details": "12 Pack 16 oz. Aluminum Btls. · 12 Pack 16 oz. Cans",
+   "price": 16.49,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "f5c04153a303"
+  },
+  {
+   "name": "Corona Extra, Modelo Especial or Dos Equis",
+   "details": "24 Pack 12 oz. Btls.",
+   "price": 35.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "9ab28e3626ac"
+  },
+  {
+   "name": "Stella Rosa Wine",
+   "details": "Select Varieties · 750 ml.",
+   "price": 10.29,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "bb6c8564df00"
+  },
+  {
+   "name": "Gallo Family Vineyards Wine or Beat Box",
+   "details": "Select Varieties • 750 ml. Btl. · Select Varieties • 500 ml. Btl.",
+   "price": 3.79,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "b47f2c342085"
+  },
+  {
+   "name": "Coca-Cola Soft Drinks",
+   "details": "Select Varieties · 20 Pack 12 oz. Cans",
+   "price": 11.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "9d61d29d0e54"
+  },
+  {
+   "name": "Corona Familiar, Pacifico, Victoria, Modelo Especial or Michelob Ultra or Famosa",
+   "details": "32 oz. Btls. · 33.8 oz. Btls.",
+   "price": 4.0,
+   "deal": "2 for $7.99",
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "71562ab6fce1"
+  },
+  {
+   "name": "Full Circle Trash Bags",
+   "details": "Select Varieties · 20-70 ct.",
+   "price": 6.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "2afc0e484fd5"
+  },
+  {
+   "name": "Vicks VapoRub",
+   "details": "Select Varieties · 1.76 oz.",
+   "price": 2.19,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "49968490ce65"
+  },
+  {
+   "name": "Juice Carrots",
+   "details": "Fresh",
+   "price": 0.75,
+   "deal": "4 for $2.99",
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "1cfe4c8dc97d"
+  },
+  {
+   "name": "Purple Garlic",
+   "details": "",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "184e255590ae"
+  },
+  {
+   "name": "Raid Ant & Roach Spray",
+   "details": "Select Varieties · 17.5 oz.",
+   "price": 1.25,
+   "deal": "2 for $2.50",
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "aa7e0f4587f5"
+  },
+  {
+   "name": "Cucumbers Purple Garlic",
+   "details": "Fresh & Crisp",
+   "price": 0.75,
+   "deal": "4 for $2.99",
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "d8db12631812"
+  },
+  {
+   "name": "Oranges",
+   "details": "Sweet & Juicy",
+   "price": 0.75,
+   "deal": "4 for $2.99",
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "c136ca3792d6"
+  },
+  {
+   "name": "Mandarins",
+   "details": "Sweet & Juicy",
+   "price": 1.25,
+   "deal": "4 for $5.00",
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "a63430bba652"
+  },
+  {
+   "name": "Flanax Pain Reliever",
+   "details": "24 ct.",
+   "price": 3.79,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "7f90944862f9"
+  },
+  {
+   "name": "Multipurpose",
+   "details": "Select Varieties • 28 oz.",
+   "price": 2.49,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "c0d208285b97"
+  },
+  {
+   "name": "Head Lettuce Russet Potatoes",
+   "details": "Fresh & Crisp",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "7f6736aa1b16"
+  },
+  {
+   "name": "White Potatoes",
+   "details": "Fresh",
+   "price": 1.5,
+   "deal": "2 for $3.00",
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "c5a19d1d1c93"
+  },
+  {
+   "name": "Roma Tomatoes Available Select Michelob Ultra, Bud Light, Budweiser or Miller Lite",
+   "details": "Fresh · Lbs. For · 6 Pack 16 oz. Cans",
+   "price": 1.5,
+   "deal": "2 for $3.00",
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "47ddc5768b98"
+  },
+  {
+   "name": "Colgate Toothbrush Zig-Zag Soft or Medium",
+   "details": "",
+   "price": 1.69,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "c9a26f3888f0"
+  },
+  {
+   "name": "Yellow Onions",
+   "details": "Fresh",
+   "price": 0.75,
+   "deal": "4 for $2.99",
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "e0954da7f245"
+  },
+  {
+   "name": "Dr Pepper, Squirt or Sunkist Soft Drinks",
+   "details": "Select Varieties • 2 Ltr. Btl.",
+   "price": 5.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "21de81e440b7"
+  },
+  {
+   "name": "Toothpaste",
+   "details": "Select Varieties · 6 oz.",
+   "price": 4.49,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "a92fd6af946f"
+  },
+  {
+   "name": "Stores",
+   "details": "",
+   "price": 7.99,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "bc4ee4356c52"
+  },
+  {
+   "name": "Saba Feminine Pads",
+   "details": "Select Varieties · 14-18 ct.",
+   "price": 14.19,
+   "deal": null,
+   "unit": "each",
+   "page": 4,
+   "source": "In-store ad",
+   "productId": "c22278d35889"
+  },
+  {
+   "name": "Cucumbers",
+   "details": "Fresh & Crisp",
+   "price": 0.75,
+   "deal": "4 for $2.99",
+   "unit": "each",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "9f05e5a8101e"
+  },
+  {
+   "name": "Head Lettuce",
+   "details": "Fresh & Crisp",
+   "price": 2.5,
+   "deal": "2 for $5.00",
+   "unit": "each",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "f61568829410"
+  },
+  {
+   "name": "Russet Potatoes",
+   "details": "Fresh 5 Lb. Bag",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "2b4d27f82f7f"
+  },
+  {
+   "name": "Purple Garlic",
+   "details": "Fresh Per Unit",
+   "price": 0.75,
+   "deal": "4 for $2.99",
+   "unit": "each",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "666ab61a4eb8"
+  },
+  {
+   "name": "Calidad Round Guerrero",
+   "details": "24 oz. · 80 ct.",
+   "price": 1.67,
+   "deal": "3 for $5.00",
+   "unit": "each",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "3039c841815b"
+  },
+  {
+   "name": "La Lechera Condensed Milk",
+   "details": "Original or Fat Free · 14 oz.",
+   "price": 5.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "407a0ca450b7"
+  },
+  {
+   "name": "Fagans Fabric Softener",
+   "details": "Select Varieties · 131 oz.",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "93fa63a88314"
+  },
+  {
+   "name": "Minute Maid Fruit Punches",
+   "details": "Select Varieties · 59 oz.",
+   "price": 2.79,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "e1a534338bcd"
+  },
+  {
+   "name": "Frito Lay Multipack",
+   "details": "Select Varieties · 10 ct.",
+   "price": 1.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "9dfabe82f1ea"
+  },
+  {
+   "name": "La Michoacana Mesquite Charcoal",
+   "details": "6.6 Lbs.",
+   "price": 3.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "958943c6ee3e"
+  },
+  {
+   "name": "Mazola Oil",
+   "details": "Corn or Canola · 96 oz.",
+   "price": 2.5,
+   "deal": "2 for $5.00",
+   "unit": "each",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "a4d943260673"
+  },
+  {
+   "name": "Ragú Pasta Sauce",
+   "details": "Select Varieties · 16-24 oz.",
+   "price": 5.0,
+   "deal": "2 for $10.00",
+   "unit": "each",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "7b2784b55f24"
+  },
+  {
+   "name": "Tilapia Fillets",
+   "details": "Amigos",
+   "price": 6.99,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "838d0df300bf"
+  },
+  {
+   "name": "Beef Shoulder Steaks",
+   "details": "Family Pack • Bone In",
+   "price": 4.97,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "447aa574b820"
+  },
+  {
+   "name": "Coffee Mate Creamer",
+   "details": "Original 22 oz.",
+   "price": 4.77,
+   "deal": null,
+   "unit": "lb",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "c7f1575fd077"
+  },
+  {
+   "name": "Las Parrillas Charcoal Lighter Fluid",
+   "details": "",
+   "price": 4.79,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "572115a4d6a4"
+  },
+  {
+   "name": "Jumex Nectars",
+   "details": "",
+   "price": 9.99,
+   "deal": null,
+   "unit": "each",
+   "page": 1,
+   "source": "Mailer",
+   "productId": "d7d8a11b3ca4"
+  },
+  {
+   "name": "Cloralen Bleach",
+   "details": "Assorted Fragrances • 32 oz. · $1.69 Ea.",
+   "price": 2.5,
+   "deal": "2 for $5.00",
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "74218834a628"
+  },
+  {
+   "name": "Simply Orange Juice",
+   "details": "Select Varieties · 76 oz.",
+   "price": 3.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "33aa0829b580"
+  },
+  {
+   "name": "Dr Pepper, Squirt or Sunkist Soft Drinks",
+   "details": "Select Varieties · 10 Pack 7.5 oz. Mini Cans",
+   "price": 1.67,
+   "deal": "3 for $5.00",
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "bc937aaa7378"
+  },
+  {
+   "name": "Ritz Crackers",
+   "details": "Select Varieties · 8.8-13.7 oz.",
+   "price": 1.79,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "de179931ea52"
+  },
+  {
+   "name": "Full Circle Trash Bags",
+   "details": "Select Varieties · 20-70 ct.",
+   "price": 3.0,
+   "deal": "2 for $6.00",
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "715e3a773067"
+  },
+  {
+   "name": "Vicks VapoRub",
+   "details": "Select Varieties · 1.76 oz.",
+   "price": 4.19,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "4115a69592b6"
+  },
+  {
+   "name": "Lala Blended Yogurt",
+   "details": "Select Varieties · 32 oz.",
+   "price": 1.88,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "ebb381d609d4"
+  },
+  {
+   "name": "Gatorade Sports Drinks Monster Energy Drinks",
+   "details": "Select Varieties · 8 Pack 20 oz. Btls. · 4 Pack 16 oz. Cans",
+   "price": 5.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "b8b6cd39f032"
+  },
+  {
+   "name": "Diamond",
+   "details": "Select Varieties",
+   "price": 3.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "29fcb0163d36"
+  },
+  {
+   "name": "El Mexicano Tostadas",
+   "details": "Yellow or Red · 10.5 oz.",
+   "price": 2.49,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "f1d82573226c"
+  },
+  {
+   "name": "Fritos Can Dips",
+   "details": "Select Varieties · 8.5-9 oz.",
+   "price": 2.69,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "cf2d4d7b6025"
+  },
+  {
+   "name": "Chocolate Tablets",
+   "details": "19 oz.",
+   "price": 4.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "2abe356a40c3"
+  },
+  {
+   "name": "Drumsticks",
+   "details": "Select Varieties · 4 Pack",
+   "price": 4.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "d8f973953325"
+  },
+  {
+   "name": "Stores",
+   "details": "",
+   "price": 6.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "7cfc5da18bc0"
+  },
+  {
+   "name": "Zuko Drink Mixes",
+   "details": "Select Varieties · 14.1 oz.",
+   "price": 5.69,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "d1ef923aa9e1"
+  },
+  {
+   "name": "All Purpose Enriched Wheat",
+   "details": "5 Lbs.",
+   "price": 2.0,
+   "deal": "2 for $4.00",
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "2efb2898d0c6"
+  },
+  {
+   "name": "Taquitos",
+   "details": "Select Varieties · 16.2-22.5 oz.",
+   "price": 5.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "ae51182a3f80"
+  },
+  {
+   "name": "Coca-Cola Soft Drinks",
+   "details": "Select Varieties · 20 Pack 12 oz. Cans",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "8d722ed278c8"
+  },
+  {
+   "name": "Gamesa Marias Cookies",
+   "details": "19.75 oz.",
+   "price": 22.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "a4cb8485ef4c"
+  },
+  {
+   "name": "Act II Microwave Popcorn",
+   "details": "Select Varieties • 3 ct.",
+   "price": 6.49,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "1dc6ec6858ee"
+  },
+  {
+   "name": "Busch or",
+   "details": "30 Pack 12 oz. Cans",
+   "price": 7.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "564670cd096a"
+  },
+  {
+   "name": "Corona Extra, Modelo Especial or Dos Equis",
+   "details": "24 Pack 12 oz. Btls.",
+   "price": 16.49,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "22b70b33c10e"
+  },
+  {
+   "name": "Raid Ant & Roach Spray",
+   "details": "Select Varieties · 17.5 oz.",
+   "price": 1.5,
+   "deal": "2 for $3.00",
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "d9dab9c3a7b7"
+  },
+  {
+   "name": "Fanta Soft Drinks",
+   "details": "Select Varieties · 2 Ltr. Btl.",
+   "price": 11.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "08bbbdebe4ac"
+  },
+  {
+   "name": "Super Lucky Elephant Jasmine Rice",
+   "details": "5 Lbs.",
+   "price": 1.25,
+   "deal": "4 for $5.00",
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "3fbaeb9f0fe4"
+  },
+  {
+   "name": "Mexican Coca-Cola, Fanta Orange or Sprite",
+   "details": "500 ml. Glass Btl.",
+   "price": 8.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "9c2b1ce1fee4"
+  },
+  {
+   "name": "Nido Kinder 1+ Powdered Milk",
+   "details": "56.43 oz.",
+   "price": 3.89,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "549eb341aab5"
+  },
+  {
+   "name": "Maggi Chicken Bouillon",
+   "details": "35.2 oz.",
+   "price": 4.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "f086060562bc"
+  },
+  {
+   "name": "Chef Boyardee Microwave Bowls 2 For $3",
+   "details": "Select Varieties 7.5 oz.",
+   "price": 4.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "fd31c351fe14"
+  },
+  {
+   "name": "Red Tea",
+   "details": "Select Varieties · Gallon",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "7e8b15ce995a"
+  },
+  {
+   "name": "Blackburn’s Preserves",
+   "details": "Select Varieties · 18 oz.",
+   "price": 2.5,
+   "deal": "2 for $5.00",
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "424913ee81d7"
+  },
+  {
+   "name": "Saba Feminine Pads",
+   "details": "Select Varieties · 14-18 ct.",
+   "price": 3.79,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "5cbaf8d5f84f"
+  },
+  {
+   "name": "Nabisco Nilla Wafers",
+   "details": "Select Varieties · 8.8-13.7 oz. · Select Varieties • 11 oz.",
+   "price": 3.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "c89ec1c00a93"
+  },
+  {
+   "name": "Tostada Casera",
+   "details": "12.8 oz.",
+   "price": 1.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "86a93039f9fd"
+  },
+  {
+   "name": "Furlani Texas Weight Watchers Smart Ones Entrees",
+   "details": "Select Varieties • 8-10 oz. · Select Varieties • 9-10.25 oz.",
+   "price": 1.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "f0e16e67e21a"
+  },
+  {
+   "name": "Shredded",
+   "details": "Select Varieties",
+   "price": 2.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "eb4488452cad"
+  },
+  {
+   "name": "Oak Farms",
+   "details": "Select Varieties",
+   "price": 5.49,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "753c00e61802"
+  },
+  {
+   "name": "Libby’s Hunt’s Canned Tomatoes",
+   "details": "Select Varieties • 28-29 oz. · Select Varieties • 14.5-15 oz.",
+   "price": 2.0,
+   "deal": "2 for $4.00",
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "5ac662bda48b"
+  },
+  {
+   "name": "Canned",
+   "details": "Select Varieties",
+   "price": 2.0,
+   "deal": "2 for $4.00",
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "131a618a7738"
+  },
+  {
+   "name": "Toothpaste",
+   "details": "Select Varieties · 6 oz.",
+   "price": 2.29,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "63c442aa12cb"
+  },
+  {
+   "name": "Gatorade Sports Drinks",
+   "details": "Select Varieties · 18 Pack 12 oz. Btls.",
+   "price": 10.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "64b7d88a2505"
+  },
+  {
+   "name": "José Olé",
+   "details": "Select Varieties",
+   "price": 1.29,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "3a13c7a94afa"
+  },
+  {
+   "name": "Milk",
+   "details": "Select Varieties · Gallon",
+   "price": 5.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "724ea80784fb"
+  },
+  {
+   "name": "Flanax Pain Reliever",
+   "details": "24 ct.",
+   "price": 7.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "35f7aea33847"
+  },
+  {
+   "name": "Best Yet Cheese",
+   "details": "Select Varieties · 8 oz.",
+   "price": 2.69,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "6a92f90ecb2d"
+  },
+  {
+   "name": "Angel Soft Bath Tissue Sparkle Paper Towels",
+   "details": "4 Mega Rolls · 2 Double Rolls",
+   "price": 4.89,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "a7cd7926b274"
+  },
+  {
+   "name": "Available Select Bud Light or Michelob Ultra",
+   "details": "12 Pack 16 oz. Aluminum Btls. · 12 Pack 16 oz. Cans",
+   "price": 35.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "b995fcedba94"
+  },
+  {
+   "name": "Bread",
+   "details": "100% Whole Wheat, · Whole Grain or · Hawaiian",
+   "price": 1.99,
+   "deal": null,
+   "unit": "each",
+   "page": 2,
+   "source": "Mailer",
+   "productId": "4ca452d3df7a"
+  }
+ ]
+}

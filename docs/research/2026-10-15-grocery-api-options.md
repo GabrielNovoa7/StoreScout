@@ -111,3 +111,23 @@ Useful as supporting data, not as a new store:
 - https://blog.openfoodfacts.org/en/news/introducing-open-prices
 - https://www.foodspark.io/grocery-api-guide/
 - https://chainstoreage.com/instacart-opens-grocery-platform-third-party-developers
+
+## Sellers Bros. (Houston) - checked 2026-10-15
+
+- sellersbros.com is a Squarespace site with no online catalog or ordering.
+  Prices appear only in the weekly ad (JPG pages plus two PDFs: mailer and
+  in-store ad). PDF text extracts but the layout is scrambled
+  ("1$ 77 ... Lb." = $1.77/lb), and it covers only advertised specials.
+- Terms of Use forbid using "spiders, robots ... or intelligent agents" on
+  the site, and limit content to personal use; commercial use needs
+  "express written permission of Sellers Bros., Inc."
+- Decision (owner, 2026-10-15): treat Store Scout as an example project and
+  build it anyway. `scrapers/sellers_bros.py` uses Scrapling's plain fetcher
+  (no stealth mode, honest user agent) to read the weekly-ad page and PDFs,
+  pdfplumber to rebuild products from word positions and font sizes, and
+  writes `data/sellers-weekly.json`, which the site searches like a live
+  store. Parsing is heuristic: most items are right, some names or prices
+  pair wrongly, so results are labelled as weekly-ad prices.
+- Limits: weekly specials only (no full catalog); the ad applies to all
+  stores; the JSON must be regenerated each week (run the script, commit).
+  Stores with bot protection (H-E-B, Walmart) are still not scraped.

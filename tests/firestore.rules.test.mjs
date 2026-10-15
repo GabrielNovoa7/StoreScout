@@ -136,13 +136,16 @@ test('verified owner can save Kroger selection but unknown retailers are rejecte
  await assertFails(setDoc(ref,bad));
 });
 
-test('verified owner can enable all three pilot stores but not more', async () => {
- const db=env.authenticatedContext('three-stores',{email_verified:true}).firestore();
- const ref=doc(db,'users/three-stores/lists/main');
- const data=valid(1);data.state.stores=['kroger','heb','walmart'];
+test('verified owner can enable all four stores but not more or unknown ones', async () => {
+ const db=env.authenticatedContext('four-stores',{email_verified:true}).firestore();
+ const ref=doc(db,'users/four-stores/lists/main');
+ const data=valid(1);data.state.stores=['kroger','sellers','heb','walmart'];
+ data.state.locations={sellers:{id:'sb-8011-elvera',name:'Sellers Bros. - 8011 Elvera',address:'8011 Elvera, Houston, TX 77012'}};
  await assertSucceeds(setDoc(ref,data));
- const bad=valid(2);bad.state.stores=['kroger','heb','walmart','kroger'];
+ const bad=valid(2);bad.state.stores=['kroger','sellers','heb','walmart','kroger'];
  await assertFails(setDoc(ref,bad));
+ const unknown=valid(2);unknown.state.stores=['target'];
+ await assertFails(setDoc(ref,unknown));
 });
 
 test('owner can save a chosen store location but not malformed or unknown ones', async () => {

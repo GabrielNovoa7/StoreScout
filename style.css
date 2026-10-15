@@ -3408,3 +3408,28 @@ width:84px;
 height:84px
 }
 }
+.store-mark.sellers {
+background:#c8102e;
+color:#fff
+}
+.deal-tag {
+display:inline-block;
+padding:1px 6px;
+border-radius:999px;
+background:var(--mint);
+color:var(--green);
+font-weight:700
+}
+.live-buy b i {
+font-style:normal;
+font-size:11px;
+font-weight:500;
+color:var(--muted)
+}
+.live-notes {
+margin:-6px 0 12px;
+padding:0;
+list-style:none;
+font-size:12px;
+color:var(--muted)
+}

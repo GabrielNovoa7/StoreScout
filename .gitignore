@@ -5,3 +5,6 @@
 /firestore-debug.log*
 /ui-debug.log*
 /database-debug.log*
+
+/scrapers/.venv/
+/scrapers/cache/
