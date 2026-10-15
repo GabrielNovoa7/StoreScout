@@ -8,3 +8,4 @@
 
 /scrapers/.venv/
 /scrapers/cache/
+__pycache__/
