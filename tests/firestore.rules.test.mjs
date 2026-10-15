@@ -144,3 +144,16 @@ test('verified owner can enable all three pilot stores but not more', async () =
  const bad=valid(2);bad.state.stores=['kroger','heb','walmart','kroger'];
  await assertFails(setDoc(ref,bad));
 });
+
+test('owner can save a chosen store location but not malformed or unknown ones', async () => {
+ const db=env.authenticatedContext('loc-owner',{email_verified:true}).firestore();
+ const ref=doc(db,'users/loc-owner/lists/main');
+ const data=valid(1);data.state.locations={kroger:{id:'03400355',name:'Kroger - River Oaks',address:'1938 W Gray St, Houston, TX'}};
+ await assertSucceeds(setDoc(ref,data));
+ const badId=valid(2);badId.state.locations={kroger:{id:'<script>',name:'x',address:''}};
+ await assertFails(setDoc(ref,badId));
+ const unknown=valid(2);unknown.state.locations={target:{id:'1',name:'x',address:''}};
+ await assertFails(setDoc(ref,unknown));
+ const extra=valid(2);extra.state.locations={kroger:{id:'1',name:'x',address:'',phone:'1'}};
+ await assertFails(setDoc(ref,extra));
+});

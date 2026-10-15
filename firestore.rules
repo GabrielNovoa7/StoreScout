@@ -41,6 +41,19 @@ service cloud.firestore {
         && validReceiptAt(r, 19)
         ;
     }
+    function validLocation(l) {
+      return l is map && l.keys().hasAll(['id', 'name', 'address'])
+        && l.keys().hasOnly(['id', 'name', 'address'])
+        && l.id is string && l.id.matches('^[A-Za-z0-9_-]{1,80}$')
+        && l.name is string && l.name.size() <= 120
+        && l.address is string && l.address.size() <= 200;
+    }
+    function validLocations(m) {
+      return m is map && m.keys().hasOnly(['kroger', 'heb', 'walmart'])
+        && (!('kroger' in m) || validLocation(m.kroger))
+        && (!('heb' in m) || validLocation(m.heb))
+        && (!('walmart' in m) || validLocation(m.walmart));
+    }
     function validList() {
       let d = request.resource.data;
       return d.keys().hasAll(['schema', 'state', 'revision', 'updatedAt'])
@@ -50,9 +63,10 @@ service cloud.firestore {
         && d.updatedAt == request.time
         && d.state is map
         && d.state.keys().hasAll(['version', 'items', 'stores', 'preferences'])
-        && d.state.keys().hasOnly(['version', 'items', 'stores', 'preferences', 'profile', 'importReceipts'])
+        && d.state.keys().hasOnly(['version', 'items', 'stores', 'preferences', 'profile', 'importReceipts', 'locations'])
         && (!('profile' in d.state) || validProfile(d.state.profile))
         && (!('importReceipts' in d.state) || validReceipts(d.state.importReceipts))
+        && (!('locations' in d.state) || validLocations(d.state.locations))
         && d.state.version == 1
         && d.state.items is list && d.state.items.size() <= 200
         && d.state.stores is list && d.state.stores.size() <= 3

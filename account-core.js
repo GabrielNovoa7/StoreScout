@@ -47,7 +47,8 @@
     const preferences=M.cleanPreferences(state.preferences);
     const receipts=state.importReceipts;
     if(receipts!==undefined&&(!Array.isArray(receipts)||receipts.length>20||receipts.some(id=>typeof id!=='string'||!/^[a-zA-Z0-9_-]{1,80}$/.test(id))||new Set(receipts).size!==receipts.length))throw new Error('Invalid import receipts.');
-    return {...(receipts?{importReceipts:[...receipts]}:{}),version:1,items,stores:[...new Set(state.stores.filter(s=>M.stores.some(store=>store.id===s)))],preferences,profile:cleanProfile(state.profile)};
+    const locations=M.cleanLocations(state.locations);
+    return {...(receipts?{importReceipts:[...receipts]}:{}),...(Object.keys(locations).length?{locations}:{}),version:1,items,stores:[...new Set(state.stores.filter(s=>M.stores.some(store=>store.id===s)))],preferences,profile:cleanProfile(state.profile)};
   }
   function createSync(adapter,onChange=()=>{}){
     let generation=0, uid=null, state=null, revision=0, dirty=false, status='signed-out',error=null,editVersion=0,running=null;

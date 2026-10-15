@@ -1,22 +1,13 @@
 (function (root) {
   "use strict";
+  // Store metadata drives logos, live search, and location pickers. A new
+  // store needs an entry here; a live store also needs a Worker adapter.
   const stores = [
-    { id: "kroger", name: "Kroger", label: "Kroger · River Oaks", short: "K", color: "#1768b2" },
-    {
-      id: "heb",
-      name: "H-E-B",
-      label: "H-E-B · Houston pilot",
-      short: "H",
-      color: "#df4c4c",
-    },
-    {
-      id: "walmart",
-      name: "Walmart",
-      label: "Walmart · Houston pilot",
-      short: "✳",
-      color: "#3274bb",
-    },
+    { id: "kroger", name: "Kroger", label: "Kroger", short: "K", color: "#1768b2", domain: "kroger.com", live: true },
+    { id: "heb", name: "H-E-B", label: "H-E-B", short: "H", color: "#df4c4c", domain: "heb.com", live: false },
+    { id: "walmart", name: "Walmart", label: "Walmart", short: "W", color: "#3274bb", domain: "walmart.com", live: false },
   ];
+  const liveStoreIds = () => stores.filter((s) => s.live).map((s) => s.id);
   const products = [
     [
       "basil",
@@ -340,7 +331,7 @@
   const liveText = (value, max) =>
     typeof value === "string" && value.trim() ? value.trim().slice(0, max) : null;
   function cleanLive(value) {
-    if (!value || typeof value !== "object" || value.retailer !== "kroger")
+    if (!value || typeof value !== "object" || !liveStoreIds().includes(value.retailer))
       return null;
     const id = liveText(value.id, 200),
       productId = liveText(value.productId, 80),
@@ -350,7 +341,8 @@
       !id ||
       !productId ||
       !name ||
-      !/^kroger:[A-Za-z0-9]{1,80}:[A-Za-z0-9]{1,80}$/.test(id) ||
+      !id.startsWith(`${value.retailer}:`) ||
+      !/^[a-z]+:[A-Za-z0-9]{1,80}:[A-Za-z0-9]{1,80}$/.test(id) ||
       !Number.isFinite(price) ||
       price <= 0 ||
       price > 10000
@@ -360,7 +352,7 @@
       fetched = Date.parse(value.fetchedAt);
     return {
       id,
-      retailer: "kroger",
+      retailer: value.retailer,
       productId,
       upc: liveText(value.upc, 20),
       name,
@@ -373,19 +365,71 @@
       fetchedAt: Number.isFinite(fetched) ? new Date(fetched).toISOString() : null,
     };
   }
+  // Converts retailer size text ("10 fl oz", "1 gal", "2 lb") into one unit
+  // per family so unit prices are only compared like-for-like.
+  const sizeUnits = {
+    "fl oz": ["fl oz", 1], floz: ["fl oz", 1], gal: ["fl oz", 128], gallon: ["fl oz", 128],
+    qt: ["fl oz", 32], quart: ["fl oz", 32], pt: ["fl oz", 16], pint: ["fl oz", 16],
+    l: ["fl oz", 33.814], liter: ["fl oz", 33.814], ml: ["fl oz", 0.033814],
+    oz: ["oz", 1], lb: ["oz", 16], lbs: ["oz", 16], g: ["oz", 0.035274], kg: ["oz", 35.274],
+    ct: ["ct", 1], count: ["ct", 1], each: ["ct", 1], ea: ["ct", 1], pk: ["ct", 1], pack: ["ct", 1],
+  };
+  function parseSize(text) {
+    const match = /^\s*(\d+(?:\.\d+)?)\s*(fl\.?\s*oz|[a-z]+)(?![a-z])/i.exec(String(text || ""));
+    if (!match) return null;
+    const key = match[2].toLowerCase().replace(/\./g, "").replace(/\s+/g, " ");
+    const unit = sizeUnits[key];
+    const amount = Number(match[1]) * (unit?.[1] || 0);
+    return unit && amount > 0 ? { amount: Math.round(amount * 1000) / 1000, unit: unit[0] } : null;
+  }
+  function unitPrice(product) {
+    const size = parseSize(product?.size);
+    const price = Number(product?.price);
+    return size && Number.isFinite(price) ? { value: price / size.amount, unit: size.unit } : null;
+  }
+  function sortLive(products, mode) {
+    const list = [...products];
+    const byName = (a, b) => String(a.name).localeCompare(String(b.name));
+    if (mode === "price-desc") return list.sort((a, b) => b.price - a.price || byName(a, b));
+    if (mode === "name") return list.sort(byName);
+    if (mode === "unit")
+      return list.sort((a, b) => {
+        const ua = unitPrice(a), ub = unitPrice(b);
+        if (!ua || !ub) return ua ? -1 : ub ? 1 : a.price - b.price;
+        return ua.unit.localeCompare(ub.unit) || ua.value - ub.value;
+      });
+    return list.sort((a, b) => a.price - b.price || byName(a, b));
+  }
+  // One chosen location per store, e.g. { kroger: { id, name, address } }.
+  function cleanLocations(value) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+    const out = {};
+    for (const store of stores) {
+      const loc = value[store.id];
+      const id = liveText(loc?.id, 80);
+      if (!id || !/^[A-Za-z0-9_-]+$/.test(id)) continue;
+      out[store.id] = {
+        id,
+        name: liveText(loc.name, 120) || store.name,
+        address: liveText(loc.address, 200) || "",
+      };
+    }
+    return out;
+  }
   function liveOffer(item) {
     const live = cleanLive(item?.live);
     if (!live || live.id !== item.offerId) return null;
+    const size = parseSize(live.size);
     return {
       id: live.id,
-      storeId: "kroger",
+      storeId: live.retailer,
       name: live.name,
-      brand: live.brand || "Kroger",
+      brand: live.brand || stores.find((st) => st.id === live.retailer)?.name || "",
       size: live.size || "size unavailable",
       price: live.price,
-      amount: 1,
-      unit: "package",
-      emoji: "🛒",
+      amount: size?.amount || 1,
+      unit: size?.unit || "package",
+      emoji: "",
       department: "pantry",
       available: live.available,
       live,
@@ -419,13 +463,18 @@
       mode === "unit"
         ? a.unit.localeCompare(b.unit) ||
           a.price / a.amount - b.price / b.amount
-        : a.price - b.price,
+        : mode === "price-desc"
+          ? b.price - a.price
+          : mode === "name"
+            ? a.name.localeCompare(b.name)
+            : a.price - b.price,
     );
   }
   function initial() {
     return {
       version: 1,
       stores: ["kroger", "heb", "walmart"],
+      locations: {},
       items: [
         { id: "i1", name: "Eggs", quantity: 1, offerId: "eggs-w", done: false },
         { id: "i2", name: "Milk", quantity: 1, offerId: "milk", done: false },
@@ -485,6 +534,7 @@
         version: 1,
         items: data.items.map((i) => cleanSelection(i)),
         stores: data.stores.filter((id) => stores.some((s) => s.id === id)),
+        locations: cleanLocations(data.locations),
         preferences: cleanPreferences(
           data.preferences && typeof data.preferences === "object"
             ? data.preferences
@@ -516,6 +566,10 @@
     selectedOffer,
     cleanLive,
     liveOffer,
+    parseSize,
+    unitPrice,
+    sortLive,
+    cleanLocations,
     cleanSelection,
     cleanPreferences,
     sortOffers,

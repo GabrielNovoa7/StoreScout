@@ -1,28 +1,39 @@
 (function (root) {
   "use strict";
   const config = root.STORE_SCOUT_RETAILERS || {};
+  // Retailers with a Worker adapter at /retailers/<id>/products and /locations.
+  const adapters = Array.isArray(config.adapters) ? config.adapters : ["kroger"];
+  const base = () => String(config.workerUrl || "").replace(/\/$/, "");
+  const available = (retailer) =>
+    !!config.enabled && !!config.workerUrl && adapters.includes(retailer);
 
-  async function searchKroger(query) {
-    if (!config.enabled || !config.workerUrl) return [];
-    const params = new URLSearchParams({ q: query, limit: "20" });
-    if (config.krogerLocationId)
-      params.set("locationId", config.krogerLocationId);
-    const response = await fetch(
-      `${config.workerUrl.replace(/\/$/, "")}/retailers/kroger/products?${params}`,
-    );
-    if (!response.ok) throw new Error("Live retailer search failed.");
-    const data = await response.json();
+  async function getJson(path, params) {
+    const response = await fetch(`${base()}${path}?${new URLSearchParams(params)}`);
+    if (!response.ok) throw new Error("Live retailer request failed.");
+    return response.json();
+  }
+
+  async function locations(retailer, zip) {
+    if (!available(retailer)) return [];
+    const data = await getJson(`/retailers/${retailer}/locations`, { zip, limit: "10" });
+    return Array.isArray(data.locations) ? data.locations : [];
+  }
+
+  async function products(retailer, query, locationId) {
+    if (!available(retailer)) return [];
+    const data = await getJson(`/retailers/${retailer}/products`, {
+      q: query,
+      locationId,
+      limit: "30",
+    });
     return Array.isArray(data.products) ? data.products : [];
   }
 
-  async function streamKroger(query, onProduct, onStatus) {
-    if (!config.enabled || !config.workerUrl) return;
-    const params = new URLSearchParams({ q: query, zip: config.zipCode || "77019" });
-    const response = await fetch(
-      `${config.workerUrl.replace(/\/$/, "")}/retailers/compare/stream?${params}`,
-    );
-    if (!response.ok || !response.body)
-      throw new Error("Live retailer stream failed.");
+  // Streams results for the store nearest a ZIP when no location is chosen.
+  async function streamNearest(query, zip, onProduct, onStatus) {
+    const params = new URLSearchParams({ q: query, zip });
+    const response = await fetch(`${base()}/retailers/compare/stream?${params}`);
+    if (!response.ok || !response.body) throw new Error("Live retailer stream failed.");
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
@@ -46,9 +57,21 @@
     }
   }
 
+  // Searches one retailer: a chosen location when given, else the nearest one.
+  async function search(retailer, query, { locationId, zip } = {}, onProduct, onStatus = () => {}) {
+    if (!available(retailer)) return;
+    if (locationId) {
+      for (const product of await products(retailer, query, locationId)) onProduct(product);
+      return;
+    }
+    if (retailer !== "kroger") return;
+    await streamNearest(query, zip || config.zipCode || "77019", onProduct, onStatus);
+  }
+
   root.ScoutRetailers = Object.freeze({
-    enabled: !!config.enabled,
-    searchKroger,
-    streamKroger,
+    enabled: !!config.enabled && !!config.workerUrl,
+    available,
+    locations,
+    search,
   });
 })(typeof window !== "undefined" ? window : globalThis);

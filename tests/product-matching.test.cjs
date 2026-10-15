@@ -32,12 +32,14 @@ function uiHarness(items,{retailers,stores=['heb','walmart']}={}){
  const account={user:()=>null,locked:()=>false,label:()=>'',render:()=>'',init:h=>hooks=h};
  const state={version:1,items,stores,preferences:{}};
  const location={hash:''};
- const window={Scout:M,ScoutAccount:account,ScoutRetailers:retailers,location,addEventListener(){},scrollTo(){}};
+ const window={Scout:M,ScoutAccount:account,ScoutRetailers:retailers,location,addEventListener(){},scrollTo(){},STORE_SCOUT_RETAILERS:{zipCode:'77019'}};
  class FormData{constructor(form){return new Map(Object.entries(form.fields));}}
  vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../script.js'),'utf8'),{window,location,FormData,document:{querySelector:get,querySelectorAll:()=>[],addEventListener:(type,fn)=>handlers[type]=fn},localStorage:{getItem:()=>JSON.stringify(state),setItem(){}},Intl,crypto:globalThis.crypto,clearTimeout(){},setTimeout:()=>1});
  const click=(action,extra={})=>handlers.click({target:{closest:selector=>selector.startsWith('a[')?null:{dataset:{action,...extra}}}});
  const search=query=>handlers.submit({preventDefault(){},target:{id:'compare-form',fields:{query}}});
- return {click,search,state:()=>hooks.getState(),html:()=>get('#main').innerHTML};
+ const findStores=zip=>handlers.submit({preventDefault(){},target:{id:'location-form',fields:{zip}}});
+ const change=(id,value,checked)=>handlers.change({target:{id,value,checked,dataset:{}}});
+ return {click,search,findStores,change,state:()=>hooks.getState(),html:()=>get('#main').innerHTML};
 }
 test('changing a Compare search cannot bind beef to a fish-oil request',()=>{
  const h=uiHarness([{id:'fish',name:'Fish oil pills',quantity:2,offerId:null,done:false}]);h.click('compare-item',{id:'fish'});h.search('ground beef');assert.ok(!h.html().includes('data-offer="beef-w"'));h.click('select-offer',{offer:'beef-w'});assert.equal(h.state().items[0].offerId,null);assert.equal(h.state().items[0].name,'Fish oil pills');
@@ -71,7 +73,8 @@ test('Kroger selection survives account serialization and renders a live store c
 });
 
 const krogerMilk={id:'kroger:0001111041700:03400355',retailer:'kroger',productId:'0001111041700',upc:'0001111041700',name:'Kroger® 2% Reduced Fat Milk Gallon',brand:'Kroger',size:'1 gal',price:3.09,regularPrice:3.29,unitPrice:null,unit:null,available:true,locationId:'03400355',source:'Kroger API',fetchedAt:'2026-10-15T08:41:24.741Z'};
-const fakeRetailers=products=>({enabled:true,async streamKroger(query,onProduct,onStatus){onStatus('Searching Kroger…');for(const p of products)onProduct(p);}});
+const riverOaks={id:'03400355',name:'Kroger - River Oaks',address:'1938 W Gray St, Houston, TX',distanceMiles:null};
+const fakeRetailers=(products,{locations=[riverOaks],calls=[]}={})=>({enabled:true,available:id=>id==='kroger',async locations(id,zip){calls.push(['locations',id,zip]);return locations;},async search(id,query,opts,onProduct,onStatus){calls.push(['search',id,query,opts]);onStatus('Searching…');for(const p of products)onProduct(p);}});
 const settle=()=>new Promise(r=>setImmediate(r));
 
 test('live Kroger snapshots are validated before they can price an item',()=>{
@@ -88,7 +91,7 @@ test('live Kroger snapshots are validated before they can price an item',()=>{
 test('a streamed Kroger product can be added, saved to the account shape, and shopped',async()=>{
  const h=uiHarness([],{retailers:fakeRetailers([krogerMilk]),stores:['kroger','heb','walmart']});
  h.click('navigate',{view:'compare'});h.search('milk');await settle();
- assert.match(h.html(),/Live Kroger results/);
+ assert.match(h.html(),/Live results for/);
  assert.match(h.html(),/data-action="select-live"/);
  assert.match(h.html(),/\$3\.29/);
  h.click('select-live',{live:krogerMilk.id});
@@ -97,7 +100,7 @@ test('a streamed Kroger product can be added, saved to the account shape, and sh
  const saved=C.cleanState({...h.state(),profile:undefined});
  assert.equal(saved.items[0].live.price,3.09);assert.deepEqual(saved.stores,['kroger','heb','walmart']);
  h.click('navigate',{view:'shopping'});
- assert.match(h.html(),/River Oaks/);assert.match(h.html(),/Kroger® 2% Reduced Fat Milk Gallon/);
+ assert.match(h.html(),/Nearest store to 77019/);assert.match(h.html(),/Kroger® 2% Reduced Fat Milk Gallon/);
 });
 
 test('a Kroger pick for an existing grocery keeps its name and can be replaced by a sample pick',async()=>{
@@ -107,4 +110,43 @@ test('a Kroger pick for an existing grocery keeps its name and can be replaced b
  assert.equal(h.state().items[0].name,'Milk');assert.equal(M.selectedOffer(h.state().items[0]).storeId,'kroger');
  h.click('select-offer',{offer:'milk'});
  assert.equal(h.state().items[0].offerId,'milk');assert.equal(h.state().items[0].live,undefined);
+});
+
+const krogerSoy=[
+ {...krogerMilk,id:'kroger:1:03400355',productId:'1',name:'Kikkoman Soy Sauce',brand:'Kikkoman',size:'20 fl oz',price:5.49,regularPrice:5.49},
+ {...krogerMilk,id:'kroger:2:03400355',productId:'2',name:'Kroger Less Sodium Soy Sauce',brand:'Kroger',size:'10 fl oz',price:1.49,regularPrice:1.99},
+ {...krogerMilk,id:'kroger:3:03400355',productId:'3',name:'Kikkoman Less Sodium Soy Sauce',brand:'Kikkoman',size:'40 fl oz',price:8.99,regularPrice:8.99},
+];
+const order=html=>[...html.matchAll(/data-live="([^"]+)"/g)].map(m=>m[1].split(':')[1]);
+
+test('live results sort by price, unit price and name, and filter by brand or sale',async()=>{
+ const h=uiHarness([],{retailers:fakeRetailers(krogerSoy),stores:['kroger']});
+ h.click('navigate',{view:'compare'});h.search('soy sauce');await settle();
+ assert.deepEqual(order(h.html()),['2','1','3']);
+ h.change('sort','price-desc');assert.deepEqual(order(h.html()),['3','1','2']);
+ h.change('sort','unit');assert.deepEqual(order(h.html()),['2','3','1']);
+ h.change('sort','name');assert.deepEqual(order(h.html()),['3','1','2']);
+ assert.match(h.html(),/\$0\.15 \/ fl oz/);
+ h.change('live-brand','Kikkoman');assert.deepEqual(order(h.html()).sort(),['1','3']);
+ h.change('live-brand','');h.change('live-sale','',true);assert.deepEqual(order(h.html()),['2']);
+});
+
+test('choosing a store location is saved and used for live searches',async()=>{
+ const calls=[];
+ const h=uiHarness([],{retailers:fakeRetailers([krogerMilk],{calls}),stores:['kroger','heb']});
+ h.click('navigate',{view:'stores'});h.findStores('77005');await settle();
+ assert.deepEqual(calls[0],['locations','kroger','77005']);
+ assert.match(h.html(),/Kroger - River Oaks/);assert.match(h.html(),/Location search coming soon/);
+ h.click('choose-location',{store:'kroger',location:'03400355'});
+ assert.deepEqual(h.state().locations.kroger,{id:'03400355',name:'Kroger - River Oaks',address:'1938 W Gray St, Houston, TX'});
+ assert.deepEqual(C.cleanState({...h.state(),profile:undefined}).locations.kroger.id,'03400355');
+ h.click('navigate',{view:'compare'});h.search('milk');await settle();
+ assert.equal(JSON.stringify(calls.at(-1)),JSON.stringify(['search','kroger','milk',{locationId:'03400355',zip:'77005'}]));
+ h.click('clear-location',{store:'kroger'});assert.equal(h.state().locations.kroger,undefined);
+});
+
+test('stored locations are validated and pilot wording is gone',()=>{
+ assert.deepEqual(M.cleanLocations({kroger:{id:'bad id!',name:'x'},walmart:{id:'5959',name:'Walmart Heights'},target:{id:'1'}}),{walmart:{id:'5959',name:'Walmart Heights',address:''}});
+ const h=uiHarness([],{retailers:fakeRetailers([]),stores:['kroger','heb','walmart']});
+ for(const view of ['list','compare','shopping','stores']){h.click('navigate',{view});assert.doesNotMatch(h.html(),/pilot|Houston|illustrative/i,view);}
 });
