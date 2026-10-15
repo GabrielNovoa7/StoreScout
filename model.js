@@ -7,6 +7,7 @@
   const stores = [
     { id: "kroger", name: "Kroger", label: "Kroger", short: "K", color: "#1768b2", domain: "kroger.com", live: true, status: "active",
       family: ["Ralphs", "King Soopers", "Fred Meyer", "Fry's", "Harris Teeter", "Smith's", "QFC", "Dillons", "Mariano's", "Food 4 Less"] },
+    { id: "wholefoods", name: "Whole Foods", label: "Whole Foods", short: "WF", color: "#00674b", domain: "wholefoodsmarket.com", live: true, status: "active" },
     { id: "heb", name: "H-E-B", label: "H-E-B", short: "H", color: "#df4c4c", domain: "heb.com", live: false, status: "coming-soon" },
     { id: "walmart", name: "Walmart", label: "Walmart", short: "W", color: "#3274bb", domain: "walmart.com", live: false, status: "coming-soon" },
     { id: "sellers", name: "Sellers Bros.", label: "Sellers Bros.", short: "S", color: "#c8102e", domain: "sellersbros.com", live: true, status: "active", pricing: "weekly-ad" },
@@ -370,7 +371,8 @@
       note: liveText(value.note, 160),
       image:
         typeof value.image === "string" &&
-        /^https:\/\/images\.openfoodfacts\.org\/images\/products\/[A-Za-z0-9/._-]+\.(jpg|jpeg|png|webp)$/.test(value.image)
+        (/^https:\/\/images\.openfoodfacts\.org\/images\/products\/[A-Za-z0-9/._-]+\.(jpg|jpeg|png|webp)$/.test(value.image) ||
+          /^https:\/\/m\.media-amazon\.com\/images\/[A-Za-z0-9/._+-]+\.(jpg|jpeg|png|webp)$/.test(value.image))
           ? value.image
           : null,
       fetchedAt: Number.isFinite(fetched) ? new Date(fetched).toISOString() : null,
@@ -397,6 +399,54 @@
     const size = parseSize(product?.size);
     const price = Number(product?.price);
     return size && Number.isFinite(price) ? { value: price / size.amount, unit: size.unit } : null;
+  }
+  // ---- Search relevance -------------------------------------------------
+  // A product name's last noun says what it is: "Wide Egg Noodles" are
+  // noodles, "Jumbo White Eggs" are eggs. Results whose main noun matches the
+  // search are best matches; ones that only mention the word are related.
+  const singular = (w) =>
+    w.length > 3 ? w.replace(/ies$/, "y").replace(/oes$/, "o").replace(/(?<!s)s$/, "") : w;
+  const nameWords = (text) =>
+    (String(text || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/['’®™]/g, "")
+      .match(/[a-z0-9%]+/g) || []).map(singular);
+  // Packaging, size and grade words that can trail a name ("Eggs, 12 Count Carton").
+  const TRAILING = new Set([
+    "pack", "pk", "pkg", "package", "jar", "bag", "box", "bottle", "btl", "can", "tub", "carton",
+    "count", "ct", "dozen", "doz", "gallon", "gal", "gl", "half", "quart", "qt", "pint", "pt",
+    "oz", "fl", "fz", "lb", "lbs", "ea", "each", "size", "value", "family", "tray", "loose", "bunch",
+    "small", "medium", "large", "xl", "jumbo", "extra", "mini", "regular",
+  ]);
+  // Cuts and forms that are still the searched food ("Chicken Breast" for chicken).
+  const PARTS = new Set([
+    "breast", "thigh", "wing", "drumstick", "tender", "tenderloin", "leg", "quarter", "fillet",
+    "filet", "steak", "chop", "rib", "loin", "roast", "cutlet", "shoulder", "brisket", "ground",
+    "half", "piece", "slice", "strip", "link", "sausage",
+  ]);
+  function mainNoun(name) {
+    const head = String(name || "")
+      .split(",")[0]
+      .split(/\s(?:with|w\/|in|for|made with|featuring|plus)\s/i)[0];
+    const words = nameWords(head);
+    while (words.length > 1 && (TRAILING.has(words.at(-1)) || /^\d/.test(words.at(-1)))) words.pop();
+    return { noun: words.at(-1) || "", words };
+  }
+  // 2 = best match, 1 = mentions every search word, 0 = otherwise.
+  function relevance(query, product) {
+    const terms = nameWords(query).filter((t) => t.length > 1);
+    if (!terms.length) return 1;
+    const { noun, words } = mainNoun(product?.name);
+    const all = new Set([...words, ...nameWords(product?.brand)]);
+    if (!terms.every((t) => all.has(t))) return 0;
+    const target = terms.at(-1);
+    if (noun === target) return 2;
+    // "Chicken Breast": the search word sits right before a cut/form word.
+    const i = words.lastIndexOf(target);
+    if (terms.length === 1 && PARTS.has(noun) && i >= 0 && i === words.length - 2) return 2;
+    return 1;
   }
   function sortLive(products, mode) {
     const list = [...products];
@@ -484,7 +534,7 @@
   function initial() {
     return {
       version: 1,
-      stores: ["kroger", "sellers", "heb", "walmart"],
+      stores: ["kroger", "wholefoods", "sellers", "heb", "walmart"],
       locations: {},
       items: [
         { id: "i1", name: "Eggs", quantity: 1, offerId: "eggs-w", done: false },
@@ -580,6 +630,7 @@
     parseSize,
     unitPrice,
     sortLive,
+    relevance,
     cleanLocations,
     cleanSelection,
     cleanPreferences,

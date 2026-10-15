@@ -49,11 +49,12 @@ service cloud.firestore {
         && l.address is string && l.address.size() <= 200;
     }
     function validLocations(m) {
-      return m is map && m.keys().hasOnly(['kroger', 'heb', 'walmart', 'sellers'])
+      return m is map && m.keys().hasOnly(['kroger', 'heb', 'walmart', 'sellers', 'wholefoods'])
         && (!('kroger' in m) || validLocation(m.kroger))
         && (!('heb' in m) || validLocation(m.heb))
         && (!('walmart' in m) || validLocation(m.walmart))
-        && (!('sellers' in m) || validLocation(m.sellers));
+        && (!('sellers' in m) || validLocation(m.sellers))
+        && (!('wholefoods' in m) || validLocation(m.wholefoods));
     }
     function validList() {
       let d = request.resource.data;
@@ -70,8 +71,8 @@ service cloud.firestore {
         && (!('locations' in d.state) || validLocations(d.state.locations))
         && d.state.version == 1
         && d.state.items is list && d.state.items.size() <= 200
-        && d.state.stores is list && d.state.stores.size() <= 4
-        && d.state.stores.hasOnly(['heb', 'walmart', 'kroger', 'sellers'])
+        && d.state.stores is list && d.state.stores.size() <= 5
+        && d.state.stores.hasOnly(['heb', 'walmart', 'kroger', 'sellers', 'wholefoods'])
         && d.state.preferences is map && d.state.preferences.size() <= 200;
     }
     match /users/{uid}/lists/main {

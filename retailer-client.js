@@ -98,13 +98,12 @@
     );
   }
 
-  async function products(retailer, query, locationId) {
+  async function products(retailer, query, locationId, zip) {
     if (!available(retailer)) return [];
-    const data = await getJson(`/retailers/${retailer}/products`, {
-      q: query,
-      locationId,
-      limit: "30",
-    });
+    const params = { q: query, limit: "30" };
+    if (locationId) params.locationId = locationId;
+    if (zip) params.zip = zip;
+    const data = await getJson(`/retailers/${retailer}/products`, params);
     return Array.isArray(data.products) ? data.products : [];
   }
 
@@ -144,7 +143,11 @@
       for (const product of await products(retailer, query, locationId)) onProduct(product);
       return;
     }
-    if (retailer !== "kroger") return;
+    if (retailer !== "kroger") {
+      // Other Worker adapters pick the nearest store to the ZIP themselves.
+      for (const product of await products(retailer, query, "", zip || config.zipCode || "77019")) onProduct(product);
+      return;
+    }
     await streamNearest(query, zip || config.zipCode || "77019", onProduct, onStatus);
   }
 

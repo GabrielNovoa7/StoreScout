@@ -64,3 +64,12 @@ test('weekly-ad search matches whole words, not word starts',async()=>{
  assert.deepEqual(await run('limes'),['Limes']);
  assert.deepEqual(await run('chick'),[]);
 });
+
+test('a Whole Foods pick keeps its Amazon-hosted photo, sale price and Prime deal',()=>{
+ const live=M.cleanLive({id:'wholefoods:B00TFXF3G4:10346',retailer:'wholefoods',productId:'B00TFXF3G4',name:'Organic Large Grade A Eggs',
+  brand:'Chino Valley Ranchers',size:'12 ct',price:7.49,regularPrice:7.99,deal:'Prime $6.74',locationId:'10346',
+  image:'https://m.media-amazon.com/images/S/assets.wholefoodsmarket.com/PIE/product/41z-lCjam0L.jpg',fetchedAt:'2026-10-15T10:00:00Z'});
+ assert.ok(live);assert.equal(live.deal,'Prime $6.74');assert.match(live.image,/^https:\/\/m\.media-amazon\.com\//);
+ const offer=M.selectedOffer({id:'x',name:'Eggs',quantity:1,offerId:live.id,live,done:false});
+ assert.equal(offer.storeId,'wholefoods');assert.equal(offer.price,7.49);assert.equal(offer.unit,'ct');
+});

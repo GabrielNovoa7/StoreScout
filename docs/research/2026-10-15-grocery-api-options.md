@@ -131,3 +131,21 @@ Useful as supporting data, not as a new store:
 - Limits: weekly specials only (no full catalog); the ad applies to all
   stores; the JSON must be regenerated each week (run the script, commit).
   Stores with bot protection (H-E-B, Walmart) are still not scraped.
+
+## Houston store checks and Whole Foods - 2026-10-15
+
+Checked the stores the owner shops at, with an honest user agent:
+
+| Store | Finding |
+|---|---|
+| Whole Foods | No bot protection; robots.txt allows search. `/api/search?text=&store=` returns names with sizes, brand, regular/sale/Prime prices and photos per store. Built as a live Worker adapter (`cloudflare/wholefoods.mjs`). |
+| Sam's Club | PerimeterX + Akamai; robots.txt disallows /search |
+| Costco | Akamai + Kasada; robots.txt disallows search |
+| H-E-B | Imperva/Incapsula |
+| Target | PerimeterX with CAPTCHA |
+| Randalls | Akamai + Imperva |
+| Sprouts | Instacart storefront with CAPTCHA; robots.txt disallows /api/ |
+
+Whole Foods store picker: 11 Houston-area stores from `/api/stores/{id}/summary`,
+sorted by distance from the shopper's ZIP (coordinates via zippopotam.us). The
+"closest store" endpoint needs a signed-in session, so it is not used.

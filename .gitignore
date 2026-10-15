@@ -9,3 +9,4 @@
 /scrapers/.venv/
 /scrapers/cache/
 __pycache__/
+.wrangler/

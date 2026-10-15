@@ -23,6 +23,8 @@
     liveBrand = "",
     liveSaleOnly = false,
     liveNotes = [],
+    liveTerm = "",
+    liveShowRelated = false,
     locationResults = {},
     locationStatus = "",
     areaZip = "",
@@ -319,7 +321,16 @@
       ? `<div class="live-filters"><label>Brand <select id="live-brand" aria-label="Filter by brand"><option value="">All brands (${enabled.length})</option>${brands.map((b) => `<option value="${esc(b)}" ${liveBrand === b ? "selected" : ""}>${esc(b)}</option>`).join("")}</select></label><label class="live-sale"><input type="checkbox" id="live-sale" ${liveSaleOnly ? "checked" : ""}> On sale only</label><button class="text-button" data-action="navigate" data-view="stores">Change store ${icon("arrow")}</button></div>`
       : "";
     const notes = liveNotes.length && enabled.length ? `<ul class="live-notes">${liveNotes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : "";
-    return `<section class="live-panel"><div class="results-heading"><h2>${esc(liveStatus)} ${enabled.length ? `<span class="count-bubble">${shown.length}</span>` : ""}</h2><span>${esc(where)}</span></div>${notes}${filters}${shown.length ? `<div class="live-results">${shown.map((p) => liveCard(p, active)).join("")}</div>` : enabled.length ? '<p class="no-alternatives">No live products match these filters.</p>' : ""}</section>`;
+    // Best matches (the product *is* what was searched) come first; products
+    // that only mention the word ("Egg Noodles" for eggs) wait under Related.
+    const best = shown.filter((p) => M.relevance(liveTerm, p) === 2);
+    const related = best.length ? shown.filter((p) => M.relevance(liveTerm, p) !== 2) : [];
+    const main = best.length ? best : shown;
+    const grid = (list) => `<div class="live-results">${list.map((p) => liveCard(p, active)).join("")}</div>`;
+    const relatedBlock = related.length
+      ? `<div class="related-toggle"><button class="text-button" data-action="toggle-related" aria-expanded="${liveShowRelated}">${liveShowRelated ? "Hide" : "Show"} ${related.length} related item${related.length === 1 ? "" : "s"} ${icon("arrow")}</button><span>Products that mention “${esc(liveTerm)}” but aren’t ${esc(liveTerm)}</span></div>${liveShowRelated ? grid(related) : ""}`
+      : "";
+    return `<section class="live-panel"><div class="results-heading"><h2>${esc(liveStatus)} ${enabled.length ? `<span class="count-bubble">${main.length}</span>` : ""}</h2><span>${esc(where)}</span></div>${notes}${filters}${main.length ? grid(main) + relatedBlock : enabled.length ? '<p class="no-alternatives">No live products match these filters.</p>' : ""}</section>`;
   }
   let liveRun = 0;
   async function attachPhotos(run) {
@@ -337,6 +348,8 @@
     liveBrand = "";
     liveSaleOnly = false;
     liveNotes = [];
+    liveShowRelated = false;
+    liveTerm = term;
     if (!targets.length || term.length < 2) {
       liveProducts = [];
       liveStatus = "";
@@ -767,6 +780,10 @@
       liveStatus = "";
       save();
       notify(`${storeFor(sid).name} will use the nearest store.`);
+      render();
+    }
+    if (action === "toggle-related") {
+      liveShowRelated = !liveShowRelated;
       render();
     }
     if (action === "select-live") {

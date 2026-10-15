@@ -197,3 +197,25 @@ test('an empty weekly-ad search explains that the ad only lists sale items',asyn
  only.click('navigate',{view:'compare'});only.search('eggs');await settle();
  assert.match(only.html(),/No “eggs” in this week’s Sellers Bros\. ad/);
 });
+
+test('search relevance ranks products by what they are, not words they mention',()=>{
+ const best=(q,n)=>M.relevance(q,{name:n});
+ for(const n of ['Kroger® Grade A Jumbo White Eggs','Simple Truth™ Natural Cage Free Grade A Large Brown Eggs','Liquid Whole Eggs','Organic Large Grade A Eggs, 12 CT'])assert.equal(best('eggs',n),2,n);
+ for(const n of ['Organic Easter Egg Radish','Chung’s Egg Rolls','Wide Egg Noodles','Kale and Spinach Egg Bites with Egg White'])assert.equal(best('eggs',n),1,n);
+ assert.equal(best('eggs',"Kellogg's Eggo Waffles"),0);assert.equal(best('eggs',"Nellie's Free Range Eggs Large"),2);
+ assert.equal(best('chicken','Chicken Breast'),2);assert.equal(best('chicken','Chicken Broth'),1);
+ assert.equal(best('milk','Milk Chocolate Bar'),1);assert.equal(best('milk','2% Reduced Fat Milk Gallon'),2);
+ assert.equal(best('orange juice','Orange Soda'),0);assert.equal(best('orange juice','Simply Orange Juice'),2);
+});
+
+test('live results show best matches first and fold related items behind a toggle',async()=>{
+ const mk=(n,name,price)=>({...krogerMilk,id:`kroger:${n}:03400355`,productId:String(n),name,price,regularPrice:price,brand:'Kroger'});
+ const items=[mk(1,'Wide Egg Noodles',3.39),mk(2,'Kroger Grade A Large White Eggs',2.49),mk(3,'Organic Easter Egg Radish',2.49),mk(4,'Kroger Jumbo White Eggs',2.09)];
+ const h=uiHarness([],{retailers:fakeRetailers(items),stores:['kroger'],realStatus:true});
+ h.click('navigate',{view:'compare'});h.search('eggs');await settle();
+ assert.deepEqual(order(h.html()),['4','2']);
+ assert.match(h.html(),/Show 2 related items/);
+ h.click('toggle-related');
+ assert.deepEqual(order(h.html()),['4','2','3','1']);
+ assert.match(h.html(),/Hide 2 related items/);
+});

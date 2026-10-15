@@ -136,13 +136,14 @@ test('verified owner can save Kroger selection but unknown retailers are rejecte
  await assertFails(setDoc(ref,bad));
 });
 
-test('verified owner can enable all four stores but not more or unknown ones', async () => {
- const db=env.authenticatedContext('four-stores',{email_verified:true}).firestore();
- const ref=doc(db,'users/four-stores/lists/main');
- const data=valid(1);data.state.stores=['kroger','sellers','heb','walmart'];
- data.state.locations={sellers:{id:'sb-8011-elvera',name:'Sellers Bros. - 8011 Elvera',address:'8011 Elvera, Houston, TX 77012'}};
+test('verified owner can enable all five stores but not more or unknown ones', async () => {
+ const db=env.authenticatedContext('five-stores',{email_verified:true}).firestore();
+ const ref=doc(db,'users/five-stores/lists/main');
+ const data=valid(1);data.state.stores=['kroger','wholefoods','sellers','heb','walmart'];
+ data.state.locations={sellers:{id:'sb-8011-elvera',name:'Sellers Bros. - 8011 Elvera',address:'8011 Elvera, Houston, TX 77012'},
+  wholefoods:{id:'10346',name:'Whole Foods - Montrose',address:'701 Waugh Drive, Houston, TX 77019'}};
  await assertSucceeds(setDoc(ref,data));
- const bad=valid(2);bad.state.stores=['kroger','sellers','heb','walmart','kroger'];
+ const bad=valid(2);bad.state.stores=['kroger','wholefoods','sellers','heb','walmart','kroger'];
  await assertFails(setDoc(ref,bad));
  const unknown=valid(2);unknown.state.stores=['target'];
  await assertFails(setDoc(ref,unknown));

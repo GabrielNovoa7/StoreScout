@@ -3433,3 +3433,20 @@ list-style:none;
 font-size:12px;
 color:var(--muted)
 }
+.store-mark.wholefoods {
+background:#00674b;
+color:#fff;
+font-size:10px
+}
+.related-toggle {
+display:flex;
+flex-wrap:wrap;
+align-items:center;
+gap:4px 12px;
+margin:16px 0 10px;
+font-size:12px;
+color:var(--muted)
+}
+.related-toggle .text-button {
+font-weight:700
+}
