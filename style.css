@@ -3303,3 +3303,74 @@ flex:1
 margin-left:0
 }
 }
+
+/* Coming-soon stores */
+.store-family {
+margin:-4px 0 10px;
+font-size:11px;
+color:var(--muted)
+}
+.soon-grid {
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:14px;
+margin-bottom:24px
+}
+.soon-card {
+display:flex;
+align-items:center;
+gap:14px;
+padding:16px 18px;
+border:1px dashed var(--line);
+border-radius:12px;
+background:var(--white)
+}
+.soon-card>.store-mark {
+width:40px;
+height:40px;
+border-radius:10px;
+opacity:.85
+}
+.soon-card h3 {
+margin:0 0 3px;
+font-size:15px
+}
+.soon-card p {
+margin:0;
+font-size:11px;
+color:var(--muted)
+}
+.soon-card .pill {
+margin-left:auto;
+white-space:nowrap
+}
+
+/* Product photos (Open Food Facts) */
+.live-results article.has-photo {
+grid-template-columns:56px minmax(0,1fr) auto
+}
+.live-results article .live-photo {
+grid-column:1;
+grid-row:1 / span 2;
+width:56px;
+height:56px;
+object-fit:contain;
+background:#fff;
+border-radius:8px;
+border:1px solid var(--line)
+}
+.live-results article.has-photo strong,
+.live-results article.has-photo .live-store {
+grid-column:2
+}
+.live-results article.has-photo b {
+grid-column:3
+}
+.food-thumb .product-photo,
+.shopping-food .product-photo {
+width:100%;
+height:100%;
+object-fit:contain;
+background:#fff;
+border-radius:inherit
+}

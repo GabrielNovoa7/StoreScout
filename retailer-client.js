@@ -16,7 +16,10 @@
   async function locations(retailer, zip) {
     if (!available(retailer)) return [];
     const data = await getJson(`/retailers/${retailer}/locations`, { zip, limit: "10" });
-    return Array.isArray(data.locations) ? data.locations : [];
+    // Some chains list warehouses and transport hubs; keep shoppable stores only.
+    return (Array.isArray(data.locations) ? data.locations : []).filter(
+      (loc) => !/\b(unused|forecast|spoke|shed|trans|warehouse|distribution|fulfillment center)\b/i.test(loc.name || ""),
+    );
   }
 
   async function products(retailer, query, locationId) {

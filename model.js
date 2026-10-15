@@ -2,10 +2,13 @@
   "use strict";
   // Store metadata drives logos, live search, and location pickers. A new
   // store needs an entry here; a live store also needs a Worker adapter.
+  // status "coming-soon" keeps a store visible as in progress but out of
+  // comparisons, totals, and shopping until its data source is connected.
   const stores = [
-    { id: "kroger", name: "Kroger", label: "Kroger", short: "K", color: "#1768b2", domain: "kroger.com", live: true },
-    { id: "heb", name: "H-E-B", label: "H-E-B", short: "H", color: "#df4c4c", domain: "heb.com", live: false },
-    { id: "walmart", name: "Walmart", label: "Walmart", short: "W", color: "#3274bb", domain: "walmart.com", live: false },
+    { id: "kroger", name: "Kroger", label: "Kroger", short: "K", color: "#1768b2", domain: "kroger.com", live: true, status: "active",
+      family: ["Ralphs", "King Soopers", "Fred Meyer", "Fry's", "Harris Teeter", "Smith's", "QFC", "Dillons", "Mariano's", "Food 4 Less"] },
+    { id: "heb", name: "H-E-B", label: "H-E-B", short: "H", color: "#df4c4c", domain: "heb.com", live: false, status: "coming-soon" },
+    { id: "walmart", name: "Walmart", label: "Walmart", short: "W", color: "#3274bb", domain: "walmart.com", live: false, status: "coming-soon" },
   ];
   const liveStoreIds = () => stores.filter((s) => s.live).map((s) => s.id);
   const products = [
@@ -362,6 +365,11 @@
       regularPrice: Number.isFinite(regular) && regular > 0 ? regular : null,
       locationId: liveText(value.locationId, 80),
       available: typeof value.available === "boolean" ? value.available : null,
+      image:
+        typeof value.image === "string" &&
+        /^https:\/\/images\.openfoodfacts\.org\/images\/products\/[A-Za-z0-9/._-]+\.(jpg|jpeg|png|webp)$/.test(value.image)
+          ? value.image
+          : null,
       fetchedAt: Number.isFinite(fetched) ? new Date(fetched).toISOString() : null,
     };
   }

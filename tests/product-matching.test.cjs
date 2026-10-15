@@ -26,13 +26,15 @@ test('totals and selected counts exclude stale unrelated products',()=>{
  assert.deepEqual(M.summary([item]),{total:0,selected:0,done:0});
 });
 const vm=require('node:vm'),fs=require('node:fs');
-function uiHarness(items,{retailers,stores=['heb','walmart']}={}){
+function uiHarness(items,{retailers,photos,stores=['heb','walmart'],realStatus=false}={}){
+ // Sample-catalog tests keep every store active; realStatus uses the shipped store status.
+ const Scout=realStatus?M:{...M,stores:M.stores.map(s=>({...s,status:'active'}))};
  const handlers={},nodes=new Map();let hooks;
  const get=selector=>{if(!nodes.has(selector))nodes.set(selector,{textContent:'',innerHTML:'',classList:{add(){},remove(){}},addEventListener(){},close(){}});return nodes.get(selector);};
  const account={user:()=>null,locked:()=>false,label:()=>'',render:()=>'',init:h=>hooks=h};
  const state={version:1,items,stores,preferences:{}};
  const location={hash:''};
- const window={Scout:M,ScoutAccount:account,ScoutRetailers:retailers,location,addEventListener(){},scrollTo(){},STORE_SCOUT_RETAILERS:{zipCode:'77019'}};
+ const window={Scout,ScoutAccount:account,ScoutRetailers:retailers,ScoutPhotos:photos,location,addEventListener(){},scrollTo(){},STORE_SCOUT_RETAILERS:{zipCode:'77019'}};
  class FormData{constructor(form){return new Map(Object.entries(form.fields));}}
  vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../script.js'),'utf8'),{window,location,FormData,document:{querySelector:get,querySelectorAll:()=>[],addEventListener:(type,fn)=>handlers[type]=fn},localStorage:{getItem:()=>JSON.stringify(state),setItem(){}},Intl,crypto:globalThis.crypto,clearTimeout(){},setTimeout:()=>1});
  const click=(action,extra={})=>handlers.click({target:{closest:selector=>selector.startsWith('a[')?null:{dataset:{action,...extra}}}});
@@ -149,4 +151,38 @@ test('stored locations are validated and pilot wording is gone',()=>{
  assert.deepEqual(M.cleanLocations({kroger:{id:'bad id!',name:'x'},walmart:{id:'5959',name:'Walmart Heights'},target:{id:'1'}}),{walmart:{id:'5959',name:'Walmart Heights',address:''}});
  const h=uiHarness([],{retailers:fakeRetailers([]),stores:['kroger','heb','walmart']});
  for(const view of ['list','compare','shopping','stores']){h.click('navigate',{view});assert.doesNotMatch(h.html(),/pilot|Houston|illustrative/i,view);}
+});
+
+test('coming-soon stores are hidden from comparisons and shopping but keep saved picks',async()=>{
+ const items=[{id:'eggs',name:'Eggs',quantity:1,offerId:'eggs-w',done:false},{id:'k',name:'Milk',quantity:1,offerId:krogerMilk.id,live:krogerMilk,done:false}];
+ const h=uiHarness(items,{retailers:fakeRetailers([krogerMilk]),stores:['kroger','heb','walmart'],realStatus:true});
+ h.click('navigate',{view:'compare'});
+ assert.doesNotMatch(h.html(),/data-store="heb"/);assert.doesNotMatch(h.html(),/data-offer=/);
+ assert.match(h.html(),/Search for a product to see live prices/);
+ h.click('navigate',{view:'shopping'});
+ assert.match(h.html(),/Kroger · 1 gal · Qty 1/);assert.doesNotMatch(h.html(),/<h2>(Walmart|H-E-B)<\/h2>/);
+ assert.match(h.html(),/1 still need a product/);
+ h.click('navigate',{view:'stores'});
+ assert.match(h.html(),/Coming soon/);assert.match(h.html(),/H-E-B<\/h3>/);assert.match(h.html(),/Walmart<\/h3>/);assert.match(h.html(),/Also covers Ralphs/);
+ h.click('toggle-store',{store:'heb'});assert.ok(h.state().stores.includes('heb'));
+ assert.equal(h.state().items[0].offerId,'eggs-w');
+});
+
+const OFF_IMG='https://images.openfoodfacts.org/images/products/001/111/041/7008/front_en.10.200.jpg';
+test('Open Food Facts photos appear on live results and stay with a saved pick',async()=>{
+ const photos={async lookup(products){return new Map(products.map(p=>[p.id,OFF_IMG]));}};
+ const h=uiHarness([],{retailers:fakeRetailers([krogerMilk]),photos,stores:['kroger'],realStatus:true});
+ h.click('navigate',{view:'compare'});h.search('milk');await settle();await settle();
+ assert.match(h.html(),/class="live-photo" src="https:\/\/images\.openfoodfacts\.org/);
+ h.click('select-live',{live:krogerMilk.id});
+ assert.equal(h.state().items[0].live.image,OFF_IMG);
+ h.click('navigate',{view:'shopping'});assert.match(h.html(),/class="product-photo"/);
+});
+test('photo barcodes convert Kroger UPCs and reject invalid codes',()=>{
+ require('../product-photos.js');const P=globalThis.ScoutPhotos;
+ assert.equal(P.barcodeFor({retailer:'kroger',upc:'0004139000105'}),'041390001055');
+ assert.equal(P.barcodeFor({retailer:'kroger',upc:'0001111041700'}),'011110417008');
+ assert.equal(P.barcodeFor({retailer:'walmart',upc:'041390001055'}),'041390001055');
+ assert.equal(P.barcodeFor({retailer:'walmart',upc:'041390001054'}),null);
+ assert.equal(M.cleanLive({...krogerMilk,image:'https://evil.example/x.jpg'}).image,null);
 });
