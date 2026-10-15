@@ -1,6 +1,7 @@
 (function (root) {
   "use strict";
   const stores = [
+    { id: "kroger", name: "Kroger", label: "Kroger · River Oaks", short: "K", color: "#1768b2" },
     {
       id: "heb",
       name: "H-E-B",
@@ -334,14 +335,77 @@
   function canSelect(value, offerId) {
     return matchOffers(value).some((o) => o.id === offerId);
   }
+  // Live retailer picks are not in the sample catalog, so the item keeps a
+  // bounded snapshot of the offer it was chosen from.
+  const liveText = (value, max) =>
+    typeof value === "string" && value.trim() ? value.trim().slice(0, max) : null;
+  function cleanLive(value) {
+    if (!value || typeof value !== "object" || value.retailer !== "kroger")
+      return null;
+    const id = liveText(value.id, 200),
+      productId = liveText(value.productId, 80),
+      name = liveText(value.name, 200),
+      price = Number(value.price);
+    if (
+      !id ||
+      !productId ||
+      !name ||
+      !/^kroger:[A-Za-z0-9]{1,80}:[A-Za-z0-9]{1,80}$/.test(id) ||
+      !Number.isFinite(price) ||
+      price <= 0 ||
+      price > 10000
+    )
+      return null;
+    const regular = Number(value.regularPrice),
+      fetched = Date.parse(value.fetchedAt);
+    return {
+      id,
+      retailer: "kroger",
+      productId,
+      upc: liveText(value.upc, 20),
+      name,
+      brand: liveText(value.brand, 120),
+      size: liveText(value.size, 80),
+      price,
+      regularPrice: Number.isFinite(regular) && regular > 0 ? regular : null,
+      locationId: liveText(value.locationId, 80),
+      available: typeof value.available === "boolean" ? value.available : null,
+      fetchedAt: Number.isFinite(fetched) ? new Date(fetched).toISOString() : null,
+    };
+  }
+  function liveOffer(item) {
+    const live = cleanLive(item?.live);
+    if (!live || live.id !== item.offerId) return null;
+    return {
+      id: live.id,
+      storeId: "kroger",
+      name: live.name,
+      brand: live.brand || "Kroger",
+      size: live.size || "size unavailable",
+      price: live.price,
+      amount: 1,
+      unit: "package",
+      emoji: "🛒",
+      department: "pantry",
+      available: live.available,
+      live,
+    };
+  }
   function selectedOffer(item) {
-    return item && canSelect(item.name, item.offerId)
+    if (!item) return null;
+    const live = item.live && liveOffer(item);
+    if (live) return live;
+    return canSelect(item.name, item.offerId)
       ? catalog.find((o) => o.id === item.offerId)
       : null;
   }
   function cleanSelection(item) {
+    const { live: rawLive, ...rest } = item;
+    const live = rawLive ? cleanLive(rawLive) : null;
+    if (live && live.id === item.offerId)
+      return { ...rest, offerId: live.id, live, done: !!item.done };
     const offerId = canSelect(item.name, item.offerId) ? item.offerId : null;
-    return { ...item, offerId, done: !!offerId && !!item.done };
+    return { ...rest, offerId, done: !!offerId && !!item.done };
   }
   function cleanPreferences(value) {
     return Object.fromEntries(
@@ -361,7 +425,7 @@
   function initial() {
     return {
       version: 1,
-      stores: ["heb", "walmart"],
+      stores: ["kroger", "heb", "walmart"],
       items: [
         { id: "i1", name: "Eggs", quantity: 1, offerId: "eggs-w", done: false },
         { id: "i2", name: "Milk", quantity: 1, offerId: "milk", done: false },
@@ -450,6 +514,8 @@
     matchOffers,
     canSelect,
     selectedOffer,
+    cleanLive,
+    liveOffer,
     cleanSelection,
     cleanPreferences,
     sortOffers,

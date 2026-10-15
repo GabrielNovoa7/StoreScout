@@ -28,6 +28,33 @@ Origins are exactly https://gabrielnovoa7.github.io, http://localhost:5500 and h
 
 ## API
 
+### Kroger product pilot
+
+The Worker can proxy Kroger's official Product and Locations APIs without
+exposing credentials to the browser. Create an application at
+[developer.kroger.com](https://developer.kroger.com/), then configure the
+credentials as Worker secrets:
+
+```text
+npx wrangler secret put KROGER_CLIENT_ID
+npx wrangler secret put KROGER_CLIENT_SECRET
+```
+
+The read-only endpoints are `GET /retailers/kroger/locations?zip=77019` and
+`GET /retailers/kroger/products?q=milk&locationId=<location-id>`. Product
+responses retain the retailer product ID, UPC when supplied, regular and
+promotional prices, location, availability, and the fetch timestamp. The
+adapter does not scrape retailer pages or accept credentials from requests.
+Search terms and location IDs are bounded server-side. These endpoints are
+rate-limited by the Worker before public rollout.
+
+`GET /retailers/compare/stream?q=milk&zip=77019` provides the same data as
+server-sent events. It emits status, product, and completion events so the
+browser can render results incrementally. It currently uses the configured
+Kroger adapter and is intentionally separate from the sample catalog; adding
+another retailer means adding another approved adapter rather than scraping
+the comparison site.
+
 Browser operations require Authorization: Bearer <Firebase ID token>, with verified email. POST /pairings returns {code,expiresAt}; GET /connection returns {connected,lastUploadAt?}; DELETE /connection returns {ok:true}; GET /snapshots/latest returns {snapshot:{snapshotId,listName,items,uploadedAt}|null}; POST /snapshots/{id}/ack returns {ok:true}. Timestamps are ISO strings. Acknowledging a missing or another owner's ID returns the same success response without changing their data.
 
 POST /pairings/claim with JSON {code} returns {credential} once. POST /snapshots with device bearer and JSON {listName,items:[string]} returns {snapshotId}. Codes and credentials have 256 random bits, represented as 43 base64url characters. A new pairing immediately revokes the prior device and pending data. Lost claim responses require a fresh pairing. Codes expire in 10 minutes. Device upload checks its credential again in the atomic INSERT so concurrent revocation cannot permit a late write.

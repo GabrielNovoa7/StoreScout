@@ -55,8 +55,8 @@ service cloud.firestore {
         && (!('importReceipts' in d.state) || validReceipts(d.state.importReceipts))
         && d.state.version == 1
         && d.state.items is list && d.state.items.size() <= 200
-        && d.state.stores is list && d.state.stores.size() <= 2
-        && d.state.stores.hasOnly(['heb', 'walmart'])
+        && d.state.stores is list && d.state.stores.size() <= 3
+        && d.state.stores.hasOnly(['heb', 'walmart', 'kroger'])
         && d.state.preferences is map && d.state.preferences.size() <= 200;
     }
     match /users/{uid}/lists/main {

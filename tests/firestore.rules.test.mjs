@@ -126,3 +126,21 @@ test("import receipts allow safe replay IDs but reject oversized or nested data"
       }),
     );
 });
+
+test('verified owner can save Kroger selection but unknown retailers are rejected', async () => {
+ const db=env.authenticatedContext('kroger-owner',{email_verified:true}).firestore();
+ const ref=doc(db,'users/kroger-owner/lists/main');
+ const data=valid(1);data.state.stores=['kroger'];
+ await assertSucceeds(setDoc(ref,data));
+ const bad=valid(2);bad.state.stores=['untrusted-retailer'];
+ await assertFails(setDoc(ref,bad));
+});
+
+test('verified owner can enable all three pilot stores but not more', async () => {
+ const db=env.authenticatedContext('three-stores',{email_verified:true}).firestore();
+ const ref=doc(db,'users/three-stores/lists/main');
+ const data=valid(1);data.state.stores=['kroger','heb','walmart'];
+ await assertSucceeds(setDoc(ref,data));
+ const bad=valid(2);bad.state.stores=['kroger','heb','walmart','kroger'];
+ await assertFails(setDoc(ref,bad));
+});

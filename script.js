@@ -3,6 +3,7 @@
   "use strict";
   const M = window.Scout;
   const Account = window.ScoutAccount;
+  const Retailers = window.ScoutRetailers;
   const KEY = "store-scout-gui-v1";
   let storageOK = true,
     state;
@@ -17,6 +18,8 @@
     listQuery = "",
     compareQuery = "",
     compareSort = "price",
+    liveProducts = [],
+    liveStatus = "",
     activeId = null,
     removed = null;
   let renderedUid = null,
@@ -206,6 +209,7 @@
       ) +
       `<div class="compare-search-card"><form id="compare-form" class="compare-form"><label>${icon("search")}<input name="query" aria-label="Search products" placeholder="Try eggs, fresh basil, or milk…" value="${esc(query)}" maxlength="100"></label><button class="button primary" type="submit">Find products ${icon("arrow")}</button></form><div class="compare-controls"><div class="store-filters">${M.stores.map((s) => `<button class="store-chip ${state.stores.includes(s.id) ? "on" : ""}" data-action="toggle-store" data-store="${s.id}" aria-pressed="${state.stores.includes(s.id)}">${storeBadge(s.id)} ${s.name}${state.stores.includes(s.id) ? icon("check") : ""}</button>`).join("")}</div><label class="sort-label">Sort by <select id="sort" aria-label="Sort products"><option value="price" ${compareSort === "price" ? "selected" : ""}>Package price</option><option value="unit" ${compareSort === "unit" ? "selected" : ""}>Unit price</option></select></label></div></div>
     ${active ? `<div class="active-request">${icon("list")} Picking for <strong>${esc(active.name)}</strong><span>· ${active.quantity} package${active.quantity > 1 ? "s" : ""}</span><button data-action="clear-active">Search whole catalog ${icon("close")}</button></div>` : ""}
+    ${liveSection(active)}
     ${
       needsForm
         ? `<section class="clarify-card"><span class="big-emoji">🌿</span><div><span class="eyebrow">A QUICK CHECK</span><h2>What kind of basil?</h2><p>Fresh herbs and dried spices serve different purposes. Let’s keep them separate.</p><div class="inline-actions"><button class="button primary" data-action="clarify" data-query="Fresh basil">Fresh basil</button><button class="button secondary" data-action="clarify" data-query="Dried basil">Dried basil</button></div></div></section>`
@@ -213,6 +217,54 @@
     }
     <div class="compare-explainer">${icon("spark")}<div><strong>Your choice comes first.</strong><p>Different brands are alternatives, not exact product matches. Store offers for the same product will be grouped when verified identifiers are available. Unit-price sorting groups compatible units.</p></div></div>${demo()}`
     );
+  }
+  function liveSection(active) {
+    if (!Retailers?.enabled || !state.stores.includes("kroger") || !liveStatus) return "";
+    const cards = liveProducts
+      .map((p) => {
+        const selected = active?.offerId === p.id;
+        const promo = p.regularPrice && p.regularPrice > p.price;
+        return `<article class="${selected ? "live-selected" : ""}"><strong>${esc(p.name)}</strong><span>${esc(p.brand || "Kroger")} · ${esc(p.size || "size unavailable")}</span><b>${money(p.price)}${promo ? ` <s>${money(p.regularPrice)}</s>` : ""}</b><small>${p.available === true ? "Fulfillment offered · shelf stock unverified" : "Shelf stock unverified"} · fetched ${esc(new Date(p.fetchedAt).toLocaleTimeString())}</small><button class="button ${selected ? "secondary" : "primary"}" data-action="select-live" data-live="${esc(p.id)}">${icon(selected ? "check" : "plus")} ${selected ? "Selected" : active ? "Choose this product" : "Add to my list"}</button></article>`;
+      })
+      .join("");
+    return `<section class="live-panel"><div class="results-heading"><h2>${storeBadge("kroger")} ${esc(liveStatus)} ${liveProducts.length ? `<span class="count-bubble">${liveProducts.length}</span>` : ""}</h2><span>Kroger River Oaks · live API prices</span></div>${cards ? `<div class="live-results">${cards}</div>` : ""}</section>`;
+  }
+  let liveRun = 0;
+  async function loadLiveProducts(query) {
+    const term = String(query || "").trim();
+    if (!Retailers?.enabled || !state.stores.includes("kroger") || term.length < 2) {
+      liveProducts = [];
+      liveStatus = "";
+      return;
+    }
+    const run = ++liveRun;
+    const current = () => run === liveRun && state.stores.includes("kroger");
+    liveStatus = "Looking up current Kroger prices…";
+    liveProducts = [];
+    render();
+    try {
+      await Retailers.streamKroger(
+        term,
+        (product) => {
+          if (!current()) return;
+          liveProducts.push(product);
+          liveStatus = `Live Kroger results for “${term}”`;
+          render();
+        },
+        (message) => {
+          if (!current()) return;
+          liveStatus = message;
+          render();
+        },
+      );
+      if (!current()) return;
+      if (!liveProducts.length)
+        liveStatus = "Kroger returned no products for this search.";
+    } catch {
+      if (!current()) return;
+      liveStatus = "Live Kroger prices are temporarily unavailable.";
+    }
+    render();
   }
   function productCard(o, active) {
     const selected = active?.offerId === o.id;
@@ -235,7 +287,7 @@
         .map((s) => {
           const items = selected.filter((i) => offerFor(i).storeId === s.id);
           if (!items.length) return "";
-          return `<section class="shopping-store"><div class="shopping-store-head">${storeBadge(s.id)}<div><h2>${s.name}</h2><p>Houston pilot · illustrative location</p></div><strong>${money(M.summary(items).total)}</strong></div>${!state.stores.includes(s.id) ? '<div class="store-warning">Disabled for comparisons. Your existing picks are kept here.</div>' : ""}<div class="shopping-items">${items
+          return `<section class="shopping-store"><div class="shopping-store-head">${storeBadge(s.id)}<div><h2>${s.name}</h2><p>${s.id === "kroger" ? "River Oaks · 1938 W Gray St, Houston" : "Houston pilot · illustrative location"}</p></div><strong>${money(M.summary(items).total)}</strong></div>${!state.stores.includes(s.id) ? '<div class="store-warning">Disabled for comparisons. Your existing picks are kept here.</div>' : ""}<div class="shopping-items">${items
             .map((i) => {
               const o = offerFor(i);
               return `<label class="shopping-item ${i.done ? "completed" : ""}"><input type="checkbox" data-check-id="${esc(i.id)}" ${i.done ? "checked" : ""}><span class="shopping-food">${o.emoji}</span><span><strong>${esc(i.name)}</strong><small>${esc(o.brand)} · ${esc(o.size)} · Qty ${i.quantity}</small></span><b>${money(o.price * i.quantity)}</b></label>`;
@@ -257,7 +309,7 @@
         "Familiar stores, smarter stops.",
         "Start close to home. Keep the stores that work for you.",
       ) +
-      `<section class="area-card"><span class="area-icon">${icon("pin")}</span><div><span class="eyebrow">YOUR PILOT AREA</span><h2>Houston, Texas <span>77019</span></h2><p>Our first neighborhood. More places to come.</p></div><span class="pill light">In-store shopping</span></section><div class="results-heading"><h2>Your stores <span class="count-bubble">${state.stores.length} enabled</span></h2><span>Choose stores to include in comparisons</span></div><div class="stores-grid">${M.stores.map((s) => `<article class="store-card"><div class="store-visual ${s.id}">${storeBadge(s.id)}<span>YOUR EVERYDAY ESSENTIALS</span></div><div class="store-card-body"><div class="store-name-line"><h2>${s.name}</h2><button class="toggle ${state.stores.includes(s.id) ? "enabled" : ""}" role="switch" aria-checked="${state.stores.includes(s.id)}" aria-label="Include ${s.name} in comparisons" data-action="toggle-store" data-store="${s.id}"><span></span></button></div><p>Houston pilot · illustrative location</p><div class="store-facts"><span>${icon("shopping")} In-store</span><span>${M.catalog.filter((o) => o.storeId === s.id).length} sample products</span></div><div class="coverage-note"><strong>Sample catalog available</strong><p>Live prices and availability aren’t connected. The exact pilot location is still to be verified.</p></div><button class="button secondary full" data-action="browse-store" data-store="${s.id}">Browse sample products ${icon("arrow")}</button></div></article>`).join("")}</div><section class="future-card">${icon("leaf")}<div><h3>Starting small. Shopping thoughtfully.</h3><p>H-E-B and Walmart are our first pilot retailers. Pickup, delivery, and more stores will get their own verified coverage later.</p></div></section>${demo()}`
+      `<section class="area-card"><span class="area-icon">${icon("pin")}</span><div><span class="eyebrow">YOUR PILOT AREA</span><h2>Houston, Texas <span>77019</span></h2><p>Our first neighborhood. More places to come.</p></div><span class="pill light">In-store shopping</span></section><div class="results-heading"><h2>Your stores <span class="count-bubble">${state.stores.length} enabled</span></h2><span>Choose stores to include in comparisons</span></div><div class="stores-grid">${M.stores.map((s) => `<article class="store-card"><div class="store-visual ${s.id}">${storeBadge(s.id)}<span>YOUR EVERYDAY ESSENTIALS</span></div><div class="store-card-body"><div class="store-name-line"><h2>${s.name}</h2><button class="toggle ${state.stores.includes(s.id) ? "enabled" : ""}" role="switch" aria-checked="${state.stores.includes(s.id)}" aria-label="Include ${s.name} in comparisons" data-action="toggle-store" data-store="${s.id}"><span></span></button></div><p>${s.id === "kroger" ? "River Oaks · 1938 W Gray St, Houston" : "Houston pilot · illustrative location"}</p><div class="store-facts"><span>${icon("shopping")} ${s.id === "kroger" ? "Shopping method unverified" : "In-store"}</span><span>${s.id === "kroger" ? "Live API search" : `${M.catalog.filter((o) => o.storeId === s.id).length} sample products`}</span></div><div class="coverage-note"><strong>${s.id === "kroger" ? "Live product search connected" : "Sample catalog available"}</strong><p>${s.id === "kroger" ? "Real Kroger API prices for store 03400355. Shelf prices and stock remain unverified. Live results are shown separately from samples." : "Live prices and availability aren’t connected. The exact pilot location is still to be verified."}</p></div><button class="button secondary full" data-action="browse-store" data-store="${s.id}">${s.id === "kroger" ? "Search live products" : "Browse sample products"} ${icon("arrow")}</button></div></article>`).join("")}</div><section class="future-card">${icon("leaf")}<div><h3>Starting small. Shopping thoughtfully.</h3><p>Kroger prices come live from Kroger’s official API. H-E-B and Walmart still use sample data. Pickup, delivery, and more stores will get their own verified coverage later.</p></div></section>${demo()}`
     );
   }
   function render() {
@@ -331,7 +383,10 @@
       const data = new FormData(event.target);
       if (event.target.id === "compare-form") {
         compareQuery = String(data.get("query")).trim();
+        liveProducts = [];
+        liveStatus = "";
         render();
+        void loadLiveProducts(compareQuery);
       } else addItem(String(data.get("grocery")));
     }
   });
@@ -414,6 +469,7 @@
       activeId = id;
       compareQuery = item.name;
       navigate("compare");
+      void loadLiveProducts(item.name);
     }
     if (action === "clarify") {
       compareQuery = button.dataset.query;
@@ -425,6 +481,7 @@
         save();
       }
       render();
+      void loadLiveProducts(compareQuery);
     }
     if (action === "clear-active") {
       const search = document.querySelector('#compare-form input[name="query"]');
@@ -439,6 +496,7 @@
     }
     if (action === "toggle-store") {
       const sid = button.dataset.store;
+      if (sid === "kroger") { liveProducts = []; liveStatus = ""; }
       state.stores = state.stores.includes(sid)
         ? state.stores.filter((s) => s !== sid)
         : [...state.stores, sid];
@@ -451,9 +509,7 @@
       compareQuery = "";
       activeId = null;
       navigate("compare");
-      notify(
-        `Showing ${storeFor(button.dataset.store).name} sample products. Re-enable other stores to compare.`,
-      );
+      notify(button.dataset.store === "kroger" ? "Kroger selected. Enter a product, then choose Search live Kroger prices." : `Showing ${storeFor(button.dataset.store).name} sample products. Re-enable other stores to compare.`);
     }
     if (action === "select-offer") {
       const offer = M.catalog.find((o) => o.id === button.dataset.offer);
@@ -472,6 +528,7 @@
       }
       if (active) {
         active.offerId = offer.id;
+        delete active.live;
         active.done = false;
         state.preferences[M.normalize(active.name)] = offer.id;
         notify(`Product selected for ${active.name.toLowerCase()}.`);
@@ -492,6 +549,34 @@
         });
         state.preferences[M.normalize(groceryName)] = offer.id;
         notify("Product added to your list.");
+      }
+      save();
+      render();
+    }
+    if (action === "select-live") {
+      const product = liveProducts.find((p) => p.id === button.dataset.live);
+      const live = product && M.cleanLive(product);
+      if (!live || !state.stores.includes("kroger")) return;
+      const active = state.items.find((i) => i.id === activeId);
+      if (active) {
+        active.offerId = live.id;
+        active.live = live;
+        active.done = false;
+        notify(`Kroger product selected for ${active.name.toLowerCase()}.`);
+      } else {
+        if (state.items.length >= 200) {
+          notify("This pilot supports up to 200 grocery items per list.");
+          return;
+        }
+        state.items.push({
+          id: crypto.randomUUID(),
+          name: live.name.slice(0, 100),
+          quantity: 1,
+          offerId: live.id,
+          live,
+          done: false,
+        });
+        notify("Kroger product added to your list.");
       }
       save();
       render();

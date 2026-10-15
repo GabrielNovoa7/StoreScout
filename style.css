@@ -1378,6 +1378,39 @@ line-height:1.8;
 margin:6px 0 0;
 max-width:800px
 }
+.live-results {
+display:grid;
+gap:8px;
+margin-top:14px
+}
+.live-results article {
+display:grid;
+grid-template-columns:minmax(0,1fr) auto;
+gap:3px 14px;
+padding:12px;
+background:var(--white);
+border:1px solid var(--line);
+border-radius:8px
+}
+.live-results article strong {
+color:var(--ink);
+font-size:12px
+}
+.live-results article span,
+.live-results article small {
+color:var(--muted);
+font-size:10px
+}
+.live-results article b {
+grid-column:2;
+grid-row:1 / span 2;
+align-self:center;
+font-size:14px;
+color:var(--green)
+}
+.live-results article small {
+grid-column:1 / -1
+}
 .clarify-card {
 display:flex;
 align-items:center;
@@ -3061,4 +3094,36 @@ transition:none!important;
 scroll-behavior:auto!important
 }
 
+}
+
+/* Kroger live retailer card */
+.store-visual.kroger { background: #164f87; color: #fff; }
+.store-mark.kroger { background: #1768b2; color: #fff; }
+.live-panel {
+margin:0 0 22px
+}
+.live-panel .results-heading h2 {
+display:flex;
+align-items:center;
+gap:8px
+}
+.live-results {
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr))
+}
+.live-results article .button {
+grid-column:1 / -1;
+justify-self:start;
+margin-top:6px;
+min-height:36px;
+padding:6px 14px;
+font-size:12px
+}
+.live-results article b s {
+color:var(--muted);
+font-size:11px;
+font-weight:500
+}
+.live-results article.live-selected {
+border-color:var(--green);
+box-shadow:0 0 0 1px var(--green)
 }
