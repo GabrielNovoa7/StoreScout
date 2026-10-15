@@ -66,6 +66,7 @@
     shopping: "Shopping",
     stores: "Stores",
     account: "Account",
+    import: "Reminders import",
   };
   const offerFor = (item) => M.selectedOffer(item);
   const storeFor = (id) => M.stores.find((s) => s.id === id);
@@ -111,7 +112,7 @@
   }
   function nav() {
     const html = Object.entries(names)
-      .filter(([key]) => key !== "account")
+      .filter(([key]) => !["account","import"].includes(key))
       .map(
         ([key, name]) =>
           `<a href="#${key}" class="nav-item ${view === key ? "active" : ""}" ${view === key ? 'aria-current="page"' : ""}>${icon(key)}<span>${name}</span>${key === "list" ? `<span class="nav-count">${state.items.length}</span>` : ""}</a>`,
@@ -169,7 +170,7 @@
     <div class="grocery-rows">${visible.map(row).join("") || `<div class="empty">${icon("list")}<h3>${state.items.length ? "No items here yet" : "A fresh start."}</h3><p>${state.items.length ? "Try another filter or search." : "Add your first grocery to start planning."}</p><button class="button secondary" data-action="add-dialog">Add an item</button></div>`}</div>
     <form class="quick-add" id="quick-add">${icon("plus")}<input name="grocery" aria-label="Add a grocery item" placeholder="Add something to your list…" maxlength="100" required><button type="submit" aria-label="Add item">${icon("arrow")}</button></form>
     <div class="list-bottom">${icon("clock")} Your choices stay here for your next visit.<button data-action="navigate" data-view="shopping">Go shopping ${icon("arrow")}</button></div></section>
-    <aside class="right-rail"><section class="sync-card"><div class="reminders-icon"><span></span><span></span><span></span></div><span class="small-pill">MADE FOR YOUR ROUTINE</span><h2>Siri adds it.<br>Scout takes it from here.</h2><p>Keep using your Apple Reminders shopping list. We’re building a simple bridge to bring it here.</p><button class="button primary full" data-action="sync">${icon("sync")} Sync Apple Reminders</button><span class="connection"><i></i> Not connected · integration planned</span></section>
+    <aside class="right-rail"><section class="sync-card"><div class="reminders-icon"><span></span><span></span><span></span></div><span class="small-pill">MADE FOR YOUR ROUTINE</span><h2>Siri adds it.<br>Scout takes it from here.</h2><p>Keep your usual Reminders list. Preview incoming groceries before adding them here.</p><button class="button primary full" data-action="sync">${icon("sync")} Sync Apple Reminders</button><span class="connection"><i></i> Review imports · Shortcut pilot</span></section>
     <section class="next-card"><span class="eyebrow">YOUR NEXT STOP</span><h3>Good things nearby.</h3><p>Two familiar stores.<br>One thoughtfully planned list.</p><div class="store-pair">${storeBadge("heb")}${storeBadge("walmart")}<span>H-E-B & Walmart</span></div><button data-action="navigate" data-view="stores">Manage your stores ${icon("arrow")}</button></section></aside></div>${demo()}`
     );
   }
@@ -269,6 +270,7 @@
             compare: comparePage,
             shopping: shoppingPage,
             stores: storesPage,
+            import: ()=>window.ScoutImportUI.render(),
           }[view]();
     document.querySelector("#location-icon").innerHTML = icon("pin");
     updateAccountChrome();
@@ -377,10 +379,7 @@
         `<span class="dialog-symbol">${icon("plus")}</span><span class="eyebrow">SOMETHING FOR YOUR NEXT SHOP</span><h2 id="dialog-title">What’s on your list?</h2><p>Start with a grocery. Pick your favorite product next.</p><form id="add-form"><label class="field-label" for="new-item">Grocery item</label><input class="dialog-input" id="new-item" name="grocery" placeholder="e.g. fresh basil" maxlength="100" required autofocus><button class="button primary full" type="submit">Add to my list ${icon("plus")}</button></form>`,
       );
     if (action === "close-dialog") dialog.close();
-    if (action === "sync")
-      openDialog(
-        `<div class="reminders-icon"><span></span><span></span><span></span></div><span class="eyebrow">APPLE REMINDERS</span><h2 id="dialog-title">Your routine stays yours.</h2><p>The planned Shortcut will read your chosen Reminders list and securely send it to your Store Scout account.</p><ol class="setup-steps"><li><span>1</span><div><strong>Connect your account</strong><p>Secure account pairing is coming with the backend.</p></div></li><li><span>2</span><div><strong>Install the prebuilt Shortcut</strong><p>Choose your usual shopping list and grant access on your iPhone.</p></div></li><li><span>3</span><div><strong>Tap to sync when you’re ready</strong><p>The Safari and Home Screen handoff still needs an iPhone test.</p></div></li></ol><div class="dialog-note">Not connected. This GUI preview cannot read or change your Reminders.</div><button class="button primary full" data-action="close-dialog">Got it</button>`,
-      );
+    if (action === "sync") navigate("import");
     if (action === "about")
       openDialog(
         `<span class="dialog-symbol">✳</span><h2 id="dialog-title">A little smarter, together.</h2><p>This is Store Scout’s first interactive GUI. Use a local guest list or sign in to save a private list across devices.</p><div class="dialog-note">Prices, availability, promotions, and locations are illustrative. Accounts and private cloud lists are connected. Apple sync and live retailer feeds are not connected.</div><button class="button primary full" data-action="close-dialog">Back to my list</button>`,
@@ -510,8 +509,10 @@
         dialog.close();
     }
   });
+  let importOwner=null;
+  window.ScoutImportUI?.init({getState:()=>state,getUser:()=>Account.user(),isReady:()=>Account.ready(),apply:(next,base)=>Account.importState(next,base),changed:()=>{if(view==='import')render();},navigate});
   window.addEventListener("hashchange", () => {
-    view = names[location.hash.slice(1)] ? location.hash.slice(1) : "list";
+  view = names[location.hash.slice(1)] ? location.hash.slice(1) : "list";
     render();
   });
   view = names[location.hash.slice(1)] ? location.hash.slice(1) : "list";
@@ -520,6 +521,8 @@
     getState: () => state,
     getGuest: readGuest,
     onState: (next) => {
+      const owner=Account.user()?.uid||null;
+      if(owner!==importOwner){window.ScoutImportUI?.reset();importOwner=owner;}
       state = next;
       window.ScoutTheme?.apply(Account.user() ? next.profile : null);
       activeId = null;

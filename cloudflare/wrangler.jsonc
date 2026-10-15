@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "storescout-reminders-inbox",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-14",
+  "workers_dev": true,
+  "vars": { "FIREBASE_PROJECT_ID": "store-scout-9d930" },
+  "d1_databases": [{ "binding": "DB", "database_name": "storescout-reminders", "database_id": "b21bec73-2a4d-45d8-967b-91ae781737ad" }],
+  "triggers": { "crons": ["0 * * * *"] },
+  "observability": { "enabled": false }
+}

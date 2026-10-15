@@ -50,6 +50,7 @@ window.ScoutFirebase = {
     });
     return {
       adapter,unsubscribe,
+      async idToken(){const uid=current()?.uid;assertOwner(uid);const token=await authSDK.getIdToken(current());assertOwner(uid);return token;},
       async login(email,password){await step('sign-in',()=>authSDK.signInWithEmailAndPassword(auth,email,password));},
       async signup(email,password){
         const policy=await step('password-policy',()=>authSDK.validatePassword(auth,password));

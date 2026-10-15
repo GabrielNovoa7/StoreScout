@@ -50,6 +50,14 @@
     timer=setTimeout(()=>sync.flush(),800);
     return true;
   }
+  async function importState(next,expected){
+    const who=user?.uid,s=current();
+    if(!user?.emailVerified||s.dirty||s.status!=='ready')throw new Error('Wait for your list to finish saving, or resolve its cloud connection in Account.');
+    if(window.ScoutImport.fingerprint(hooks.getState())!==expected)throw new Error('Your list changed. Open a fresh import preview.');
+    clearTimeout(timer);sync.edit(next);hooks.onState(next);refresh();await sync.flush();
+    if(user?.uid!==who)throw new Error('Account changed during import.');
+    if(current().dirty||current().status!=='ready')throw new Error('The import has not been saved. Open Account to retry saving before leaving this page.');
+  }
   function label(){
     if(!user)return configured?'Guest · saved on this device':'Guest · accounts not configured';
     const s=current();
@@ -159,5 +167,5 @@
   });
   document.addEventListener('click',event=>{const target=event.target.closest('[data-account-action]');if(target)void act(target.dataset.accountAction);});
   window.addEventListener('beforeunload',event=>{if(current().dirty||profileDraft){event.preventDefault();event.returnValue='';}});
-  window.ScoutAccount={init,save,render,label,user:()=>user,locked:()=>configured&&connection==='connecting'||!!user&&(!user.emailVerified||!current().state),dirty:()=>current().dirty};
+  window.ScoutAccount={init,save,render,label,importState,requestToken:()=>provider.idToken(),ready:()=>!!user?.emailVerified&&current().status==='ready'&&!current().dirty,user:()=>user,locked:()=>configured&&connection==='connecting'||!!user&&(!user.emailVerified||!current().state),dirty:()=>current().dirty};
 })();

@@ -29,12 +29,21 @@ This is an ongoing learning and portfolio project. My aim is to understand the d
 
 **Prices, availability, promotions, and store locations are sample data, not verified local in-store offers.**
 
-The Apple Reminders button currently explains the planned integration. It does not read or change Reminders. Firebase Authentication and Firestore provide the account and cloud-list integration. The real signup/email/login flow must be verified after project configuration; see [FIREBASE_SETUP.md](FIREBASE_SETUP.md). The app is a browser-based GUI preview; installable/offline PWA support is not implemented.
+The Apple Reminders page supports a preview-before-save inbox flow. A
+Shortcuts recipe uploads incomplete Reminders titles to an optional Cloudflare
+Worker; the browser retrieves that upload and saves confirmed rows through the
+existing Firebase account list. It does not read or change Reminders directly.
+The Worker is disabled in the checked-in browser configuration until it has
+been deployed and tested; see [REMINDERS_SETUP.md](REMINDERS_SETUP.md).
+Firebase Authentication and Firestore provide the account and permanent list
+storage. The real signup/email/login flow must be verified after project
+configuration; see [FIREBASE_SETUP.md](FIREBASE_SETUP.md). The app is a
+browser-based GUI preview; installable/offline PWA support is not implemented.
 
 The intended future workflow is:
 
 1. Add groceries to the usual Apple Reminders shopping list through Siri.
-2. Run a prebuilt Apple Shortcut to securely sync that list to a Store Scout account.
+2. Run the Store Scout Apple Shortcut to securely upload that list to a Store Scout account.
 3. Find relevant products at supported nearby store locations.
 4. Choose exact products while comparing package sizes, prices, unit prices, availability, and promotions.
 5. Shop using checklists grouped by the selected store locations.
@@ -76,7 +85,10 @@ Browser verification covers adding groceries, choosing products, shopping checkl
 
 ## Development direction
 
-Build incrementally: verify and refine account syncing, validate secure Reminders synchronization, and integrate permitted retailer data sources. More retailers, pickup and delivery, and trip optimization are future possibilities.
+Build incrementally: complete the physical iPhone Shortcut acceptance test,
+verify and refine account syncing, and integrate permitted retailer data
+sources. More retailers, pickup and delivery, and trip optimization are
+future possibilities.
 
 GroceryChop provides visual inspiration for comparison controls and navigation. Store Scout has its own identity and focuses on Reminders synchronization, remembered product choices, and store-organized shopping.
 

@@ -1,42 +1,103 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://www.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'self'">
-  <meta name="theme-color" content="#174e43">
-  <meta name="description" content="Your grocery list. A little smarter. Compare products and plan your next grocery trip with Store Scout.">
-  <title>Store Scout — Your list, a little smarter</title>
-  <link rel="icon" type="image/svg+xml" href="icon.svg">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="account.css">
-  <link rel="stylesheet" href="theme.css">
-  <script defer src="theme.js"></script>
-  <script defer src="model.js"></script>
-  <script defer src="firebase-config.js"></script>
-  <script defer src="account-core.js"></script>
-  <script defer src="firebase-client.js"></script>
-  <script defer src="account-ui.js"></script>
-  <script defer src="script.js"></script>
-</head>
-<body>
-  <a class="skip" href="#main">Skip to content</a>
-  <aside class="sidebar">
-    <a class="brand" href="#list" aria-label="Store Scout home"><span class="brand-icon"><img src="icon.svg" alt="" width="38" height="38"></span><span>store<span class="brand-light">scout</span><small>A LITTLE SMARTER.</small></span></a>
-    <p class="nav-label">YOUR EVERYDAY SHOP</p>
-    <nav id="desktop-nav" aria-label="Main navigation"></nav>
-    <div class="sidebar-note"><strong>Houston pilot</strong><p>H-E-B + Walmart<br>Sample prices · 77019</p></div>
-    <button class="sidebar-bottom" data-action="navigate" data-view="account"><span class="avatar">Y</span><span><strong id="workspace-label">Guest workspace</strong><small id="workspace-status">Saved on this device</small></span><span class="local-dot"></span></button>
-  </aside>
-  <div class="workspace">
-    <header class="topbar"><a href="#list" class="mobile-brand"><img src="icon.svg" alt="" width="28" height="28"> store<strong>scout</strong></a><div class="breadcrumb">Your grocery companion <span>/</span> <strong id="breadcrumb">My List</strong></div><button class="location-button" data-action="navigate" data-view="stores"><span id="location-icon"></span> Houston, TX <span class="zip">77019</span><span class="chevron">⌄</span></button><button class="account-button" data-action="navigate" data-view="account">Sign in</button></header>
-    <main id="main" tabindex="-1"></main>
-    <footer class="page-footer"><span>Made for your everyday groceries.</span><span><i></i> Houston pilot <b>·</b> GUI preview</span></footer>
-  </div>
-  <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation"></nav>
-  <dialog id="dialog" aria-labelledby="dialog-title"><div id="dialog-content"></div></dialog>
-  <div id="toast" role="status" aria-live="polite"></div>
-  <noscript><p>This interactive grocery list needs JavaScript enabled.</p></noscript>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="script-src 'self' https://www.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <meta name="theme-color" content="#174e43" />
+    <meta
+      name="description"
+      content="Your grocery list. A little smarter. Compare products and plan your next grocery trip with Store Scout."
+    />
+    <title>Store Scout — Your list, a little smarter</title>
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="account.css" />
+    <link rel="stylesheet" href="theme.css" />
+    <script defer src="theme.js"></script>
+    <script defer src="model.js"></script>
+    <script defer src="firebase-config.js"></script>
+    <script defer src="account-core.js"></script>
+    <script defer src="firebase-client.js"></script>
+    <script defer src="account-ui.js"></script>
+    <script defer src="import-core.js"></script>
+    <script defer src="sync-config.js"></script>
+    <script defer src="sync-client.js"></script>
+    <script defer src="import-ui.js"></script>
+    <script defer src="script.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <aside class="sidebar">
+      <a class="brand" href="#list" aria-label="Store Scout home"
+        ><span class="brand-icon"
+          ><img src="icon.svg" alt="" width="38" height="38" /></span
+        ><span
+          >store<span class="brand-light">scout</span
+          ><small>A LITTLE SMARTER.</small></span
+        ></a
+      >
+      <p class="nav-label">YOUR EVERYDAY SHOP</p>
+      <nav id="desktop-nav" aria-label="Main navigation"></nav>
+      <div class="sidebar-note">
+        <strong>Houston pilot</strong>
+        <p>H-E-B + Walmart<br />Sample prices · 77019</p>
+      </div>
+      <button class="sidebar-bottom" data-action="navigate" data-view="account">
+        <span class="avatar">Y</span
+        ><span
+          ><strong id="workspace-label">Guest workspace</strong
+          ><small id="workspace-status">Saved on this device</small></span
+        ><span class="local-dot"></span>
+      </button>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <a href="#list" class="mobile-brand"
+          ><img src="icon.svg" alt="" width="28" height="28" /> store<strong
+            >scout</strong
+          ></a
+        >
+        <div class="breadcrumb">
+          Your grocery companion <span>/</span>
+          <strong id="breadcrumb">My List</strong>
+        </div>
+        <button
+          class="location-button"
+          data-action="navigate"
+          data-view="stores"
+        >
+          <span id="location-icon"></span> Houston, TX
+          <span class="zip">77019</span><span class="chevron">⌄</span></button
+        ><button
+          class="account-button"
+          data-action="navigate"
+          data-view="account"
+        >
+          Sign in
+        </button>
+      </header>
+      <main id="main" tabindex="-1"></main>
+      <footer class="page-footer">
+        <span>Made for your everyday groceries.</span
+        ><span><i></i> Houston pilot <b>·</b> GUI preview</span>
+      </footer>
+    </div>
+    <nav
+      class="mobile-nav"
+      id="mobile-nav"
+      aria-label="Mobile navigation"
+    ></nav>
+    <dialog id="dialog" aria-labelledby="dialog-title">
+      <div id="dialog-content"></div>
+    </dialog>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <noscript
+      ><p>This interactive grocery list needs JavaScript enabled.</p></noscript
+    >
+  </body>
 </html>
