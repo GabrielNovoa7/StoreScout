@@ -1383,34 +1383,6 @@ display:grid;
 gap:8px;
 margin-top:14px
 }
-.live-results article {
-display:grid;
-grid-template-columns:minmax(0,1fr) auto;
-gap:3px 14px;
-padding:12px;
-background:var(--white);
-border:1px solid var(--line);
-border-radius:8px
-}
-.live-results article strong {
-color:var(--ink);
-font-size:12px
-}
-.live-results article span,
-.live-results article small {
-color:var(--muted);
-font-size:10px
-}
-.live-results article b {
-grid-column:2;
-grid-row:1 / span 2;
-align-self:center;
-font-size:14px;
-color:var(--green)
-}
-.live-results article small {
-grid-column:1 / -1
-}
 .clarify-card {
 display:flex;
 align-items:center;
@@ -3108,24 +3080,7 @@ align-items:center;
 gap:8px
 }
 .live-results {
-grid-template-columns:repeat(auto-fill,minmax(260px,1fr))
-}
-.live-results article .button {
-grid-column:1 / -1;
-justify-self:start;
-margin-top:6px;
-min-height:36px;
-padding:6px 14px;
-font-size:12px
-}
-.live-results article b s {
-color:var(--muted);
-font-size:11px;
-font-weight:500
-}
-.live-results article.live-selected {
-border-color:var(--green);
-box-shadow:0 0 0 1px var(--green)
+grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr))
 }
 
 /* Store logos: retailer site icon over the letter fallback */
@@ -3158,14 +3113,6 @@ gap:6px
 width:16px;
 height:16px;
 border-radius:4px
-}
-.live-results article b em {
-display:block;
-font-style:normal;
-font-size:10px;
-font-weight:500;
-color:var(--muted);
-text-align:right
 }
 .live-filters {
 display:flex;
@@ -3344,33 +3291,120 @@ color:var(--muted)
 margin-left:auto;
 white-space:nowrap
 }
-
-/* Product photos (Open Food Facts) */
-.live-results article.has-photo {
-grid-template-columns:56px minmax(0,1fr) auto
+/* Photos fill and are clipped to their thumbnail, so tall images can't spill into the next row */
+.food-thumb:has(.product-photo),
+.shopping-food:has(.product-photo) {
+position:relative;
+overflow:hidden
 }
-.live-results article .live-photo {
-grid-column:1;
-grid-row:1 / span 2;
-width:56px;
-height:56px;
-object-fit:contain;
-background:#fff;
+.shopping-food:has(.product-photo) {
+display:block;
+width:40px;
+height:40px;
 border-radius:8px;
-border:1px solid var(--line)
-}
-.live-results article.has-photo strong,
-.live-results article.has-photo .live-store {
-grid-column:2
-}
-.live-results article.has-photo b {
-grid-column:3
+flex-shrink:0
 }
 .food-thumb .product-photo,
 .shopping-food .product-photo {
+position:absolute;
+inset:0;
 width:100%;
 height:100%;
-object-fit:contain;
-background:#fff;
+object-fit:cover;
 border-radius:inherit
+}
+
+/* Live result cards: photo | details | price and button */
+.live-results article {
+display:grid;
+grid-template-columns:minmax(0,1fr) auto;
+align-items:stretch;
+gap:14px;
+padding:14px;
+background:var(--white);
+border:1px solid var(--line);
+border-radius:10px
+}
+.live-results article.has-photo {
+grid-template-columns:112px minmax(0,1fr) auto
+}
+.live-results article.live-selected {
+border-color:var(--green);
+box-shadow:0 0 0 1px var(--green)
+}
+.live-photo-frame {
+display:flex;
+align-items:center;
+justify-content:center;
+width:112px;
+height:112px
+}
+.live-photo-frame {
+overflow:hidden;
+border-radius:10px
+}
+.live-photo-frame .live-photo {
+display:block;
+width:100%;
+height:100%;
+object-fit:cover
+}
+.live-info {
+display:flex;
+flex-direction:column;
+gap:6px;
+min-width:0
+}
+.live-info strong {
+color:var(--ink);
+font-size:14px;
+line-height:1.3
+}
+.live-info .live-store,
+.live-info small {
+color:var(--muted);
+font-size:11px
+}
+.live-info small {
+margin-top:auto
+}
+.live-buy {
+display:flex;
+flex-direction:column;
+align-items:flex-end;
+justify-content:space-between;
+gap:10px;
+text-align:right
+}
+.live-buy b {
+font-size:18px;
+color:var(--green)
+}
+.live-buy b s {
+display:block;
+color:var(--muted);
+font-size:11px;
+font-weight:500
+}
+.live-buy b em {
+display:block;
+font-style:normal;
+font-size:11px;
+font-weight:500;
+color:var(--muted)
+}
+.live-buy .button {
+min-height:36px;
+padding:6px 14px;
+font-size:12px;
+white-space:nowrap
+}
+@media (max-width:520px) {
+.live-results article.has-photo {
+grid-template-columns:84px minmax(0,1fr) auto
+}
+.live-photo-frame {
+width:84px;
+height:84px
+}
 }

@@ -107,5 +107,85 @@
     return result;
   }
 
-  root.ScoutPhotos = Object.freeze({ lookup, barcodeFor, isPhotoUrl: (url) => !!cleanUrl(url) });
+  // Trims plain white borders so the product fills its frame. Open Food Facts
+  // images allow cross-origin reads, so the browser can crop them on a canvas.
+  const trimmed = new Map();
+  const pending = new Map();
+  const WHITE = 236;
+  function larger(url) {
+    return url.replace(/\.(100|200)\.(jpg|jpeg|png|webp)$/, ".400.$2");
+  }
+  function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.referrerPolicy = "no-referrer";
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+  function contentBox(data, width, height) {
+    let top = height, left = width, right = -1, bottom = -1;
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 4;
+        if (data[i + 3] > 16 && (data[i] < WHITE || data[i + 1] < WHITE || data[i + 2] < WHITE)) {
+          if (x < left) left = x;
+          if (x > right) right = x;
+          if (y < top) top = y;
+          if (y > bottom) bottom = y;
+        }
+      }
+    }
+    return right < 0 ? null : { left, top, right, bottom };
+  }
+  async function trim(url) {
+    let img;
+    try {
+      img = await loadImage(larger(url));
+    } catch {
+      img = await loadImage(url);
+    }
+    const scan = document.createElement("canvas");
+    const scale = Math.min(1, 160 / Math.max(img.naturalWidth, img.naturalHeight));
+    scan.width = Math.max(1, Math.round(img.naturalWidth * scale));
+    scan.height = Math.max(1, Math.round(img.naturalHeight * scale));
+    const sctx = scan.getContext("2d", { willReadFrequently: true });
+    sctx.drawImage(img, 0, 0, scan.width, scan.height);
+    const box = contentBox(sctx.getImageData(0, 0, scan.width, scan.height).data, scan.width, scan.height);
+    if (!box) return img.src;
+    const pad = 2;
+    const sx = Math.max(0, (box.left - pad) / scale);
+    const sy = Math.max(0, (box.top - pad) / scale);
+    const sw = Math.min(img.naturalWidth - sx, (box.right - box.left + 1 + pad * 2) / scale);
+    const sh = Math.min(img.naturalHeight - sy, (box.bottom - box.top + 1 + pad * 2) / scale);
+    // Nothing worth cropping: keep the original (already cached by the browser).
+    if (sw * sh > img.naturalWidth * img.naturalHeight * 0.92) return img.src;
+    const out = document.createElement("canvas");
+    out.width = Math.round(sw);
+    out.height = Math.round(sh);
+    out.getContext("2d").drawImage(img, sx, sy, sw, sh, 0, 0, out.width, out.height);
+    return out.toDataURL("image/jpeg", 0.88);
+  }
+  // Returns the best source available now; calls onReady once a trimmed one exists.
+  function display(url, onReady) {
+    if (!cleanUrl(url)) return "";
+    if (trimmed.has(url)) return trimmed.get(url);
+    if (typeof document !== "undefined" && !pending.has(url)) {
+      pending.set(
+        url,
+        trim(url)
+          .then((src) => trimmed.set(url, src))
+          .catch(() => trimmed.set(url, url))
+          .finally(() => {
+            pending.delete(url);
+            onReady?.();
+          }),
+      );
+    }
+    return url;
+  }
+
+  root.ScoutPhotos = Object.freeze({ lookup, display, barcodeFor, isPhotoUrl: (url) => !!cleanUrl(url) });
 })(typeof window !== "undefined" ? window : globalThis);

@@ -106,8 +106,19 @@
     const logo = logoUrl(store);
     return `<span class="store-mark ${esc(id)}${logo ? " has-logo" : ""}" title="${esc(store?.name || "")}">${esc(store?.short || "?")}${logo ? `<img src="${logo}" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.classList.remove('has-logo');this.remove()">` : ""}</span>`;
   };
-  const photo = (url, cls = "product-photo") =>
-    url ? `<img class="${cls}" src="${esc(url)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
+  // Shows a product photo; once a white-border-trimmed copy is ready it swaps in
+  // place without re-rendering the page.
+  const swapPhoto = (url) => () => {
+    const src = window.ScoutPhotos?.display?.(url);
+    for (const img of document.querySelectorAll("img[data-photo]"))
+      if (img.dataset.photo === url && src) img.src = src;
+  };
+  const photo = (url, cls = "product-photo") => {
+    const src = url && (window.ScoutPhotos?.display?.(url, swapPhoto(url)) || url);
+    return src
+      ? `<img class="${cls}" src="${esc(src)}" data-photo="${esc(url)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`
+      : "";
+  };
   const thumb = (o, fallback) =>
     o?.live ? (o.live.image ? photo(o.live.image) : storeBadge(o.storeId)) : o?.emoji || fallback;
   const locationFor = (id) => state.locations?.[id] || null;
@@ -280,7 +291,7 @@
     const selected = active?.offerId === p.id;
     const promo = p.regularPrice && p.regularPrice > p.price;
     const unit = M.unitPrice(p);
-    return `<article class="${selected ? "live-selected" : ""}${p.image ? " has-photo" : ""}">${photo(p.image, "live-photo")}<strong>${esc(p.name)}</strong><span class="live-store">${storeBadge(p.retailer)} ${esc(p.brand || storeFor(p.retailer)?.name || "")} · ${esc(p.size || "size unavailable")}</span><b>${money(p.price)}${promo ? ` <s>${money(p.regularPrice)}</s>` : ""}${unit ? `<em>${money(unit.value)} / ${esc(unit.unit)}</em>` : ""}</b><small>${promo ? "On sale · " : ""}${p.available === true ? "Fulfillment offered · shelf stock unverified" : "Shelf stock unverified"} · fetched ${esc(new Date(p.fetchedAt).toLocaleTimeString())}</small><button class="button ${selected ? "secondary" : "primary"}" data-action="select-live" data-live="${esc(p.id)}">${icon(selected ? "check" : "plus")} ${selected ? "Selected" : active ? "Choose this product" : "Add to my list"}</button></article>`;
+    return `<article class="${selected ? "live-selected" : ""}${p.image ? " has-photo" : ""}">${p.image ? `<div class="live-photo-frame">${photo(p.image, "live-photo")}</div>` : ""}<div class="live-info"><strong>${esc(p.name)}</strong><span class="live-store">${storeBadge(p.retailer)} ${esc(p.brand || storeFor(p.retailer)?.name || "")} · ${esc(p.size || "size unavailable")}</span><small>${promo ? "On sale · " : ""}${p.available === true ? "Fulfillment offered · shelf stock unverified" : "Shelf stock unverified"} · fetched ${esc(new Date(p.fetchedAt).toLocaleTimeString())}</small></div><div class="live-buy"><b>${money(p.price)}${promo ? ` <s>${money(p.regularPrice)}</s>` : ""}${unit ? `<em>${money(unit.value)} / ${esc(unit.unit)}</em>` : ""}</b><button class="button ${selected ? "secondary" : "primary"}" data-action="select-live" data-live="${esc(p.id)}">${icon(selected ? "check" : "plus")} ${selected ? "Selected" : active ? "Choose" : "Add to list"}</button></div></article>`;
   }
   function liveSection(active) {
     if (!liveStatus || !liveStores().some((s) => isOn(s.id))) return "";
