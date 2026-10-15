@@ -27,22 +27,22 @@ placeholder link as if it were a working installation.
 
 The following is a one-run pairing/upload test, not the finished reusable Shortcut. It asks for a new code on every run because a Shortcut variable does not persist between runs. Do not expect this version to pair only once. After the first successful iPhone upload, separate setup from sync and keep the upload credential in a private file or private Shortcut configuration; verify repeat runs before sharing an unpaired template. Never share a credential-containing Shortcut or commit its credential.
 
-In this pilot, select the specific shopping list directly in Find Reminders rather than relying on an unverified �Reminders Lists� action. Enter that same list name as text for the payload's listName.
+In this pilot, select the specific shopping list directly in Find Reminders rather than relying on an unverified “Reminders Lists” action. Enter that same list name as text for the payload's listName.
 
 ## Shortcut action recipe
 
 Create a personal Shortcut with these actions, in order:
 
-1. **Ask for Input** — Text — prompt: `Store Scout pairing code`.
+1. **Ask for Input** â€” Text â€” prompt: `Store Scout pairing code`.
 2. **Get Contents of URL**
    - URL: `https://storescout-reminders-inbox.xxnovoaxgx.workers.dev/pairings/claim`
    - Method: `POST`
    - Request body: `JSON`
    - JSON field `code`: the result of **Ask for Input**.
-3. **Get Dictionary Value** — key `credential` from the previous response.
-4. **Set Variable** — name `StoreScoutCredential` — value from
+3. **Get Dictionary Value** â€” key `credential` from the previous response.
+4. **Set Variable** â€” name `StoreScoutCredential` â€” value from
    **Get Dictionary Value**.
-5. **Choose from List** — list: **Reminders Lists**. Save the result as
+5. **Choose from List** â€” list: **Reminders Lists**. Save the result as
    `StoreScoutList`.
 6. **Find Reminders**
    - List is your specific shopping list.
@@ -50,8 +50,8 @@ Create a personal Shortcut with these actions, in order:
    - Request only the reminder title/name field in the next action; do not
      upload notes, locations, due dates, or contact data.
 7. **Repeat with Each** reminder:
-   - **Get Details of Reminders** — detail `Name` from `Repeat Item`.
-   - **Add to Variable** — variable `StoreScoutTitles` — the name.
+   - **Get Details of Reminders** â€” detail `Name` from `Repeat Item`.
+   - **Add to Variable** â€” variable `StoreScoutTitles` â€” the name.
 8. **Get Contents of URL**
    - URL: `https://storescout-reminders-inbox.xxnovoaxgx.workers.dev/snapshots`
    - Method: `POST`
@@ -59,7 +59,7 @@ Create a personal Shortcut with these actions, in order:
    - Request body: `JSON`
    - `listName`: a Text value containing your chosen shopping list name.
    - `items`: `StoreScoutTitles`.
-9. **Get Dictionary Value** � `snapshotId`. If missing, show an upload error and stop the Shortcut.
+9. **Get Dictionary Value** — `snapshotId`. If missing, show an upload error and stop the Shortcut.
 10. **Open URLs**
    - `https://gabrielnovoa7.github.io/StoreScout/#import`
 
