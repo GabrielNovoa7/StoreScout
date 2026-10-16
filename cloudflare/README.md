@@ -48,6 +48,26 @@ adapter does not scrape retailer pages or accept credentials from requests.
 Search terms and location IDs are bounded server-side. These endpoints are
 rate-limited by the Worker before public rollout.
 
+### Walmart
+
+`walmart.mjs` uses the Walmart I/O affiliate APIs (product search and store
+locator). Each request is signed with RSA-SHA256 over
+`consumerId\ntimestamp\nkeyVersion\n`. After uploading the public key on
+walmart.io, set these Worker secrets (the private key must be the PKCS#8
+`BEGIN PRIVATE KEY` PEM):
+
+```text
+npx wrangler secret put WALMART_CONSUMER_ID
+npx wrangler secret put WALMART_KEY_VERSION
+npx wrangler secret put WALMART_PRIVATE_KEY < ~/.walmart-io/WM_IO_private_key.pem
+```
+
+The endpoints are `GET /retailers/walmart/locations?zip=77019` and
+`GET /retailers/walmart/products?q=milk&locationId=<store-number>`. Prices are
+Walmart.com prices; the search API does not return per-store prices, so each
+product carries a note saying store prices can differ. Without the secrets the
+endpoints answer 503.
+
 `GET /retailers/compare/stream?q=milk&zip=77019` provides the same data as
 server-sent events. It emits status, product, and completion events so the
 browser can render results incrementally. It currently uses the configured

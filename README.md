@@ -1,10 +1,10 @@
 # Store Scout
 
-**Version 2.1 — Firebase accounts and cloud-list integration**
+**Version 2.1 — live store prices, Firebase accounts and cloud lists**
 
 Store Scout is a mobile-first grocery-shopping web app in development. Its goal is to make grocery shopping cheaper and require less work by connecting the shopping list people already use with product selection, price comparison, and shopping checklists organized by store.
 
-The initial pilot focuses on **in-store shopping at H-E-B and Walmart near ZIP code 77019 in Houston, Texas**.
+Live site: https://gabrielnovoa7.github.io/StoreScout/
 
 ## AI-assisted development
 
@@ -12,43 +12,35 @@ I am building Store Scout with substantial assistance from AI, including ChatGPT
 
 This is an ongoing learning and portfolio project. My aim is to understand the decisions and code as the application develops, rather than simply generate a finished product. AI involvement is disclosed openly; the application is still a work in progress and its behavior and integrations need continued verification.
 
-## What works in Version 2
+## Stores
+
+| Store | Status | Source |
+| --- | --- | --- |
+| Kroger (plus Ralphs, King Soopers, Fred Meyer, Fry's, Harris Teeter, Smith's, QFC, Dillons, Mariano's, Food 4 Less) | Live | Official Kroger API, through the Cloudflare Worker |
+| Whole Foods | Live (Houston stores) | wholefoodsmarket.com's own search feed, through the Worker |
+| Sellers Bros. | Weekly ad only | `scrapers/sellers_bros.py` turns the weekly-ad PDFs into `data/sellers-weekly.json`; a GitHub Actions job refreshes it every Wednesday |
+| Walmart | Coming soon | Walmart I/O affiliate API; adapter built, waiting on API credentials |
+| H-E-B | Coming soon | No public API |
+
+Prices are fetched live (or from the current weekly ad) for the chosen store location. Shelf stock is not verified, and in-store, pickup and delivery prices can differ.
+
+## What works
 
 - **My List:** add and remove groceries, undo removal, adjust package counts, filter items, and revisit saved product choices.
-- **Compare:** browse individual products with package size, price, unit price, sample availability, and promotion details; filter stores and sort by package or unit price.
-- **Product matching:** clarify fresh versus dried basil and exclude products merely containing basil from basil matches. Different products are treated as alternatives, not identical matches.
-- **Shopping:** check off selected products grouped by illustrative H-E-B and Walmart pilot locations.
-- **Stores:** manage the retailers included in comparisons.
+- **Compare:** live product search across the stores you shop at, with photos, package size, price, unit price and sale prices; sort by price, unit price or name; filter by brand or on-sale items. Best matches come first, and products that only mention the search word are grouped under "Related items".
+- **Stores:** turn retailers on or off and pick a store location by ZIP code for each one (saved to your account).
+- **Shopping:** check off selected products grouped by store.
+- **Accounts and cloud lists:** Firebase email/password signup, verification, sign-in, reset, and sign-out; private lists available on every device signed in to the account.
+- **Guest mode:** lists and product choices are saved in this browser.
+- **Apple Reminders inbox:** a Shortcuts recipe uploads a Reminders shopping list to the Worker; the site previews it before saving. See [REMINDERS_SETUP.md](REMINDERS_SETUP.md).
 - **Responsive layout:** desktop navigation and phone-friendly bottom navigation.
-- **Guest persistence:** guest lists and product choices are saved in this browser.
-- **Accounts and cloud lists:** Firebase email/password signup, verification, sign-in, reset, and sign-out; private lists accessible from the same account on multiple devices.
-- **Password requirements:** 9–128 characters with uppercase, lowercase, and a number, enforced in the form and Firebase policy.
-- **Cloud safeguards:** verified-account access, autosave status, conflict detection, explicit guest import, and list download.
 
 ## Current limitations
 
-**Prices, availability, promotions, and store locations are sample data, not verified local in-store offers.**
-
-The Apple Reminders page supports a preview-before-save inbox flow. A
-Shortcuts recipe uploads incomplete Reminders titles to an optional Cloudflare
-Worker; the browser retrieves that upload and saves confirmed rows through the
-existing Firebase account list. It does not read or change Reminders directly.
-The Worker is disabled in the checked-in browser configuration until it has
-been deployed and tested; see [REMINDERS_SETUP.md](REMINDERS_SETUP.md).
-Firebase Authentication and Firestore provide the account and permanent list
-storage. The real signup/email/login flow must be verified after project
-configuration; see [FIREBASE_SETUP.md](FIREBASE_SETUP.md). The app is a
-browser-based GUI preview; installable/offline PWA support is not implemented.
-
-The intended future workflow is:
-
-1. Add groceries to the usual Apple Reminders shopping list through Siri.
-2. Run the Store Scout Apple Shortcut to securely upload that list to a Store Scout account.
-3. Find relevant products at supported nearby store locations.
-4. Choose exact products while comparing package sizes, prices, unit prices, availability, and promotions.
-5. Shop using checklists grouped by the selected store locations.
-
-Reliable, permitted retailer price access is still being researched. The Safari/Home Screen-to-Shortcuts handoff needs testing on an iPhone. In-store, pickup, and delivery prices must remain separate; the pilot prioritizes in-store shopping.
+- Only the stores above have real prices; Walmart and H-E-B are listed as coming soon.
+- Sellers Bros. has no online catalog, so only items in this week's ad are searchable, and the PDF parsing is heuristic.
+- Whole Foods covers the Houston-area stores only.
+- Stock levels are not verified, and the app is not an installable/offline PWA.
 
 ## Technology
 
@@ -62,33 +54,35 @@ These instructions do not grant permission to use or reproduce the code. See [LI
 
 ## Project structure
 
-| File                      | Purpose                                                                 |
-| ------------------------- | ----------------------------------------------------------------------- |
-| `index.html`              | Application shell and navigation                                        |
-| `style.css`               | Responsive visual design and screen layouts                             |
-| `model.js`                | Sample catalog, grocery matching, sorting, state validation, and totals |
-| `script.js`               | Screen rendering and browser interactions                               |
-| `tests/model.test.cjs`    | Focused logic tests using Node's built-in test runner                   |
-| `docs/superpowers/specs/` | Design documentation                                                    |
+| Path | Purpose |
+| --- | --- |
+| `index.html`, `style.css`, `theme.css` | Application shell, layout and themes |
+| `model.js` | Store list, live-offer validation, size and unit-price parsing, search relevance, state validation |
+| `script.js` | Screen rendering and browser interactions |
+| `retailer-client.js`, `retailer-config.js` | Browser client for the Worker's store adapters and weekly-ad feeds |
+| `product-photos.js` | Open Food Facts photo fallback for products without a retailer photo |
+| `cloudflare/` | Worker: store adapters (`kroger.mjs`, `wholefoods.mjs`, `walmart.mjs`), Reminders inbox, tests |
+| `scrapers/sellers_bros.py` | Sellers Bros. weekly-ad scraper |
+| `data/sellers-weekly.json` | Generated weekly-ad data, served with the site |
+| `firestore.rules` | Firestore security rules |
+| `tests/` | Frontend and rules tests |
+| `docs/adding-a-store.md` | How to add a store |
 
 ## Verification
 
 With Node.js installed:
 
 ```sh
-node --test tests/*.test.cjs
-node --check script.js
-node --check model.js
+npm test
+node --test cloudflare/tests/*.test.mjs
+npm run test:rules
 ```
 
-Browser verification covers adding groceries, choosing products, shopping checklists, persistence after refresh, basil clarification, store filters, empty results, removal/undo, and safe handling of typed text. These checks support the GUI preview; they do not establish production readiness or validate future integrations.
+`npm run test:rules` needs Java 21 and the Firebase emulator. Browser checks cover searching each store, choosing a location, adding products, Shopping, and persistence after a reload and sign-in.
 
 ## Development direction
 
-Build incrementally: complete the physical iPhone Shortcut acceptance test,
-verify and refine account syncing, and integrate permitted retailer data
-sources. More retailers, pickup and delivery, and trip optimization are
-future possibilities.
+Next: turn on Walmart once its API credentials are set up, and keep adding stores that offer permitted price access (see [docs/adding-a-store.md](docs/adding-a-store.md)). Pickup and delivery prices and trip optimization are future possibilities.
 
 GroceryChop provides visual inspiration for comparison controls and navigation. Store Scout has its own identity and focuses on Reminders synchronization, remembered product choices, and store-organized shopping.
 
@@ -110,12 +104,12 @@ See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for configuration, session behavior, 
 
 After verifying your email, open **Account > Profile & appearance** to set an optional display name, a five-digit shopping ZIP, Light/Dark/System mode, and a Green/Blue/Purple/Orange/Pink accent. Light with Green is the default. Click **Save profile & appearance** and wait for **Saved to your account**. These settings use the same private, revision-checked cloud document as your list and load when you sign into the same account on another device. Refresh older open tabs before changing profile settings.
 
-Signing out clears the account appearance and restores the default guest appearance. System mode follows each device's operating-system preference. Display names and ZIP codes are profile information, not authentication credentials. Store coverage remains the 77019 Houston pilot; entering another ZIP does not add live store coverage. The app icon and favicon use an original shopping-bag/check design.
+Signing out clears the account appearance and restores the default guest appearance. System mode follows each device's operating-system preference. Display names and ZIP codes are profile information, not authentication credentials. The app icon and favicon use an original shopping-bag/check design.
 
 ## Product-selection accuracy
 
-Compare keeps every choice tied to the grocery being selected, even if its search text changes. A relevant alternative is not a verified exact cross-store match; the selected product and other relevant options are displayed separately. The pilot catalog has no verified cross-store identifiers.
+Compare keeps every choice tied to the grocery being selected, even if its search text changes. Products from different stores are shown as alternatives, not verified identical matches. A saved pick keeps a snapshot of the product (name, size, price, photo, store location) so it can be shown in Shopping without searching again.
 
-Loading local or account data removes unrelated product selections and invalid remembered choices while preserving grocery names and quantities. Invalid picks return to **Needs a pick** and are excluded from totals and Shopping. The normalized list is written with the next successful edit/save; merely opening the list does not rewrite its cloud document.
+Loading local or account data removes invalid product selections while keeping grocery names and quantities. Invalid picks return to **Needs a pick** and are excluded from totals and Shopping.
 
-Basil and basil leaves require an explicit fresh/dried choice. Choosing a form updates that grocery's name so the choice can be remembered correctly. Prepared products containing basil do not match the herb. Unsupported groceries such as fish oil remain on the list without a sample product rather than receiving an unrelated match. Matching remains conservative and limited to the sample catalog; it is not a live retailer search.
+Basil and basil leaves require an explicit fresh/dried choice, and prepared products that contain basil do not match the herb.
