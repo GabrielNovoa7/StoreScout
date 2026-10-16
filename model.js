@@ -372,7 +372,9 @@
       image:
         typeof value.image === "string" &&
         (/^https:\/\/images\.openfoodfacts\.org\/images\/products\/[A-Za-z0-9/._-]+\.(jpg|jpeg|png|webp)$/.test(value.image) ||
-          /^https:\/\/m\.media-amazon\.com\/images\/[A-Za-z0-9/._+-]+\.(jpg|jpeg|png|webp)$/.test(value.image))
+          /^https:\/\/m\.media-amazon\.com\/images\/[A-Za-z0-9/._+-]+\.(jpg|jpeg|png|webp)$/.test(value.image) ||
+          /^https:\/\/www\.kroger\.com\/product\/images\/(xlarge|large|medium|small|thumbnail)\/[a-z]+\/\d{8,14}$/.test(value.image) ||
+          /^https:\/\/i5\.walmartimages\.com\/[A-Za-z0-9/._-]+\.(jpg|jpeg|png|webp)$/.test(value.image))
           ? value.image
           : null,
       fetchedAt: Number.isFinite(fetched) ? new Date(fetched).toISOString() : null,

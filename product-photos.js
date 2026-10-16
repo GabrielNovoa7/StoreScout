@@ -85,6 +85,7 @@
   async function lookup(products) {
     const codes = new Map();
     for (const product of products || []) {
+      if (product?.image) continue; // The retailer already sent a photo.
       const code = barcodeFor(product);
       if (code) codes.set(product.id, code);
     }

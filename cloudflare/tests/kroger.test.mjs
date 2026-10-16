@@ -67,3 +67,35 @@ test('Kroger adapter rejects invalid search input', async () => {
     {status: 400},
   );
 });
+
+test('Kroger products use the front photo from the API and drop unknown hosts', async () => {
+  clearTokenCache();
+  const fetcher = async (url) => url.includes('/oauth2/token')
+    ? response({access_token: 'token', expires_in: 3600})
+    : response({data: [
+      {
+        productId: '0001111041700',
+        description: 'Milk',
+        items: [{price: {regular: 3.29}}],
+        images: [
+          {perspective: 'back', sizes: [{size: 'large', url: 'https://www.kroger.com/product/images/large/back/0001111041700'}]},
+          {perspective: 'front', featured: true, sizes: [
+            {size: 'thumbnail', url: 'https://www.kroger.com/product/images/thumbnail/front/0001111041700'},
+            {size: 'large', url: 'https://www.kroger.com/product/images/large/front/0001111041700'},
+          ]},
+        ],
+      },
+      {
+        productId: '0002',
+        description: 'Bread',
+        items: [{price: {regular: 2}}],
+        images: [{perspective: 'front', sizes: [{size: 'large', url: 'https://evil.example/large/front/0002'}]}],
+      },
+    ]});
+  const result = await products({query: 'milk', locationId: '01234'}, {
+    KROGER_CLIENT_ID: 'id',
+    KROGER_CLIENT_SECRET: 'secret',
+  }, fetcher);
+  assert.equal(result[0].image, 'https://www.kroger.com/product/images/large/front/0001111041700');
+  assert.equal(result[1].image, null);
+});

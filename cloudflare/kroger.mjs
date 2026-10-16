@@ -64,6 +64,24 @@ function mapLocation(location) {
   };
 }
 
+// Kroger serves product photos from www.kroger.com/product/images/<size>/<side>/<upc>.
+const IMAGE = /^https:\/\/www\.kroger\.com\/product\/images\/(xlarge|large|medium|small|thumbnail)\/[a-z]+\/\d{8,14}$/;
+const SIZES = ['large', 'medium', 'xlarge', 'small'];
+
+function imageFor(product) {
+  const images = Array.isArray(product.images) ? product.images : [];
+  const front =
+    images.find((image) => image?.perspective === 'front') ||
+    images.find((image) => image?.featured) ||
+    images[0];
+  const sizes = Array.isArray(front?.sizes) ? front.sizes : [];
+  for (const wanted of SIZES) {
+    const url = cleanText(sizes.find((size) => size?.size === wanted)?.url, 200);
+    if (IMAGE.test(url)) return url;
+  }
+  return null;
+}
+
 function mapProduct(product, locationId) {
   const item = Array.isArray(product.items)
     ? product.items.find((candidate) => candidate?.price?.regular != null) ||
@@ -90,6 +108,7 @@ function mapProduct(product, locationId) {
       ? Object.values(item.fulfillment).some(Boolean)
       : null,
     locationId: locationId || null,
+    image: imageFor(product),
     source: 'Kroger API',
     fetchedAt: new Date().toISOString(),
   };

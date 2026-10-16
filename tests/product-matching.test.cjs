@@ -178,6 +178,12 @@ test('Open Food Facts photos appear on live results and stay with a saved pick',
  assert.equal(h.state().items[0].live.image,OFF_IMG);
  h.click('navigate',{view:'shopping'});assert.match(h.html(),/class="product-photo"/);
 });
+test('products that already carry a retailer photo skip the Open Food Facts lookup',async()=>{
+ require('../product-photos.js');const P=globalThis.ScoutPhotos;
+ const calls=[];const saved=globalThis.fetch;globalThis.fetch=async(url)=>{calls.push(url);return {ok:true,async json(){return {products:[]};}};};
+ try{await P.lookup([{...krogerMilk,image:'https://www.kroger.com/product/images/large/front/0001111041700'}]);}finally{globalThis.fetch=saved;}
+ assert.equal(calls.length,0);
+});
 test('photo barcodes convert Kroger UPCs and reject invalid codes',()=>{
  require('../product-photos.js');const P=globalThis.ScoutPhotos;
  assert.equal(P.barcodeFor({retailer:'kroger',upc:'0004139000105'}),'041390001055');
@@ -185,6 +191,10 @@ test('photo barcodes convert Kroger UPCs and reject invalid codes',()=>{
  assert.equal(P.barcodeFor({retailer:'walmart',upc:'041390001055'}),'041390001055');
  assert.equal(P.barcodeFor({retailer:'walmart',upc:'041390001054'}),null);
  assert.equal(M.cleanLive({...krogerMilk,image:'https://evil.example/x.jpg'}).image,null);
+ const KROGER_IMG='https://www.kroger.com/product/images/large/front/0001111041700';
+ assert.equal(M.cleanLive({...krogerMilk,image:KROGER_IMG}).image,KROGER_IMG);
+ assert.equal(M.cleanLive({...krogerMilk,image:'https://www.kroger.com/product/images/large/front/../x'}).image,null);
+ assert.equal(M.cleanLive({...krogerMilk,image:'https://i5.walmartimages.com/asr/abc.jpeg'}).image,'https://i5.walmartimages.com/asr/abc.jpeg');
 });
 
 test('an empty weekly-ad search explains that the ad only lists sale items',async()=>{

@@ -2,6 +2,7 @@ import {verifyFirebase} from './auth.mjs';
 import {Store} from './store.mjs';
 import {locations as krogerLocations, products as krogerProducts} from './kroger.mjs';
 import {locations as wholeFoodsLocations, products as wholeFoodsProducts} from './wholefoods.mjs';
+import {locations as walmartLocations, products as walmartProducts} from './walmart.mjs';
 const ORIGINS=new Set(['https://gabrielnovoa7.github.io','http://localhost:5500','http://127.0.0.1:5500']);
 const secret=()=>btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
 export async function hash(value){return [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))].map(x=>x.toString(16).padStart(2,'0')).join('');}
@@ -39,6 +40,18 @@ export function createWorker({verify=verifyFirebase,clock=()=>Math.floor(Date.no
    if(!await store.rate(subject,'wholefoods-products',60,now))fail(429);
    const params=new URL(request.url).searchParams;
    return reply({retailer:'wholefoods',products:await wholeFoodsProducts({query:params.get('q'),locationId:params.get('locationId'),zipCode:params.get('zip'),limit:params.get('limit')},env,fetcher)});
+ }
+ if(method==='GET'&&path==='/retailers/walmart/locations'){
+   const subject=request.headers.get('CF-Connecting-IP')||'anonymous';
+   if(!await store.rate(subject,'walmart-locations',30,now))fail(429);
+   const params=new URL(request.url).searchParams;
+   return reply({retailer:'walmart',locations:await walmartLocations({zipCode:params.get('zip'),limit:params.get('limit')},env,fetcher)});
+ }
+ if(method==='GET'&&path==='/retailers/walmart/products'){
+   const subject=request.headers.get('CF-Connecting-IP')||'anonymous';
+   if(!await store.rate(subject,'walmart-products',60,now))fail(429);
+   const params=new URL(request.url).searchParams;
+   return reply({retailer:'walmart',products:await walmartProducts({query:params.get('q'),locationId:params.get('locationId'),limit:params.get('limit')},env,fetcher)});
  }
  if(method==='GET'&&path==='/retailers/compare/stream'){
    const subject=request.headers.get('CF-Connecting-IP')||'anonymous';
