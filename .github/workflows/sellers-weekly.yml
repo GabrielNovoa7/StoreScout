@@ -1,0 +1,64 @@
+name: Sellers Bros. weekly ad
+
+# Sellers Bros. publishes a new weekly ad on Wednesdays. This rebuilds
+# data/sellers-weekly.json and commits it, which redeploys GitHub Pages.
+on:
+  schedule:
+    - cron: '0 15 * * 3' # Wednesday 10:00 Houston (CDT)
+    - cron: '0 15 * * 4' # Thursday retry, in case the ad went up late
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sellers-weekly
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: scrapers/requirements.txt
+
+      - name: Install scraper dependencies
+        run: pip install -r scrapers/requirements.txt
+
+      - name: Build the weekly-ad feed
+        run: python scrapers/sellers_bros.py --output "$RUNNER_TEMP/sellers-weekly.json"
+
+      # Only replace the published feed with a new ad week that parsed well;
+      # a failed or partial parse keeps last week's data online.
+      - name: Check the new feed
+        id: check
+        run: |
+          python - "$RUNNER_TEMP/sellers-weekly.json" data/sellers-weekly.json <<'PY'
+          import json, os, sys
+          new = json.load(open(sys.argv[1], encoding="utf-8"))
+          old = json.load(open(sys.argv[2], encoding="utf-8"))
+          count = len(new.get("products", []))
+          if count < 50 or not new.get("stores"):
+              sys.exit(f"Only {count} products / {len(new.get('stores', []))} stores parsed; keeping the current feed.")
+          changed = new.get("adFiles") != old.get("adFiles")
+          print(f"{count} products, ad week {new.get('validFrom')} to {new.get('validTo')}, changed={changed}")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"changed={'true' if changed else 'false'}\n")
+              out.write(f"week={new.get('validFrom')}\n")
+          PY
+
+      - name: Commit the new ad week
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          cp "$RUNNER_TEMP/sellers-weekly.json" data/sellers-weekly.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/sellers-weekly.json
+          git commit -m "data: Sellers Bros. weekly ad for ${{ steps.check.outputs.week }}"
+          git push
