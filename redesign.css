@@ -1,0 +1,941 @@
+/*
+  Shelf-tag redesign layer.
+  Loaded after theme.css so the whole look can be tried (or dropped) as one file.
+  Idea: a grocery shelf tag. Quiet stone surfaces, one deep accent from the
+  account's chosen colour, prices set big in tabular figures, and the sale
+  yellow reserved for actual deals. No tiny tracked capitals, no outlined boxes:
+  structure comes from space and tone steps.
+*/
+
+:root {
+  --font: "Schibsted Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --shell: hsl(40 40% 94%);
+  --canvas: hsl(40 40% 94%);
+  --white: hsl(42 55% 98.5%);
+  --mint: hsl(var(--accent-hue) 30% 90%);
+  --surface-soft: hsl(40 30% 90%);
+  --line: hsl(38 24% 84%);
+  --ink: hsl(var(--accent-hue) 30% 12%);
+  --muted: hsl(var(--accent-hue) 8% 36%);
+  --tag: #f5d33f;
+  --tag-ink: #2b2200;
+  --r-surface: 10px;
+  --r-control: 999px;
+  font-family: var(--font);
+}
+:root[data-theme="dark"] {
+  --shell: hsl(var(--accent-hue) 12% 8%);
+  --canvas: hsl(var(--accent-hue) 12% 8%);
+  --white: hsl(var(--accent-hue) 12% 12.5%);
+  --mint: hsl(var(--accent-hue) 24% 19%);
+  --surface-soft: hsl(var(--accent-hue) 12% 16%);
+  --line: hsl(var(--accent-hue) 10% 22%);
+  --ink: hsl(var(--accent-hue) 15% 94%);
+  --muted: hsl(var(--accent-hue) 8% 70%);
+  --tag: #e9c52f;
+}
+body {
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button,
+input,
+select,
+textarea {
+  font-family: var(--font);
+}
+/* Type: one face, five sizes far apart (13 / 15 / 18 / 26 / 44). */
+.page-heading h1 {
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0 0 12px;
+}
+.page-heading p,
+.section-heading p {
+  font-size: 15px;
+  color: var(--muted);
+}
+.sync-card h2,
+.clarify-card h2,
+.area-card h2,
+.next-card h3,
+.profile-form h2,
+.import-section h2,
+.section-heading h2,
+.results-heading h2,
+.shopping-store h2,
+.store-card h2,
+.trip-summary h2,
+#dialog h2 {
+  font-family: var(--font);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+.sync-card h2,
+.area-card h2 {
+  font-size: 26px;
+  line-height: 1.15;
+}
+.section-heading h2 {
+  font-size: 26px;
+}
+.sync-card p,
+.next-card p,
+.compare-explainer p,
+.area-card p,
+.account-panel p {
+  font-size: 15px;
+  line-height: 1.6;
+}
+/* Tiny tracked capitals and kicker labels say nothing the heading doesn't. */
+/* Shell: the sidebar and top bar sit on the same ground as the page. */
+.sidebar,
+.topbar,
+.mobile-nav {
+  background: var(--shell);
+  border-color: transparent;
+}
+.sidebar {
+  box-shadow: inset -1px 0 0 var(--line);
+}
+.topbar {
+  box-shadow: inset 0 -1px 0 var(--line);
+}
+.brand {
+  font-size: 26px;
+  letter-spacing: -0.04em;
+  margin-bottom: 28px;
+}
+.nav-item {
+  font-size: 15px;
+  font-weight: 550;
+  border-radius: var(--r-control);
+  color: var(--muted);
+}
+.nav-item.active {
+  background: var(--ink);
+  color: var(--canvas);
+}
+.nav-item.active .icon {
+  color: var(--canvas);
+}
+.nav-item.active .nav-count {
+  background: var(--canvas);
+  color: var(--ink);
+}
+.sidebar-note {
+  background: transparent;
+  border: 0;
+  padding: 0 15px;
+}
+.sidebar-note strong {
+  font-size: 13px;
+}
+.sidebar-note p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.sidebar-bottom small,
+.breadcrumb {
+  font-size: 13px;
+}
+.breadcrumb {
+  color: var(--muted);
+}
+.location-button,
+.account-button {
+  font-size: 13px;
+  border-radius: var(--r-control);
+}
+.account-button {
+  border: 0;
+  background: var(--ink);
+  color: var(--canvas);
+  padding-inline: 18px;
+}
+/* Controls: fully round, named for their action. */
+.button,
+.pick-button,
+.icon-button,
+.tabs button,
+.store-chip,
+.quantity,
+.list-search,
+.dialog-input,
+select {
+  border-radius: var(--r-control);
+}
+.button {
+  font-size: 15px;
+  min-height: 44px;
+  padding: 11px 20px;
+}
+.button:hover:not(:disabled) {
+  transform: none;
+}
+.button.white {
+  background: var(--ink);
+  color: var(--canvas);
+  box-shadow: none;
+}
+.pick-button {
+  font-size: 13px;
+}
+.tabs button {
+  font-size: 13px;
+}
+.tabs button.selected {
+  background: var(--ink);
+  color: var(--canvas);
+}
+/* Surfaces: tone steps instead of outlined boxes. */
+.list-panel,
+.sync-card,
+.next-card,
+.product-card,
+.store-card,
+.shopping-store,
+.compare-search-card,
+.compare-explainer,
+.area-card,
+.trip-summary,
+.account-panel,
+.import-panel,
+.clarify-card,
+.pending-panel,
+.soon-card,
+.future-card,
+.live-panel {
+  border: 0 !important;
+  border-radius: var(--r-surface);
+  box-shadow: none;
+}
+.compare-explainer,
+.area-card,
+.trip-summary {
+  background: var(--mint);
+}
+.list-panel,
+.sync-card,
+.next-card,
+.product-card,
+.store-card,
+.shopping-store,
+.compare-search-card,
+.account-panel,
+.import-panel,
+.clarify-card {
+  background: var(--white);
+}
+/* The three summary figures read as one tally strip, not three cards. */
+/* List rows. */
+.grocery-row {
+  border-color: var(--line);
+}
+.grocery-detail h3 {
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.grocery-detail p {
+  font-size: 13px;
+  color: var(--muted);
+}
+.needs-label {
+  font-size: 13px;
+  background: transparent;
+  padding: 0;
+  color: var(--muted);
+}
+.needs-label::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--tag);
+  vertical-align: 1px;
+}
+.food-thumb {
+  background: var(--surface-soft);
+  border: 0;
+}
+.count-bubble {
+  background: var(--surface-soft);
+  font-size: 13px;
+}
+/* Prices are the shelf tag: big, heavy, tabular. */
+.product-price,
+.live-buy strong,
+.trip-summary strong,
+.shopping-summary strong {
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+.product-price {
+  font-size: 26px;
+}
+.product-card h3,
+.product-card strong:first-child {
+  font-size: 18px;
+}
+.product-store,
+.product-size,
+.product-brand {
+  font-size: 13px;
+}
+.deal-tag,
+.promo {
+  background: var(--tag) !important;
+  color: var(--tag-ink) !important;
+  border: 0 !important;
+  border-radius: 4px;
+  font-weight: 650;
+}
+/* Stores. */
+.store-card h2,
+.store-name-line {
+  font-size: 26px;
+}
+.store-chip {
+  border: 0;
+  background: var(--surface-soft);
+  font-size: 13px;
+}
+.store-chip.on {
+  background: var(--ink);
+  color: var(--canvas);
+}
+.store-chip.on .icon {
+  color: var(--canvas);
+}
+/* Footer and small print stay readable. */
+.page-footer,
+.demo-note,
+.account-footnote,
+.store-facts,
+.no-alternatives {
+  font-size: 13px;
+}
+.page-footer {
+  border-color: var(--line);
+}
+/* The decorative sparkle marks in the hero art are noise without the copy around them. */
+@media (max-width: 740px) {
+  .page-heading h1 {
+    font-size: 34px;
+  }
+}
+@media (max-width: 480px) {
+  .page-heading h1 {
+    font-size: 30px;
+  }
+  /* On a phone the list is the job; the illustration steps aside. */
+}
+/* Second pass: everything a person reads is at least 13px. */
+.sync-card .button,
+.next-card button,
+.list-bottom,
+.list-bottom button,
+.quantity button,
+.quantity span,
+.sort-label,
+.sort-label select,
+.empty p,
+.results-heading span,
+.store-family,
+.store-card-body p,
+.store-card-body small,
+.trip-summary p,
+.trip-summary small,
+.shopping-store p,
+.shopping-store small,
+.account-form label,
+.password-field button,
+.text-button,
+.account-privacy strong,
+.connection,
+.store-pair span,
+.list-search input,
+.sidebar-bottom strong,
+.sidebar-bottom small {
+  font-size: 13px;
+}
+.sync-card .button {
+  font-size: 15px;
+  min-height: 44px;
+  padding: 11px 20px;
+}
+.compare-form input,
+.dialog-input,
+.location-form input {
+  font-size: 15px;
+}
+.nav-count {
+  font-size: 12px;
+}
+#desktop-nav .nav-item {
+  font-size: 15px;
+}
+/* Big single figures don't need tabular spacing; it opened a gap around the decimal point. */
+.product-price {
+  font-variant-numeric: normal;
+}
+/* The store banner repeats "Live prices" from the facts below it, in tiny caps. */
+.store-visual > span:not(.store-mark),
+.soon-card .pill {
+  display: none;
+}
+.list-layout > * {
+  min-width: 0;
+}
+.shopping-summary,
+.pending-panel {
+  border: 0 !important;
+  border-radius: var(--r-surface);
+}
+.shopping-summary {
+  background: var(--mint);
+}
+.pending-panel {
+  background: var(--white);
+}
+.shopping-summary h2 {
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+.shopping-summary strong {
+  font-size: 44px;
+  font-variant-numeric: normal;
+}
+.shopping-summary p,
+.shopping-summary small,
+.pending-panel p,
+.soon-card p,
+.future-card p,
+.stores-grid ~ p {
+  font-size: 13px;
+}
+.shopping-summary small {
+  letter-spacing: 0;
+}
+.pending-panel h3,
+.empty h3 {
+  font-size: 18px;
+  font-weight: 650;
+}
+.empty p {
+  font-size: 15px;
+}
+/* style.css hides these breaks below 960px, which glued "favorites.Head" together. */
+.mobile-nav .nav-item {
+  font-size: 12px;
+  border-radius: 12px;
+}
+.mobile-nav .nav-item.active {
+  background: var(--ink);
+  color: var(--canvas);
+}
+@media (max-width: 480px) {
+  .page-heading .button {
+    font-size: 15px;
+  }
+}
+.right-rail {
+  grid-template-columns: minmax(0, 1fr);
+}
+.list-search {
+  background: var(--surface-soft);
+}
+.list-search input {
+  background: transparent;
+}
+/* Live result cards: the price is the shelf tag; a sale price sits on sale yellow. */
+.live-results article {
+  border: 0;
+  border-radius: var(--r-surface);
+  padding: 18px;
+}
+.live-results article.live-selected {
+  box-shadow: 0 0 0 2px var(--green);
+}
+.live-info strong {
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.live-info small,
+.live-store {
+  font-size: 13px;
+}
+.live-buy b {
+  font-size: 26px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.live-buy b i {
+  font-size: 13px;
+  font-weight: 550;
+  font-style: normal;
+  color: var(--muted);
+  letter-spacing: 0;
+}
+.live-buy b:has(s) {
+  background: var(--tag);
+  color: var(--tag-ink);
+  padding: 4px 10px 6px;
+  border-radius: 4px;
+}
+.live-buy b:has(s) s,
+.live-buy b:has(s) em,
+.live-buy b:has(s) i {
+  color: var(--tag-ink);
+  opacity: 0.75;
+}
+.live-buy b s,
+.live-buy b em {
+  font-size: 13px;
+  letter-spacing: 0;
+}
+.live-filters label {
+  font-size: 13px;
+}
+.live-info .live-store {
+  font-size: 13px;
+}
+.compare-explainer strong {
+  font-size: 15px;
+}
+@media (max-width: 480px) {
+  .results-heading {
+    flex-wrap: wrap;
+  }
+  .results-heading > span {
+    flex-basis: 100%;
+    text-align: left;
+  }
+}
+
+/* ---------- Trip tag: the list page's lead, shaped like a shelf price tag. ---------- */
+.trip-tag {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 40px;
+  align-items: end;
+  margin-bottom: 24px;
+  padding: 40px 44px 36px 76px;
+  background: var(--white);
+  border-radius: var(--r-surface);
+  border-top: 8px solid var(--green);
+  transform-origin: 34px 50%;
+}
+.tag-hole {
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  margin-top: -11px;
+  border-radius: 50%;
+  background: var(--canvas);
+  box-shadow: inset 0 2px 3px hsl(var(--accent-hue) 20% 20% / 0.18);
+}
+.tag-label {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 550;
+  color: var(--muted);
+}
+.tag-price {
+  display: block;
+  margin: 4px 0 10px;
+  font-size: 104px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+  color: var(--ink);
+}
+.cents {
+  font-size: 0.42em;
+  letter-spacing: -0.02em;
+  vertical-align: 0.95em;
+  margin-left: 0.04em;
+}
+.tag-sub {
+  margin: 0;
+  max-width: 34ch;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.tag-progress {
+  height: 10px;
+  border-radius: var(--r-control);
+  background: var(--surface-soft);
+  overflow: hidden;
+}
+.tag-progress span {
+  display: block;
+  height: 100%;
+  min-width: 10px;
+  border-radius: inherit;
+  background: var(--green);
+  transform-origin: left center;
+}
+.tag-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  margin: 18px 0 24px;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+  color: var(--muted);
+}
+.tag-facts b {
+  display: block;
+  font-size: 26px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.tag-side .button {
+  width: 100%;
+}
+
+/* Shelf-tag cents on the other big prices too. */
+.live-buy .cents,
+.shopping-summary .cents {
+  font-size: 0.55em;
+  vertical-align: 0.6em;
+}
+
+/* The hero copy and the stat row are gone; the list sits right under the tag. */
+.page-heading p {
+  max-width: 52ch;
+  text-wrap: pretty;
+}
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+/* ---------- Motion ---------- */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --t-press: 140ms;
+  --t-hover: 180ms;
+  --t-ui: 240ms;
+}
+
+/* Feedback under the hand. */
+.button,
+.pick-button,
+.tabs button,
+.store-chip,
+.nav-item,
+.icon-button,
+.remove-button {
+  transition:
+    transform var(--t-press) var(--ease-out),
+    background-color var(--t-hover) ease,
+    color var(--t-hover) ease;
+}
+.button:active:not(:disabled),
+.pick-button:active,
+.store-chip:active,
+.icon-button:active,
+.tabs button:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) and (pointer: fine) {
+  .nav-item:not(.active):hover,
+  .tabs button:not(.selected):hover {
+    background: var(--surface-soft);
+    color: var(--ink);
+  }
+  .remove-button:hover {
+    color: var(--ink);
+  }
+}
+
+/* Checking an item off draws a line through it instead of just fading it. */
+.shopping-item strong {
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 55% / 0
+    2px;
+  transition: background-size var(--t-ui) var(--ease-out);
+}
+.shopping-item.completed strong {
+  text-decoration: none;
+  background-size: 100% 2px;
+}
+
+#toast {
+  font-size: 13px;
+  border-radius: var(--r-control);
+  background: var(--ink);
+  color: var(--canvas);
+  transition:
+    opacity var(--t-ui) var(--ease-out),
+    transform var(--t-ui) var(--ease-out);
+}
+#toast button {
+  color: var(--canvas);
+  font-size: 13px;
+}
+
+/*
+  Page entrance, once per view change (script.js adds .view-enter).
+  Each part arrives its own way: the heading rises, the trip tag swings on its
+  hole like a tag on a peg (the one loud move), list rows arrive in order, cards settle.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  .view-enter .page-heading {
+    animation: rise 640ms var(--ease-out) both;
+  }
+  .view-enter .trip-tag {
+    animation: tag-swing 1100ms var(--ease-out) 120ms both;
+  }
+  .view-enter .tag-progress span {
+    animation: fill 900ms var(--ease-out) 520ms both;
+  }
+  .view-enter .grocery-row {
+    animation: rise 520ms var(--ease-out) both;
+    animation-delay: calc(260ms + var(--i, 0) * 45ms);
+  }
+  .view-enter .grocery-row:nth-child(1) {
+    --i: 0;
+  }
+  .view-enter .grocery-row:nth-child(2) {
+    --i: 1;
+  }
+  .view-enter .grocery-row:nth-child(3) {
+    --i: 2;
+  }
+  .view-enter .grocery-row:nth-child(4) {
+    --i: 3;
+  }
+  .view-enter .grocery-row:nth-child(5) {
+    --i: 4;
+  }
+  .view-enter .grocery-row:nth-child(6) {
+    --i: 5;
+  }
+  .view-enter .grocery-row:nth-child(n + 7) {
+    --i: 6;
+  }
+  .view-enter .right-rail > *,
+  .view-enter .compare-search-card,
+  .view-enter .area-card,
+  .view-enter .shopping-summary,
+  .view-enter .account-panel,
+  .view-enter .import-panel {
+    animation: settle 700ms var(--ease-out) 140ms both;
+  }
+  .view-enter .store-card,
+  .view-enter .shopping-store,
+  .view-enter .live-results article,
+  .view-enter .product-card {
+    animation: settle 640ms var(--ease-out) both;
+    animation-delay: calc(240ms + var(--i, 0) * 70ms);
+  }
+  .view-enter
+    :is(
+      .store-card,
+      .shopping-store,
+      .live-results article,
+      .product-card
+    ):nth-child(2) {
+    --i: 1;
+  }
+  .view-enter
+    :is(
+      .store-card,
+      .shopping-store,
+      .live-results article,
+      .product-card
+    ):nth-child(3) {
+    --i: 2;
+  }
+  .view-enter
+    :is(
+      .store-card,
+      .shopping-store,
+      .live-results article,
+      .product-card
+    ):nth-child(n + 4) {
+    --i: 3;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+}
+@keyframes tag-swing {
+  0% {
+    opacity: 0;
+    transform: rotate(-9deg) translateY(-12px);
+  }
+  35% {
+    opacity: 1;
+  }
+  60% {
+    transform: rotate(1.6deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes fill {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@media (max-width: 960px) {
+  .trip-tag {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 32px 28px 28px 64px;
+  }
+  .tag-price {
+    font-size: 88px;
+  }
+}
+@media (max-width: 480px) {
+  .trip-tag {
+    padding: 28px 20px 24px 52px;
+    transform-origin: 26px 50%;
+  }
+  .tag-hole {
+    left: 16px;
+    width: 18px;
+    height: 18px;
+    margin-top: -9px;
+  }
+  .tag-price {
+    font-size: 72px;
+  }
+  .tag-facts {
+    gap: 8px 20px;
+  }
+  .tag-side .button {
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+/* One loud action per screen: the per-row "Pick product" is a quiet tone button. */
+.row-action {
+  width: auto;
+  min-width: 89px;
+}
+.grocery-row .pick-button {
+  min-height: 36px;
+  padding: 8px 14px;
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+@media (hover: hover) and (pointer: fine) {
+  .grocery-row .pick-button:hover {
+    background: var(--ink);
+    color: var(--canvas);
+    filter: none;
+  }
+}
+.tag-hole {
+  box-shadow:
+    inset 0 2px 3px hsl(var(--accent-hue) 20% 20% / 0.18),
+    0 0 0 5px var(--surface-soft);
+}
+@media (max-width: 960px) {
+  .tag-hole {
+    top: 56px;
+  }
+}
+
+.shopping-item strong {
+  display: block;
+  width: fit-content;
+  font-size: 15px;
+  font-weight: 650;
+}
+.shopping-item small,
+.store-completion,
+.store-completion span {
+  font-size: 13px;
+}
+.shopping-item b,
+.shopping-store-head strong {
+  font-size: 18px;
+  font-weight: 750;
+}
+.shopping-store-head h2 {
+  font-size: 18px;
+}
+.inline-store,
+.account-panel .text-button,
+.row-action .text-button {
+  font-size: 13px;
+}
+.row-action > strong {
+  font-size: 18px;
+  font-weight: 750;
+}
+.compare-form .button {
+  font-size: 15px;
+}
+@media (max-width: 480px) {
+  .shopping-summary h2 {
+    font-size: 18px;
+  }
+  .shopping-summary strong {
+    font-size: 34px;
+  }
+}
+
+@media (max-width: 480px) {
+  .list-toolbar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .list-search {
+    flex: 1 1 100%;
+  }
+}
+
+/* Profile save confirmation */
+#profile-status.is-saved {
+  color: var(--ink);
+  font-weight: 650;
+}
+#profile-status.is-saved::before {
+  content: "✓ ";
+  color: var(--green);
+}
+@media (prefers-reduced-motion: no-preference) {
+  #profile-status.is-saved {
+    animation: rise 320ms var(--ease-out) both;
+  }
+}

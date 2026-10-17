@@ -31,7 +31,8 @@
     activeId = null,
     removed = null;
   let renderedUid = null,
-    renderedLocked = false;
+    renderedLocked = false,
+    renderedView = null;
   const main = document.querySelector("#main");
   const dialog = document.querySelector("#dialog");
   const money = (value) =>
@@ -39,6 +40,10 @@
       style: "currency",
       currency: "USD",
     }).format(value);
+  const tagMoney = (value) => {
+    const [dollars, cents] = money(value).split(".");
+    return `<span class="dollars">${dollars}</span><span class="cents">.${cents}</span>`;
+  };
   const esc = (value) =>
     String(value ?? "").replace(
       /[&<>"']/g,
@@ -205,12 +210,25 @@
     ].filter(Boolean).join(" ");
   }
   const demo = () =>
-    `<div class="demo-note"><span class="demo-label">PRICES</span> ${esc(priceNote())} <span class="cloud-save-status" role="status">${esc(storageLabel())}</span></div>`;
-  function heading(eyebrow, title, description, action = "") {
-    return `<div class="page-heading"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${description}</p></div>${action}</div>`;
+    `<div class="demo-note">${esc(priceNote())} <span class="cloud-save-status" role="status">${esc(storageLabel())}</span></div>`;
+  function heading(title, description, action = "") {
+    return `<div class="page-heading"><div><h1>${title}</h1><p>${description}</p></div>${action}</div>`;
   }
-  function groceryArt() {
-    return `<div class="grocery-art" aria-hidden="true"><span class="art-circle"></span><div class="floating-leaf leaf-one">✦</div><div class="floating-leaf leaf-two">✧</div><span class="art-bread">🥖</span><span class="art-leaves">🥬</span><span class="art-carrot">🥕</span><span class="art-milk">🥛</span><div class="paper-bag"><span class="bag-handle"></span><span class="bag-logo">✳</span><span>GOOD THINGS<br>IN STORE.</span></div><span class="art-tomato">🍅</span><span class="art-avocado">🥑</span><div class="art-sticker">${icon("check")} A smarter shop</div></div>`;
+  // The list page leads with the trip as a shelf tag: what it costs so far and what's left to pick.
+  function tripTag(summary, pending) {
+    const count = state.items.length;
+    const next = state.items.find((i) => !offerFor(i));
+    const action = !count
+      ? `<button class="button primary" data-action="add-dialog">${icon("plus")} Add your first item</button>`
+      : next
+        ? `<button class="button primary" data-action="compare-item" data-id="${esc(next.id)}">Pick a product for ${esc(next.name)} ${icon("arrow")}</button>`
+        : `<button class="button primary" data-action="navigate" data-view="shopping">Start shopping ${icon("arrow")}</button>`;
+    const sub = !count
+      ? "Your list is empty."
+      : summary.selected
+        ? `For ${summary.selected} of ${count} item${count === 1 ? "" : "s"}. ${pending ? `${pending} still need${pending === 1 ? "s" : ""} a product.` : "Everything has a product."}`
+        : `Pick a product for each item to see what this trip costs.`;
+    return `<section class="trip-tag" aria-label="Trip summary"><span class="tag-hole" aria-hidden="true"></span><div class="tag-main"><p class="tag-label">Estimated total</p><strong class="tag-price">${tagMoney(summary.total)}</strong><p class="tag-sub">${sub}</p></div><div class="tag-side"><div class="tag-progress" role="progressbar" aria-label="Items with a product" aria-valuemin="0" aria-valuemax="${count}" aria-valuenow="${summary.selected}"><span style="width:${count ? (summary.selected / count) * 100 : 0}%"></span></div><ul class="tag-facts"><li><b>${count}</b> on your list</li><li><b>${summary.selected}</b> picked</li><li><b>${enabledStores().length}</b> store${enabledStores().length === 1 ? "" : "s"} compared</li></ul>${action}</div></section>`;
   }
   function listPage() {
     const summary = summarize(state.items),
@@ -223,17 +241,15 @@
     );
     return (
       heading(
-        "A LITTLE PLANNING. A BETTER SHOP.",
-        "Your list, a little smarter.",
-        "The groceries you need. The choices you love. All in one place.",
+        "Your next shop",
+        "Write it like a normal list. Then pick the product and store for each item.",
         `<button class="button primary" data-action="add-dialog">${icon("plus")} Add an item</button>`,
       ) +
-      `<section class="welcome-card"><div class="welcome-copy"><span class="pill light">${icon("leaf")} SMALL HABITS, SMARTER SHOPPING</span><h2>Good groceries.<br>Less guesswork.</h2><p>Start with your usual list. Find your favorites.<br>Head to the store with a plan.</p><button class="button white" data-action="navigate" data-view="compare">Explore products ${icon("arrow")}</button></div>${groceryArt()}</section>
-    <div class="stats-grid"><div class="stat"><span class="stat-icon mint">${icon("list")}</span><div><strong>${state.items.length} <span>items on your list</span></strong><small>Your next grocery run</small></div></div><div class="stat"><span class="stat-icon peach">${icon("check")}</span><div><strong>${summary.selected} <span>products picked</span></strong><small>${pending ? `${pending} more to make your own` : "You’re ready to shop"}</small></div></div><div class="stat"><span class="stat-icon lavender">${icon("shopping")}</span><div><strong>${money(summary.total)} <span>estimated total</span></strong><small>Selected products only</small></div></div></div>
-    <div class="list-layout"><section class="list-panel"><div class="section-heading"><div><h2>My shopping list <span class="count-bubble">${state.items.length}</span></h2><p>A little of what you need, a little of what you love.</p></div><button class="icon-button" data-action="add-dialog" aria-label="Add grocery">${icon("plus")}</button></div>
+      `${tripTag(summary, pending)}
+    <div class="list-layout"><section class="list-panel"><div class="section-heading"><div><h2>On the list <span class="count-bubble">${state.items.length}</span></h2></div><button class="icon-button" data-action="add-dialog" aria-label="Add grocery">${icon("plus")}</button></div>
     <div class="list-toolbar"><div class="tabs" aria-label="Filter list">${[
-      ["all", "All items"],
-      ["pending", "Needs a pick"],
+      ["all", "All"],
+      ["pending", "To pick"],
       ["picked", "Picked"],
     ]
       .map(
@@ -242,12 +258,12 @@
       )
       .join(
         "",
-      )}</div><label class="list-search">${icon("search")}<input id="list-search" aria-label="Search your list" placeholder="Find an item" value="${esc(listQuery)}"></label></div>
-    <div class="grocery-rows">${visible.map(row).join("") || `<div class="empty">${icon("list")}<h3>${state.items.length ? "No items here yet" : "A fresh start."}</h3><p>${state.items.length ? "Try another filter or search." : "Add your first grocery to start planning."}</p><button class="button secondary" data-action="add-dialog">Add an item</button></div>`}</div>
-    <form class="quick-add" id="quick-add">${icon("plus")}<input name="grocery" aria-label="Add a grocery item" placeholder="Add something to your list…" maxlength="100" required><button type="submit" aria-label="Add item">${icon("arrow")}</button></form>
-    <div class="list-bottom">${icon("clock")} Your choices stay here for your next visit.<button data-action="navigate" data-view="shopping">Go shopping ${icon("arrow")}</button></div></section>
-    <aside class="right-rail"><section class="sync-card"><div class="reminders-icon"><span></span><span></span><span></span></div><span class="small-pill">MADE FOR YOUR ROUTINE</span><h2>Siri adds it.<br>Scout takes it from here.</h2><p>Keep your usual Reminders list. Preview incoming groceries before adding them here.</p><button class="button primary full" data-action="sync">${icon("sync")} Sync Apple Reminders</button><span class="connection"><i></i> Review imports before adding</span></section>
-    <section class="next-card"><span class="eyebrow">YOUR NEXT STOP</span><h3>Good things nearby.</h3><p>${enabledStores().length} store${enabledStores().length === 1 ? "" : "s"} in your comparisons.<br>One thoughtfully planned list.</p><div class="store-pair">${enabledStores().map(storeBadge).join("")}<span>${esc(enabledStores().map((id) => locationFor(id)?.name || storeFor(id)?.name).join(" & ") || "No stores enabled")}</span></div><button data-action="navigate" data-view="stores">Manage your stores ${icon("arrow")}</button></section></aside></div>${demo()}`
+      )}</div><label class="list-search">${icon("search")}<input id="list-search" aria-label="Search your list" placeholder="Find on your list" value="${esc(listQuery)}"></label></div>
+    <div class="grocery-rows">${visible.map(row).join("") || `<div class="empty">${icon("list")}<h3>${state.items.length ? "Nothing matches" : "Nothing on the list yet"}</h3><p>${state.items.length ? "Try another filter or search." : "Add an item below, or bring your list over from Reminders."}</p><button class="button secondary" data-action="add-dialog">Add an item</button></div>`}</div>
+    <form class="quick-add" id="quick-add">${icon("plus")}<input name="grocery" aria-label="Add a grocery item" placeholder="Add an item, like oat milk" maxlength="100" required><button type="submit" aria-label="Add item">${icon("arrow")}</button></form>
+    <div class="list-bottom">${icon("clock")} Your product picks are remembered for next time.<button data-action="navigate" data-view="shopping">Go shopping ${icon("arrow")}</button></div></section>
+    <aside class="right-rail"><section class="sync-card"><div class="reminders-icon"><span></span><span></span><span></span></div><h2>Keep using Reminders</h2><p>Add groceries with Siri as usual. Store Scout shows you what came in, and nothing joins your list until you approve it.</p><button class="button primary full" data-action="sync">${icon("sync")} Sync Apple Reminders</button></section>
+    <section class="next-card"><h3>Stores you compare</h3><p>${enabledStores().length} store${enabledStores().length === 1 ? "" : "s"} near ${esc(shopZip())}.</p><div class="store-pair">${enabledStores().map(storeBadge).join("")}<span>${esc(enabledStores().map((id) => locationFor(id)?.name || storeFor(id)?.name).join(" & ") || "No stores enabled")}</span></div><button data-action="navigate" data-view="stores">Change stores ${icon("arrow")}</button></section></aside></div>${demo()}`
     );
   }
   function row(item) {
@@ -258,7 +274,7 @@
         item.name.toLowerCase()
       ] || "🛒",
     );
-    return `<article class="grocery-row ${item.done ? "is-done" : ""}"><span class="food-thumb ${o?.department || "produce"}">${glyph}</span><div class="grocery-detail"><h3>${esc(item.name)}</h3><p>${o ? `${esc(o.brand)} <span>·</span> ${esc(o.size)}` : M.intent(item.name).needsForm ? "Fresh or dried? Let’s find your kind." : "Choose the product that’s right for you."}</p>${o ? `<span class="inline-store">${storeBadge(o.storeId)} ${esc(storeFor(o.storeId).name)}${!state.stores.includes(o.storeId) ? " · disabled for comparison" : ""}</span>` : '<span class="needs-label">Needs a pick</span>'}</div><div class="quantity" aria-label="Quantity"><button data-action="quantity" data-id="${esc(item.id)}" data-delta="-1" aria-label="Decrease ${esc(item.name)} quantity" ${item.quantity <= 1 ? "disabled" : ""}>−</button><span>${item.quantity}</span><button data-action="quantity" data-id="${esc(item.id)}" data-delta="1" aria-label="Increase ${esc(item.name)} quantity" ${item.quantity >= 99 ? "disabled" : ""}>+</button></div><div class="row-action">${o ? `<strong>${money(o.price * item.quantity)}</strong><button class="text-button" data-action="compare-item" data-id="${esc(item.id)}">Change ${icon("arrow")}</button>` : `<button class="button pick-button" data-action="compare-item" data-id="${esc(item.id)}">Pick product ${icon("arrow")}</button>`}</div><button class="remove-button" data-action="remove" data-id="${esc(item.id)}" aria-label="Remove ${esc(item.name)}">${icon("close")}</button></article>`;
+    return `<article class="grocery-row ${item.done ? "is-done" : ""}"><span class="food-thumb ${o?.department || "produce"}">${glyph}</span><div class="grocery-detail"><h3>${esc(item.name)}</h3><p>${o ? `${esc(o.brand)} <span>·</span> ${esc(o.size)}` : M.intent(item.name).needsForm ? "Fresh or dried? Pick one to compare." : "No product picked yet."}</p>${o ? `<span class="inline-store">${storeBadge(o.storeId)} ${esc(storeFor(o.storeId).name)}${!state.stores.includes(o.storeId) ? " · disabled for comparison" : ""}</span>` : '<span class="needs-label">To pick</span>'}</div><div class="quantity" aria-label="Quantity"><button data-action="quantity" data-id="${esc(item.id)}" data-delta="-1" aria-label="Decrease ${esc(item.name)} quantity" ${item.quantity <= 1 ? "disabled" : ""}>−</button><span>${item.quantity}</span><button data-action="quantity" data-id="${esc(item.id)}" data-delta="1" aria-label="Increase ${esc(item.name)} quantity" ${item.quantity >= 99 ? "disabled" : ""}>+</button></div><div class="row-action">${o ? `<strong>${money(o.price * item.quantity)}</strong><button class="text-button" data-action="compare-item" data-id="${esc(item.id)}">Change ${icon("arrow")}</button>` : `<button class="button pick-button" data-action="compare-item" data-id="${esc(item.id)}">Pick product ${icon("arrow")}</button>`}</div><button class="remove-button" data-action="remove" data-id="${esc(item.id)}" aria-label="Remove ${esc(item.name)}">${icon("close")}</button></article>`;
   }
   function comparePage() {
     const active = state.items.find((i) => i.id === activeId);
@@ -276,30 +292,29 @@
       alternatives = offers.filter((o) => o.id !== selected?.id);
     return (
       heading(
-        "FIND YOUR KIND OF GOOD.",
-        "A better pick for every item.",
-        "Compare the details. Choose what works for you.",
+        "Compare prices",
+        "Search once and see what each of your stores charges.",
       ) +
-      `<div class="compare-search-card"><form id="compare-form" class="compare-form"><label>${icon("search")}<input name="query" aria-label="Search products" placeholder="Try eggs, fresh basil, or milk…" value="${esc(query)}" maxlength="100"></label><button class="button primary" type="submit">Find products ${icon("arrow")}</button></form><div class="compare-controls"><div class="store-filters">${activeStores().map((s) => `<button class="store-chip ${isOn(s.id) ? "on" : ""}" data-action="toggle-store" data-store="${s.id}" aria-pressed="${isOn(s.id)}">${storeBadge(s.id)} ${s.name}${isOn(s.id) ? icon("check") : ""}</button>`).join("")}</div><label class="sort-label">Sort by <select id="sort" aria-label="Sort products">${[["price", "Price: low to high"], ["price-desc", "Price: high to low"], ["unit", "Unit price: low to high"], ["name", "Name: A to Z"]].map(([value, label]) => `<option value="${value}" ${compareSort === value ? "selected" : ""}>${label}</option>`).join("")}</select></label></div></div>
+      `<div class="compare-search-card"><form id="compare-form" class="compare-form"><label>${icon("search")}<input name="query" aria-label="Search products" placeholder="Search eggs, fresh basil, milk…" value="${esc(query)}" maxlength="100"></label><button class="button primary" type="submit">Find products ${icon("arrow")}</button></form><div class="compare-controls"><div class="store-filters">${activeStores().map((s) => `<button class="store-chip ${isOn(s.id) ? "on" : ""}" data-action="toggle-store" data-store="${s.id}" aria-pressed="${isOn(s.id)}">${storeBadge(s.id)} ${s.name}${isOn(s.id) ? icon("check") : ""}</button>`).join("")}</div><label class="sort-label">Sort by <select id="sort" aria-label="Sort products">${[["price", "Price: low to high"], ["price-desc", "Price: high to low"], ["unit", "Unit price: low to high"], ["name", "Name: A to Z"]].map(([value, label]) => `<option value="${value}" ${compareSort === value ? "selected" : ""}>${label}</option>`).join("")}</select></label></div></div>
     ${active ? `<div class="active-request">${icon("list")} Picking for <strong>${esc(active.name)}</strong><span>· ${active.quantity} package${active.quantity > 1 ? "s" : ""}</span><button data-action="clear-active">Search whole catalog ${icon("close")}</button></div>` : ""}
     ${liveSection(active)}
     ${
       !activeStores().some((st) => !st.live)
         ? liveStatus
           ? ""
-          : `<div class="empty wide">${icon("search")}<h3>${enabledStores().length ? "Search for a product to see live prices." : "Turn on a store to start comparing."}</h3><p>${enabledStores().length ? `Results come from ${esc(enabledStores().map((id) => locationFor(id)?.name || storeFor(id).name).join(", "))}.` : "Choose your stores in the Stores tab."}</p>${enabledStores().length ? "" : `<button class="button secondary" data-action="navigate" data-view="stores">Choose stores ${icon("arrow")}</button>`}</div>`
+          : `<div class="empty wide">${icon("search")}<h3>${enabledStores().length ? "Search for a product to see live prices." : "Turn on a store to start comparing."}</h3><p>${enabledStores().length ? `Results come from ${esc(enabledStores().map((id) => locationFor(id)?.name || storeFor(id).name).join(", ").replace(/\.$/, ""))}.` : "Choose your stores in the Stores tab."}</p>${enabledStores().length ? "" : `<button class="button secondary" data-action="navigate" data-view="stores">Choose stores ${icon("arrow")}</button>`}</div>`
         : needsForm
-        ? `<section class="clarify-card"><span class="big-emoji">🌿</span><div><span class="eyebrow">A QUICK CHECK</span><h2>What kind of basil?</h2><p>Fresh herbs and dried spices serve different purposes. Let’s keep them separate.</p><div class="inline-actions"><button class="button primary" data-action="clarify" data-query="Fresh basil">Fresh basil</button><button class="button secondary" data-action="clarify" data-query="Dried basil">Dried basil</button></div></div></section>`
+        ? `<section class="clarify-card"><span class="big-emoji">🌿</span><div><h2>Fresh or dried basil?</h2><p>They're different products at different prices, so Store Scout compares them separately.</p><div class="inline-actions"><button class="button primary" data-action="clarify" data-query="Fresh basil">Fresh basil</button><button class="button secondary" data-action="clarify" data-query="Dried basil">Dried basil</button></div></div></section>`
         : `<div class="results-heading"><h2>${query ? `Relevant options for “${esc(query)}”` : "Find your next favorite"} <span class="count-bubble">${offers.length}</span></h2><span>In-store · sample offers</span></div>${current.length ? `<h3 class="match-group-heading">Your selected product</h3><div class="product-grid">${current.map((o) => productCard(o, active)).join("")}</div><h3 class="match-group-heading">Other relevant options · alternatives</h3>` : ""}<div class="product-grid">${alternatives.map((o) => productCard(o, active)).join("") || (current.length ? '<p class="no-alternatives">No other relevant sample products for this search.</p>' : `<div class="empty wide">${icon("search")}<h3>No matching sample products</h3><p>${!state.stores.length ? "Enable a store to see its sample products." : active ? `You are still choosing for ${esc(active.name)}. Search the whole catalog to find a different grocery and add it separately.` : "This sample catalog is limited. Try eggs, milk, fresh basil, avocados, or chicken."}</p><button class="button secondary" data-action="${active ? "clear-active" : "clear-query"}">${active ? "Search whole catalog" : "Browse sample catalog"}</button></div>`)}</div>`
     }
-    <div class="compare-explainer">${icon("spark")}<div><strong>Your choice comes first.</strong><p>Different brands are alternatives, not exact product matches. Store offers for the same product will be grouped when verified identifiers are available. Unit-price sorting groups compatible units.</p></div></div>${demo()}`
+    <div class="compare-explainer">${icon("spark")}<div><strong>How matching works</strong><p>A different brand is shown as an alternative, never as the same product. Offers will be grouped once stores share a verified product ID. Unit-price sorting only compares matching units, like per ounce with per ounce.</p></div></div>${demo()}`
     );
   }
   function liveCard(p, active) {
     const selected = active?.offerId === p.id;
     const promo = p.regularPrice && p.regularPrice > p.price;
     const unit = M.unitPrice(p);
-    return `<article class="${selected ? "live-selected" : ""}${p.image ? " has-photo" : ""}">${p.image ? `<div class="live-photo-frame">${photo(p.image, "live-photo")}</div>` : ""}<div class="live-info"><strong>${esc(p.name)}</strong><span class="live-store">${storeBadge(p.retailer)} ${esc(p.brand || storeFor(p.retailer)?.name || "")} · ${esc(p.size || "size unavailable")}</span><small>${p.deal ? `<span class="deal-tag">${esc(p.deal)}</span> ` : ""}${p.note ? esc(p.note) : `${promo ? "On sale · " : ""}${p.available === true ? "Fulfillment offered · shelf stock unverified" : "Shelf stock unverified"} · fetched ${esc(new Date(p.fetchedAt).toLocaleTimeString())}`}</small></div><div class="live-buy"><b>${money(p.price)}${p.size === "per lb" ? "<i>/lb</i>" : ""}${promo ? ` <s>${money(p.regularPrice)}</s>` : ""}${unit ? `<em>${money(unit.value)} / ${esc(unit.unit)}</em>` : ""}</b><button class="button ${selected ? "secondary" : "primary"}" data-action="select-live" data-live="${esc(p.id)}">${icon(selected ? "check" : "plus")} ${selected ? "Selected" : active ? "Choose" : "Add to list"}</button></div></article>`;
+    return `<article class="${selected ? "live-selected" : ""}${p.image ? " has-photo" : ""}">${p.image ? `<div class="live-photo-frame">${photo(p.image, "live-photo")}</div>` : ""}<div class="live-info"><strong>${esc(p.name)}</strong><span class="live-store">${storeBadge(p.retailer)} ${esc(p.brand || storeFor(p.retailer)?.name || "")} · ${esc(p.size || "size unavailable")}</span><small>${p.deal ? `<span class="deal-tag">${esc(p.deal)}</span> ` : ""}${p.note ? esc(p.note) : `${promo ? "On sale · " : ""}${p.available === true ? "Fulfillment offered · shelf stock unverified" : "Shelf stock unverified"} · fetched ${esc(new Date(p.fetchedAt).toLocaleTimeString())}`}</small></div><div class="live-buy"><b>${tagMoney(p.price)}${p.size === "per lb" ? "<i>/lb</i>" : ""}${promo ? ` <s>${money(p.regularPrice)}</s>` : ""}${unit ? `<em>${money(unit.value)} / ${esc(unit.unit)}</em>` : ""}</b><button class="button ${selected ? "secondary" : "primary"}" data-action="select-live" data-live="${esc(p.id)}">${icon(selected ? "check" : "plus")} ${selected ? "Selected" : active ? "Choose" : "Add to list"}</button></div></article>`;
   }
   function liveSection(active) {
     if (!liveStatus || !liveStores().some((s) => isOn(s.id))) return "";
@@ -406,12 +421,11 @@
       selected = state.items.filter((i) => offerFor(i));
     return (
       heading(
-        "LESS THINKING IN THE AISLES.",
-        "Let’s make it a good shop.",
-        "Your picks, organized by where you’re buying them.",
+        "Shopping trip",
+        "Your picks, grouped by store. Check items off as they go in the cart.",
         `<button class="button secondary" data-action="navigate" data-view="list">${icon("list")} Back to my list</button>`,
       ) +
-      `<section class="shopping-summary"><span class="stat-icon mint">${icon("shopping")}</span><div><h2>${sum.done === sum.selected && sum.selected ? "All picked up. Nicely done!" : "Your trip, at a glance."}</h2><p>${sum.done} of ${sum.selected} selected items picked up${pending.length ? ` · ${pending.length} still need a product` : ""}</p></div><strong>${money(sum.total)}<small>estimated total</small></strong><div class="progress-track"><span style="width:${sum.selected ? (sum.done / sum.selected) * 100 : 0}%"></span></div></section>
+      `<section class="shopping-summary"><span class="stat-icon mint">${icon("shopping")}</span><div><h2>${sum.done === sum.selected && sum.selected ? (pending.length ? "Every pick is in the cart." : "Everything is in the cart.") : "Trip progress"}</h2><p>${sum.selected ? `${sum.done} of ${sum.selected} item${sum.selected === 1 ? "" : "s"} in the cart` : "No products picked yet"}${pending.length ? ` · ${pending.length} still need${pending.length === 1 ? "s" : ""} a product` : ""}</p></div><strong>${tagMoney(sum.total)}<small>estimated total</small></strong><div class="progress-track"><span style="width:${sum.selected ? (sum.done / sum.selected) * 100 : 0}%"></span></div></section>
     <div class="shopping-columns">${
       activeStores()
         .map((s) => {
@@ -424,12 +438,12 @@
             })
             .join(
               "",
-            )}</div><div class="store-completion">${items.filter((i) => i.done).length} of ${items.length} picked up <span>In-store shopping</span></div></section>`;
+            )}</div><div class="store-completion">${items.filter((i) => i.done).length} of ${items.length} in the cart <span>In-store shopping</span></div></section>`;
         })
         .join("") ||
-      '<div class="empty wide"><h3>Your shopping trip starts with a pick.</h3><p>Choose products from your list to organize them here.</p><button class="button primary" data-action="navigate" data-view="compare">Find products</button></div>'
+      '<div class="empty wide"><h3>Nothing to shop for yet</h3><p>Pick a product for an item and it shows up here, under the store that sells it.</p><button class="button primary" data-action="navigate" data-view="compare">Pick products</button></div>'
     }</div>
-    ${pending.length ? `<section class="pending-panel"><span class="stat-icon peach">${icon("list")}</span><div><h3>A few choices before you go.</h3><p>${pending.map((i) => esc(i.name)).join(" · ")}</p></div><button class="button secondary" data-action="compare-item" data-id="${esc(pending[0].id)}">Finish picking ${icon("arrow")}</button></section>` : ""}${demo()}`
+    ${pending.length ? `<section class="pending-panel"><span class="stat-icon peach">${icon("list")}</span><div><h3>Still needs a product</h3><p>${pending.map((i) => esc(i.name)).join(" · ")}</p></div><button class="button secondary" data-action="compare-item" data-id="${esc(pending[0].id)}">Finish picking ${icon("arrow")}</button></section>` : ""}${demo()}`
     );
   }
   function locationList(store) {
@@ -454,7 +468,7 @@
       : live
         ? `<strong>No store chosen</strong><small>Using the nearest store to ${esc(shopZip())}</small>`
         : "<strong>Location search coming soon</strong><small>Available once live prices are connected</small>";
-    return `<article class="store-card"><div class="store-visual ${esc(s.id)}">${storeBadge(s.id)}<span>${s.pricing === "weekly-ad" ? "WEEKLY AD" : live ? "LIVE PRICES" : "SAMPLE PRICES"}</span></div><div class="store-card-body"><div class="store-name-line"><h2>${esc(s.name)}</h2><button class="toggle ${on ? "enabled" : ""}" role="switch" aria-checked="${on}" aria-label="Include ${esc(s.name)} in comparisons" data-action="toggle-store" data-store="${esc(s.id)}"><span></span></button></div><div class="store-location">${icon("pin")}<span>${where}</span>${loc ? `<button class="text-button" data-action="clear-location" data-store="${esc(s.id)}">Use nearest</button>` : ""}</div>${s.family?.length ? `<p class="store-family">Also covers ${esc(s.family.join(", "))}</p>` : ""}<div class="store-facts"><span>${icon("spark")} ${s.pricing === "weekly-ad" ? "Weekly ad prices" : live ? "Live prices" : "Sample prices"}</span><span>${s.pricing === "weekly-ad" ? "Updated each week" : live ? "Official retailer API" : `${samples} sample products`}</span></div>${live ? locationList(s) : ""}<button class="button secondary full" data-action="browse-store" data-store="${esc(s.id)}">${live ? "Search products" : "Browse sample products"} ${icon("arrow")}</button></div></article>`;
+    return `<article class="store-card"><div class="store-visual ${esc(s.id)}">${storeBadge(s.id)}</div><div class="store-card-body"><div class="store-name-line"><h2>${esc(s.name)}</h2><button class="toggle ${on ? "enabled" : ""}" role="switch" aria-checked="${on}" aria-label="Include ${esc(s.name)} in comparisons" data-action="toggle-store" data-store="${esc(s.id)}"><span></span></button></div><div class="store-location">${icon("pin")}<span>${where}</span>${loc ? `<button class="text-button" data-action="clear-location" data-store="${esc(s.id)}">Use nearest</button>` : ""}</div>${s.family?.length ? `<p class="store-family">Also covers ${esc(s.family.join(", "))}</p>` : ""}<div class="store-facts"><span>${icon("spark")} ${s.pricing === "weekly-ad" ? "Weekly ad prices" : live ? "Live prices" : "Sample prices"}</span><span>${s.pricing === "weekly-ad" ? "Updated each week" : live ? "Official retailer API" : `${samples} sample products`}</span></div>${live ? locationList(s) : ""}<button class="button secondary full" data-action="browse-store" data-store="${esc(s.id)}">${live ? "Search products" : "Browse sample products"} ${icon("arrow")}</button></div></article>`;
   }
   function storesPage() {
     const searchable = liveStores();
@@ -466,11 +480,10 @@
       : "";
     return (
       heading(
-        "YOUR NEIGHBORHOOD. YOUR CHOICES.",
-        "Familiar stores, smarter stops.",
-        "Choose the stores you shop and the exact location for each one.",
+        "Your stores",
+        "Choose which stores to compare and the exact location for each one.",
       ) +
-      `<section class="area-card"><span class="area-icon">${icon("pin")}</span><div><span class="eyebrow">FIND STORES NEAR YOU</span><h2>Shopping near <span>${esc(shopZip())}</span></h2><p>${intro}</p></div>${form}</section>${locationStatus ? `<p class="location-status" role="status">${esc(locationStatus)}</p>` : ""}<div class="results-heading"><h2>Your stores <span class="count-bubble">${enabledStores().length} enabled</span></h2><span>Choose stores to include in comparisons</span></div><div class="stores-grid">${activeStores().map(storeCard).join("")}</div>${comingSoon().length ? `<div class="results-heading"><h2>Coming soon <span class="count-bubble">${comingSoon().length}</span></h2><span>We’re working on connecting these stores</span></div><div class="soon-grid">${comingSoon().map((st) => `<article class="soon-card">${storeBadge(st.id)}<div><h3>${esc(st.name)}</h3><p>In progress · we’re working on official live prices and store locations.</p></div><span class="pill light">In progress</span></article>`).join("")}</div>` : ""}<section class="future-card">${icon("leaf")}<div><h3>More stores on the way.</h3><p>Each store is added once an official data source with real prices and locations is connected.</p></div></section>${demo()}`
+      `<section class="area-card"><span class="area-icon">${icon("pin")}</span><div><h2>Shopping near <span>${esc(shopZip())}</span></h2><p>${intro}</p></div>${form}</section>${locationStatus ? `<p class="location-status" role="status">${esc(locationStatus)}</p>` : ""}<div class="results-heading"><h2>Stores you compare <span class="count-bubble">${enabledStores().length} on</span></h2><span>Switch a store off to leave it out of comparisons</span></div><div class="stores-grid">${activeStores().map(storeCard).join("")}</div>${comingSoon().length ? `<div class="results-heading"><h2>Coming soon <span class="count-bubble">${comingSoon().length}</span></h2><span>Not connected yet</span></div><div class="soon-grid">${comingSoon().map((st) => `<article class="soon-card">${storeBadge(st.id)}<div><h3>${esc(st.name)}</h3><p>Waiting on an official source for live prices and store locations.</p></div></article>`).join("")}</div>` : ""}<section class="future-card">${icon("leaf")}<div><h3>More stores on the way</h3><p>A store is added once an official source for its real prices and locations is connected.</p></div></section>${demo()}`
     );
   }
   async function findLocations(zip) {
@@ -508,6 +521,13 @@
             stores: storesPage,
             import: ()=>window.ScoutImportUI.render(),
           }[view]();
+    const entering = view !== renderedView;
+    renderedView = view;
+    main.classList?.remove("view-enter");
+    if (entering && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      void main.offsetWidth;
+      main.classList?.add("view-enter");
+    }
     document.querySelector("#location-icon").innerHTML = icon("pin");
     const chosen = activeStores()
       .filter((st) => isOn(st.id))
@@ -579,6 +599,13 @@
       const data = new FormData(event.target);
       if (event.target.id === "compare-form") {
         compareQuery = String(data.get("query")).trim();
+        // A search that no longer names the item being picked (milk → peanuts)
+        // is a new search, so its results add to the list instead.
+        const picking = state.items.find((i) => i.id === activeId);
+        if (picking && compareQuery && !M.fitsItem(picking.name, { name: compareQuery })) {
+          activeId = null;
+          notify(`Searching “${compareQuery}” on its own. ${picking.name} still needs a product.`);
+        }
         liveProducts = [];
         liveStatus = "";
         render();
@@ -635,7 +662,7 @@
     if (action === "navigate") navigate(button.dataset.view);
     if (action === "add-dialog")
       openDialog(
-        `<span class="dialog-symbol">${icon("plus")}</span><span class="eyebrow">SOMETHING FOR YOUR NEXT SHOP</span><h2 id="dialog-title">What’s on your list?</h2><p>Start with a grocery. Pick your favorite product next.</p><form id="add-form"><label class="field-label" for="new-item">Grocery item</label><input class="dialog-input" id="new-item" name="grocery" placeholder="e.g. fresh basil" maxlength="100" required autofocus><button class="button primary full" type="submit">Add to my list ${icon("plus")}</button></form>`,
+        `<span class="dialog-symbol">${icon("plus")}</span><h2 id="dialog-title">Add an item</h2><p>Write it the way you would on a list. You'll pick the exact product next.</p><form id="add-form"><label class="field-label" for="new-item">Item</label><input class="dialog-input" id="new-item" name="grocery" placeholder="e.g. fresh basil" maxlength="100" required autofocus><button class="button primary full" type="submit">Add to list ${icon("plus")}</button></form>`,
       );
     if (action === "close-dialog") dialog.close();
     if (action === "sync") navigate("import");
@@ -791,6 +818,10 @@
       const live = product && M.cleanLive(product);
       if (!live || !isOn(live.retailer)) return;
       const active = state.items.find((i) => i.id === activeId);
+      if (active && !M.fitsItem(active.name, live)) {
+        notify(`That isn't a match for ${active.name.toLowerCase()}. Search for ${active.name.toLowerCase()} to pick it.`);
+        return;
+      }
       if (active) {
         active.offerId = live.id;
         active.live = live;
@@ -842,7 +873,7 @@
       const owner=Account.user()?.uid||null;
       if(owner!==importOwner){window.ScoutImportUI?.reset();importOwner=owner;}
       state = next;
-      window.ScoutTheme?.apply(Account.user() ? next.profile : null);
+      window.ScoutTheme?.apply(Account.user() ? { ...next.profile, ...Account.appearance?.() } : null);
       activeId = null;
       removed = null;
       compareQuery = "";

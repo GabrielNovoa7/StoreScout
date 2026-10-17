@@ -5,7 +5,7 @@
   const config=window.STORE_SCOUT_FIREBASE;
   const configured=!!(config?.enabled&&config.apiKey&&config.projectId&&config.authDomain&&config.appId);
   let provider=null,user=null,connection=configured?'connecting':'not-configured',mode='login';
-  let profileDraft=null;
+  let profileDraft=null,profileSaved=false,savedTimer=null;
   let sync=null,hooks=null,feedback='',isError=false,busy=false,timer=null,lastStatus='signed-out',pendingUser;
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const button=(action,label,cls='secondary')=>`<button class="button ${cls}" data-account-action="${action}">${label}</button>`;
@@ -66,7 +66,7 @@
   }
   function render(){
     const s=current(),selected=user?'Your account':mode==='signup'?'Create your account':mode==='reset'?'Reset your password':'Welcome back.';
-    if(!user&&configured&&connection==='connecting')return '<div class="page-heading"><div><div class="eyebrow">YOUR LIST. YOUR SPACE.</div><h1>Restoring your session…</h1><p role="status">Checking your sign-in before opening your list.</p></div></div>';
+    if(!user&&configured&&connection==='connecting')return '<div class="page-heading"><div><h1>Restoring your session…</h1><p role="status">Checking your sign-in before opening your list.</p></div></div>';
     let body='';
     if(user){
       body=`<div class="signed-in-identity"><span class="account-avatar">${esc((s.state?.profile?.name||user.email)?.charAt(0).toUpperCase()||'Y')}</span><div><strong>${esc(s.state?.profile?.name||user.email)}</strong><small>${esc(user.email)}</small><small>${user.emailVerified?'Email verified':'Email verification required'}</small></div></div>`;
@@ -76,7 +76,7 @@
       else{
         body+=`<div class="account-callout ${s.dirty?'warning':''}"><h3>${esc(label())}</h3><p>${s.status==='conflict'?'Another device changed the cloud list. Your unsaved changes are kept in memory. Download them before loading the newer cloud copy.':s.dirty?'Keep this page open until saving finishes. If a save failed, retry online.':'Your list is available when you sign into this same account on another device. Reopen the account or use Refresh cloud list to load later changes.'}</p><div class="account-actions">${s.dirty&&s.status!=='conflict'?button('retry-save','Save now','primary'):''}${button('reload',s.dirty?'Review cloud reload':'Refresh cloud list')}${button('export','Download my list')}${button('go-list','Go to my list','primary')}</div></div>`;
         const p=profileDraft||Core.cleanProfile(s.state.profile);
-        body+=`<form id="profile-form" class="account-form profile-form"><div><div class="eyebrow">MAKE IT YOURS</div><h2>Profile & appearance</h2><p>Your settings travel with your account. Save after making changes.</p></div><label for="profile-name">Display name</label><input id="profile-name" class="dialog-input" name="name" autocomplete="nickname" maxlength="60" value="${esc(p.name)}" placeholder="What should we call you?"><label for="profile-zip">Shopping ZIP code</label><input id="profile-zip" class="dialog-input" name="zip" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{5}" maxlength="5" required value="${esc(p.zip)}"><small>Used to find stores near you. Choose exact locations in the Stores tab.</small><fieldset><legend>Appearance</legend><div class="theme-options">${['light','dark','system'].map(mode=>`<label><input type="radio" name="mode" value="${mode}" ${p.mode===mode?'checked':''}>${mode.charAt(0).toUpperCase()+mode.slice(1)}</label>`).join('')}</div></fieldset><fieldset><legend>Accent color</legend><div class="accent-options">${['green','blue','purple','orange','pink'].map(accent=>`<label class="accent-choice" data-color="${accent}"><input type="radio" name="accent" value="${accent}" ${p.accent===accent?'checked':''}><span class="color-dot" aria-hidden="true"></span>${accent.charAt(0).toUpperCase()+accent.slice(1)}</label>`).join('')}</div></fieldset><p id="profile-status" role="status"></p><button class="button primary" type="submit">Save profile & appearance</button></form>`;
+        body+=`<form id="profile-form" class="account-form profile-form"><div><h2>Profile & appearance</h2><p>Appearance changes show right away. Save to keep them on your account.</p></div><label for="profile-name">Display name</label><input id="profile-name" class="dialog-input" name="name" autocomplete="nickname" maxlength="60" value="${esc(p.name)}" placeholder="What should we call you?"><label for="profile-zip">Shopping ZIP code</label><input id="profile-zip" class="dialog-input" name="zip" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{5}" maxlength="5" required value="${esc(p.zip)}"><small>Used to find stores near you. Choose exact locations in the Stores tab.</small><fieldset><legend>Appearance</legend><div class="theme-options">${['light','dark','system'].map(mode=>`<label><input type="radio" name="mode" value="${mode}" ${p.mode===mode?'checked':''}>${mode.charAt(0).toUpperCase()+mode.slice(1)}</label>`).join('')}</div></fieldset><fieldset><legend>Accent color</legend><div class="accent-options">${['green','blue','purple','orange','pink'].map(accent=>`<label class="accent-choice" data-color="${accent}"><input type="radio" name="accent" value="${accent}" ${p.accent===accent?'checked':''}><span class="color-dot" aria-hidden="true"></span>${accent.charAt(0).toUpperCase()+accent.slice(1)}</label>`).join('')}</div></fieldset><p id="profile-status" class="${profileSaved?'is-saved':''}" role="status">${profileSaved?'Changes saved.':''}</p><button class="button primary" type="submit">Save changes</button></form>`;
         body+=`<div class="account-import"><h3>Bring your guest list with you.</h3><p>Copy groceries saved in this browser into this account. This uploads that guest list to Firebase. It leaves the local guest copy intact.</p>${button('import','Copy guest list into account')}</div>`;
       }
       body+=`<div class="account-actions end">${button('logout','Sign out')}</div>`;
@@ -91,7 +91,7 @@
       ${!reset?button('mode-reset','Forgot your password?','text-button'):button('mode-login','Back to sign in','text-button')}
       <div class="account-privacy"><strong>Your password stays with Firebase Authentication.</strong><p>Store Scout never saves your password. Firebase securely manages your sign-in state for this tab, so refreshing keeps you signed in. Sign out when finished on a shared device. Closing the tab normally ends the session; browser session-restore features may restore it. Your lists and settings are stored in your account, with no persistent offline list cache.</p></div>`;
     }
-    return `<div class="page-heading"><div><div class="eyebrow">YOUR LIST. YOUR SPACE.</div><h1>${selected}</h1><p>One account, wherever your next grocery run begins.</p></div></div><section class="account-panel">${body}${user&&feedback?`<p role="status" class="account-form-status ${isError?'error':''}">${esc(feedback)}</p>`:''}</section><p class="account-footnote">Guest lists are local to this browser. Account lists are stored online. Signing out hides the account list and returns to the guest workspace.</p>`;
+    return `<div class="page-heading"><div><h1>${selected}</h1><p>One account, wherever your next grocery run begins.</p></div></div><section class="account-panel">${body}${user&&feedback?`<p role="status" class="account-form-status ${isError?'error':''}">${esc(feedback)}</p>`:''}</section><p class="account-footnote">Guest lists are local to this browser. Account lists are stored online. Signing out hides the account list and returns to the guest workspace.</p>`;
   }
   async function submit(event){
     event.preventDefault();if(!provider||busy)return;
@@ -147,11 +147,25 @@
     if(event.target.id==='account-form')void submit(event);
     if(event.target.id==='profile-form'){
       event.preventDefault();const status=document.querySelector('#profile-status');
-      try{const data=new FormData(event.target),profile=Core.cleanProfile(Object.fromEntries(data));const next={...hooks.getState(),profile};profileDraft=null;save(next);hooks.onState(next);refresh();}
+      try{const data=new FormData(event.target),profile=Core.cleanProfile(Object.fromEntries(data));const next={...hooks.getState(),profile};profileDraft=null;save(next);hooks.onState(next);profileSaved=true;clearTimeout(savedTimer);savedTimer=setTimeout(()=>{profileSaved=false;refresh();},4000);refresh();}
       catch(error){status.textContent=error.message;}
     }
   });
-  const captureProfile=event=>{const form=event.target.closest?.('#profile-form');if(form)profileDraft=Object.fromEntries(new FormData(form));};
+  // Light/dark and accent preview on click; Save keeps them on the account.
+  const appearance=()=>Object.fromEntries(['mode','accent'].filter(k=>profileDraft?.[k]).map(k=>[k,profileDraft[k]]));
+  const savedProfile=()=>{try{return Core.cleanProfile(current().state?.profile);}catch{return Core.cleanProfile();}};
+  const captureProfile=event=>{
+    const form=event.target.closest?.('#profile-form');if(!form)return;
+    profileDraft=Object.fromEntries(new FormData(form));
+    if(profileSaved){profileSaved=false;clearTimeout(savedTimer);const status=form.querySelector('#profile-status');if(status){status.textContent='';status.className='';}}
+    if(event.target.name==='mode'||event.target.name==='accent')window.ScoutTheme?.apply({...savedProfile(),...appearance()});
+  };
+  // Leaving Account without saving puts the saved look back.
+  window.addEventListener('hashchange',()=>{
+    if(location.hash==='#account'||!profileDraft)return;
+    const saved=savedProfile();profileDraft={...profileDraft,mode:saved.mode,accent:saved.accent};
+    window.ScoutTheme?.apply(saved);
+  });
   document.addEventListener('change',captureProfile);
   document.addEventListener('input',event=>{
     captureProfile(event);
@@ -167,5 +181,5 @@
   });
   document.addEventListener('click',event=>{const target=event.target.closest('[data-account-action]');if(target)void act(target.dataset.accountAction);});
   window.addEventListener('beforeunload',event=>{if(current().dirty||profileDraft){event.preventDefault();event.returnValue='';}});
-  window.ScoutAccount={init,save,render,label,importState,requestToken:()=>provider.idToken(),ready:()=>!!user?.emailVerified&&current().status==='ready'&&!current().dirty,user:()=>user,locked:()=>configured&&connection==='connecting'||!!user&&(!user.emailVerified||!current().state),dirty:()=>current().dirty};
+  window.ScoutAccount={init,appearance,save,render,label,importState,requestToken:()=>provider.idToken(),ready:()=>!!user?.emailVerified&&current().status==='ready'&&!current().dirty,user:()=>user,locked:()=>configured&&connection==='connecting'||!!user&&(!user.emailVerified||!current().state),dirty:()=>current().dirty};
 })();

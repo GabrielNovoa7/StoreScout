@@ -18,3 +18,21 @@ test('profile drafts and focus survive unrelated background sync status changes'
   handlers.input({target:input});window.ScoutAccount.save(C.empty());assert.ok(rendered.includes('value="New draft"'));assert.ok(rendered.includes('value="77"'));assert.ok(focused>0);
   await change(null);assert.ok(!window.ScoutAccount.render().includes('New draft'));
 });
+test('appearance previews on click, save confirms, and leaving unsaved restores the saved look',async()=>{
+  const handlers={},winHandlers={},applied=[];let rendered='',change;
+  const form={querySelector:()=>null},radio={name:'mode',value:'dark',closest:()=>form};
+  const document={activeElement:null,querySelector:()=>null,addEventListener:(type,cb)=>handlers[type]=cb};
+  const location={hash:'#account'};
+  const window={ScoutAccountCore:C,STORE_SCOUT_FIREBASE:{enabled:true,apiKey:'mock',projectId:'mock',authDomain:'mock',appId:'mock'},addEventListener:(type,cb)=>winHandlers[type]=cb,ScoutTheme:{apply:p=>applied.push(p)},ScoutFirebase:{connect:async(c,cb)=>{change=cb;return {adapter:{load:async()=>null,write:async()=>1}};}}};
+  class FormData{constructor(){return new Map([['name',''],['zip','77019'],['mode','dark'],['accent','pink']]);}}
+  vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../account-ui.js'),'utf8'),{window,document,location,FormData,clearTimeout(){},setTimeout:()=>1});
+  let state=C.empty();
+  await window.ScoutAccount.init({getGuest:()=>C.empty(),getState:()=>state,onState:next=>state=next,onStatus:()=>rendered=window.ScoutAccount.render()});await change({uid:'a',email:'demo@example.com',emailVerified:true});
+  handlers.change({target:radio});
+  assert.equal(applied.at(-1).mode,'dark');assert.equal(applied.at(-1).accent,'pink');
+  location.hash='#list';winHandlers.hashchange();
+  assert.equal(applied.at(-1).mode,'light');assert.equal(applied.at(-1).accent,'green');
+  location.hash='#account';handlers.change({target:radio});
+  handlers.submit({preventDefault(){},target:{id:'profile-form'}});
+  assert.ok(rendered.includes('Changes saved.'));assert.equal(state.profile.mode,'dark');assert.equal(state.profile.accent,'pink');
+});

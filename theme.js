@@ -13,7 +13,7 @@
     root.style.setProperty('--accent-hue',hue);
     root.style.setProperty('--green',colors[selected.accent][dark?1:0]);
     root.style.setProperty('--deep',colors[selected.accent][dark?1:0]);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'hsl('+hue+' 35% 14%)':'hsl('+hue+' 32% 90%)');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'hsl('+hue+' 35% 14%)':'hsl(40 40% 94%)');
   }
   media.addEventListener('change',()=>{if(selected.mode==='system')apply(selected);});
   window.ScoutTheme={apply};apply(null);

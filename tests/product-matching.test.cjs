@@ -44,7 +44,7 @@ function uiHarness(items,{retailers,photos,stores=['heb','walmart'],realStatus=f
  return {click,search,findStores,change,state:()=>hooks.getState(),html:()=>get('#main').innerHTML};
 }
 test('changing a Compare search cannot bind beef to a fish-oil request',()=>{
- const h=uiHarness([{id:'fish',name:'Fish oil pills',quantity:2,offerId:null,done:false}]);h.click('compare-item',{id:'fish'});h.search('ground beef');assert.ok(!h.html().includes('data-offer="beef-w"'));h.click('select-offer',{offer:'beef-w'});assert.equal(h.state().items[0].offerId,null);assert.equal(h.state().items[0].name,'Fish oil pills');
+ const h=uiHarness([{id:'fish',name:'Fish oil pills',quantity:2,offerId:null,done:false}]);h.click('compare-item',{id:'fish'});h.search('ground beef');assert.ok(!h.html().includes('Picking for'));h.click('select-offer',{offer:'beef-w'});assert.equal(h.state().items[0].offerId,null);assert.equal(h.state().items[0].name,'Fish oil pills');assert.equal(h.state().items[1].offerId,'beef-w');
 });
 test('explicit basil clarification updates the grocery before accepting a product',()=>{
  const h=uiHarness([{id:'herb',name:'Basil',quantity:2,offerId:null,done:false}]);h.click('compare-item',{id:'herb'});h.click('clarify',{query:'Fresh basil'});h.click('select-offer',{offer:'basil'});assert.equal(h.state().items[0].name,'Fresh basil');assert.equal(h.state().items[0].quantity,2);assert.equal(h.state().items[0].offerId,'basil');assert.equal(h.state().preferences['fresh basil'],'basil');
@@ -60,8 +60,8 @@ test('an explicitly named egg variant does not match another variant',()=>{
  assert.equal(M.canSelect('Large brown eggs','eggs'),true);
  assert.equal(M.canSelect('H-E-B Whole milk','milk-w'),false);
 });
-test('whole-catalog search preserves bananas query and keeps pesto separate',()=>{
- const h=uiHarness([{id:'pesto',name:'Pesto Sauce',quantity:1,offerId:null,done:false}]);h.click('compare-item',{id:'pesto'});h.search('yellow Bananas');assert.ok(h.html().includes('Search whole catalog'));assert.ok(!h.html().includes('data-offer="banana"'));h.click('clear-active');assert.ok(h.html().includes('value="yellow Bananas"'));assert.ok(h.html().includes('data-offer="banana"'));assert.ok(!h.html().includes('Picking for'));h.click('select-offer',{offer:'banana'});assert.equal(h.state().items.length,2);assert.equal(h.state().items[0].offerId,null);assert.equal(h.state().items[0].name,'Pesto Sauce');assert.equal(h.state().items[1].offerId,'banana');
+test('a search for something else leaves pesto picking and keeps the bananas query and keeps pesto separate',()=>{
+ const h=uiHarness([{id:'pesto',name:'Pesto Sauce',quantity:1,offerId:null,done:false}]);h.click('compare-item',{id:'pesto'});h.search('yellow Bananas');assert.ok(h.html().includes('value="yellow Bananas"'));assert.ok(h.html().includes('data-offer="banana"'));assert.ok(!h.html().includes('Picking for'));h.click('select-offer',{offer:'banana'});assert.equal(h.state().items.length,2);assert.equal(h.state().items[0].offerId,null);assert.equal(h.state().items[0].name,'Pesto Sauce');assert.equal(h.state().items[1].offerId,'banana');
 });
 
 test('Kroger selection survives account serialization and renders a live store card',()=>{
@@ -161,7 +161,7 @@ test('coming-soon stores are hidden from comparisons and shopping but keep saved
  assert.match(h.html(),/Search for a product to see live prices/);
  h.click('navigate',{view:'shopping'});
  assert.match(h.html(),/Kroger · 1 gal · Qty 1/);assert.doesNotMatch(h.html(),/<h2>(Walmart|H-E-B)<\/h2>/);
- assert.match(h.html(),/1 still need a product/);
+ assert.match(h.html(),/1 still needs a product/);
  h.click('navigate',{view:'stores'});
  assert.match(h.html(),/Coming soon/);assert.match(h.html(),/H-E-B<\/h3>/);assert.match(h.html(),/Walmart<\/h3>/);assert.doesNotMatch(h.html(),/Sellers Bros\.<\/h3>/);assert.match(h.html(),/<h2>Sellers Bros\.<\/h2>/);assert.match(h.html(),/Also covers Ralphs/);
  h.click('toggle-store',{store:'heb'});assert.ok(h.state().stores.includes('heb'));
@@ -228,4 +228,36 @@ test('live results show best matches first and fold related items behind a toggl
  h.click('toggle-related');
  assert.deepEqual(order(h.html()),['4','2','3','1']);
  assert.match(h.html(),/Hide 2 related items/);
+});
+
+test('an item fits only products that name all of its important words',()=>{
+ assert.equal(M.fitsItem('Milk',{name:'Kroger® 2% Reduced Fat Milk Gallon'}),true);
+ assert.equal(M.fitsItem('Milk',{name:'peanuts'}),false);
+ assert.equal(M.fitsItem('Gluten free tortillas',{name:'Mission Gluten Free Soft Taco Tortillas, 6 ct'}),true);
+ assert.equal(M.fitsItem('Gluten free tortillas',{name:'tortilla'}),false);
+ assert.equal(M.fitsItem('Gluten free tortillas',{name:'Mission Flour Tortillas'}),false);
+ assert.equal(M.fitsItem('Eggs, 12 count',{name:'Large White Eggs'}),true);
+ assert.equal(M.fitsItem('Oreo cookies',{name:'Chocolate Sandwich Cookies',brand:'Oreo'}),true);
+});
+
+const krogerPeanuts={...krogerMilk,id:'kroger:0001111000001:03400355',productId:'0001111000001',upc:'0001111000001',name:'Kroger Dry Roasted Peanuts',size:'16 oz',price:2.49,regularPrice:2.49};
+test('searching peanuts while picking milk adds peanuts as their own item',async()=>{
+ const h=uiHarness([{id:'milk',name:'Milk',quantity:1,offerId:null,done:false}],{retailers:fakeRetailers([krogerPeanuts]),stores:['kroger','heb','walmart']});
+ h.click('compare-item',{id:'milk'});await settle();
+ h.search('peanuts');await settle();
+ assert.ok(!h.html().includes('Picking for'));
+ h.click('select-live',{live:krogerPeanuts.id});
+ assert.equal(h.state().items[0].name,'Milk');assert.equal(h.state().items[0].offerId,null);
+ assert.equal(h.state().items[1].offerId,krogerPeanuts.id);
+});
+test('dropping "gluten free" from the search stops picking for gluten-free tortillas',async()=>{
+ const flour={...krogerPeanuts,id:'kroger:0001111000002:03400355',productId:'0001111000002',upc:'0001111000002',name:'Kroger Flour Tortillas',size:'10 ct'};
+ const h=uiHarness([{id:'gf',name:'Gluten free tortillas',quantity:1,offerId:null,done:false}],{retailers:fakeRetailers([flour]),stores:['kroger','heb','walmart']});
+ h.click('compare-item',{id:'gf'});await settle();
+ h.click('select-live',{live:flour.id});
+ assert.equal(h.state().items[0].offerId,null);assert.equal(h.state().items.length,1);
+ h.search('tortilla');await settle();
+ assert.ok(!h.html().includes('Picking for'));
+ h.click('select-live',{live:flour.id});
+ assert.equal(h.state().items[0].offerId,null);assert.equal(h.state().items[1].offerId,flour.id);
 });

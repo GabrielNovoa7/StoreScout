@@ -450,6 +450,18 @@
     if (terms.length === 1 && PARTS.has(noun) && i >= 0 && i === words.length - 2) return 2;
     return 1;
   }
+  // A product fits a list item when it names every important word of the
+  // item ("Gluten Free Tortillas" fits "gluten free tortilla"; plain
+  // "Flour Tortillas" does not). Sizes, counts and filler words don't count.
+  const FILLER = new Set(["and", "of", "the", "with", "for", "a", "an", "or", "in", "w"]);
+  function fitsItem(itemName, product) {
+    const need = nameWords(itemName).filter(
+      (w) => w.length > 1 && !FILLER.has(w) && !TRAILING.has(w) && !/^\d/.test(w),
+    );
+    if (!need.length) return true;
+    const have = new Set([...nameWords(product?.name), ...nameWords(product?.brand)]);
+    return need.every((w) => have.has(w));
+  }
   function sortLive(products, mode) {
     const list = [...products];
     const byName = (a, b) => String(a.name).localeCompare(String(b.name));
@@ -633,6 +645,7 @@
     unitPrice,
     sortLive,
     relevance,
+    fitsItem,
     cleanLocations,
     cleanSelection,
     cleanPreferences,

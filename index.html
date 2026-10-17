@@ -10,14 +10,21 @@
     <meta name="theme-color" content="#174e43" />
     <meta
       name="description"
-      content="Your grocery list. A little smarter. Compare products and plan your next grocery trip with Store Scout."
+      content="Compare grocery prices across Kroger, Whole Foods and Sellers Bros., then shop your list store by store."
     />
-    <title>Store Scout — Your list, a little smarter</title>
+    <title>Store Scout · Grocery prices across your stores</title>
     <link rel="icon" type="image/svg+xml" href="icon.svg" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="account.css" />
     <link rel="stylesheet" href="theme.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..900&display=swap"
+    />
+    <link rel="stylesheet" href="redesign.css" />
     <script defer src="theme.js"></script>
     <script defer src="model.js"></script>
     <script defer src="firebase-config.js"></script>
@@ -40,11 +47,9 @@
         ><span class="brand-icon"
           ><img src="icon.svg" alt="" width="38" height="38" /></span
         ><span
-          >store<span class="brand-light">scout</span
-          ><small>A LITTLE SMARTER.</small></span
+          >store<span class="brand-light">scout</span></span
         ></a
       >
-      <p class="nav-label">YOUR EVERYDAY SHOP</p>
       <nav id="desktop-nav" aria-label="Main navigation"></nav>
       <div class="sidebar-note">
         <strong>Your stores</strong>
@@ -66,7 +71,6 @@
           ></a
         >
         <div class="breadcrumb">
-          Your grocery companion <span>/</span>
           <strong id="breadcrumb">My List</strong>
         </div>
         <button
@@ -86,8 +90,8 @@
       </header>
       <main id="main" tabindex="-1"></main>
       <footer class="page-footer">
-        <span>Made for your everyday groceries.</span
-        ><span><i></i> Live prices where available <b>·</b> Shelf prices may vary</span>
+        <span>Store Scout</span
+        ><span>Prices come from store data and can differ on the shelf.</span>
       </footer>
     </div>
     <nav
