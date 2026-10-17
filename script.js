@@ -94,7 +94,8 @@
   const enabledStores = () => state.stores.filter(isActive);
   const offerFor = (item) => {
     const o = M.selectedOffer(item);
-    return o && isActive(o.storeId) ? o : null;
+    // Sample-catalog picks only stand in for stores without live prices.
+    return o && isActive(o.storeId) && (o.live || !storeFor(o.storeId)?.live) ? o : null;
   };
   const summarize = (items) => {
     const valid = items.filter((i) => offerFor(i));
@@ -109,6 +110,11 @@
     store?.domain
       ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(store.domain)}&sz=128`
       : "";
+  // Green pulsing dot for stores that are live and switched on; grey otherwise.
+  const storeStatus = (s) => {
+    const active = !!s && isOn(s.id) && s.live && (Retailers?.available?.(s.id) ?? true);
+    return `<span class="store-status ${active ? "is-active" : ""}"><span class="status-dot" aria-hidden="true"></span>${active ? "Active" : "Not active"}</span>`;
+  };
   const storeBadge = (id) => {
     const store = storeFor(id);
     const logo = logoUrl(store);
@@ -246,7 +252,7 @@
         `<button class="button primary" data-action="add-dialog">${icon("plus")} Add an item</button>`,
       ) +
       `${tripTag(summary, pending)}
-    <div class="list-layout"><section class="list-panel"><div class="section-heading"><div><h2>On the list <span class="count-bubble">${state.items.length}</span></h2></div><button class="icon-button" data-action="add-dialog" aria-label="Add grocery">${icon("plus")}</button></div>
+    <div class="list-layout"><section class="list-panel"><div class="section-heading"><div><h2>On the list <span class="count-bubble">${state.items.length}</span></h2></div><div class="section-actions">${state.items.length ? '<button class="text-button clear-list" data-action="clear-list">Clear list</button>' : ""}<button class="icon-button" data-action="add-dialog" aria-label="Add grocery">${icon("plus")}</button></div></div>
     <div class="list-toolbar"><div class="tabs" aria-label="Filter list">${[
       ["all", "All"],
       ["pending", "To pick"],
@@ -468,7 +474,7 @@
       : live
         ? `<strong>No store chosen</strong><small>Using the nearest store to ${esc(shopZip())}</small>`
         : "<strong>Location search coming soon</strong><small>Available once live prices are connected</small>";
-    return `<article class="store-card"><div class="store-visual ${esc(s.id)}">${storeBadge(s.id)}</div><div class="store-card-body"><div class="store-name-line"><h2>${esc(s.name)}</h2><button class="toggle ${on ? "enabled" : ""}" role="switch" aria-checked="${on}" aria-label="Include ${esc(s.name)} in comparisons" data-action="toggle-store" data-store="${esc(s.id)}"><span></span></button></div><div class="store-location">${icon("pin")}<span>${where}</span>${loc ? `<button class="text-button" data-action="clear-location" data-store="${esc(s.id)}">Use nearest</button>` : ""}</div>${s.family?.length ? `<p class="store-family">Also covers ${esc(s.family.join(", "))}</p>` : ""}<div class="store-facts"><span>${icon("spark")} ${s.pricing === "weekly-ad" ? "Weekly ad prices" : live ? "Live prices" : "Sample prices"}</span><span>${s.pricing === "weekly-ad" ? "Updated each week" : live ? "Official retailer API" : `${samples} sample products`}</span></div>${live ? locationList(s) : ""}<button class="button secondary full" data-action="browse-store" data-store="${esc(s.id)}">${live ? "Search products" : "Browse sample products"} ${icon("arrow")}</button></div></article>`;
+    return `<article class="store-card"><div class="store-visual ${esc(s.id)}">${storeBadge(s.id)}</div><div class="store-card-body"><div class="store-name-line"><h2>${esc(s.name)}</h2>${storeStatus(s)}<button class="toggle ${on ? "enabled" : ""}" role="switch" aria-checked="${on}" aria-label="Include ${esc(s.name)} in comparisons" data-action="toggle-store" data-store="${esc(s.id)}"><span></span></button></div><div class="store-location">${icon("pin")}<span>${where}${loc ? `<button class="text-button use-nearest" data-action="clear-location" data-store="${esc(s.id)}">Use nearest</button>` : ""}</span></div><div class="store-facts"><span>${icon("spark")} ${s.pricing === "weekly-ad" ? "Weekly ad prices" : live ? "Live prices" : "Sample prices"}</span><span>${s.pricing === "weekly-ad" ? "Updated each week" : live ? "Official retailer API" : `${samples} sample products`}</span></div>${s.family?.length ? `<p class="store-family">Also covers ${esc(s.family.join(", "))}</p>` : ""}${live && locationResults[s.id] ? `<div class="nearby-stores"><p class="nearby-label">Nearby stores</p>${locationList(s)}</div>` : ""}<button class="button secondary full" data-action="browse-store" data-store="${esc(s.id)}">${live ? "Search products" : "Browse sample products"} ${icon("arrow")}</button></div></article>`;
   }
   function storesPage() {
     const searchable = liveStores();
@@ -483,7 +489,7 @@
         "Your stores",
         "Choose which stores to compare and the exact location for each one.",
       ) +
-      `<section class="area-card"><span class="area-icon">${icon("pin")}</span><div><h2>Shopping near <span>${esc(shopZip())}</span></h2><p>${intro}</p></div>${form}</section>${locationStatus ? `<p class="location-status" role="status">${esc(locationStatus)}</p>` : ""}<div class="results-heading"><h2>Stores you compare <span class="count-bubble">${enabledStores().length} on</span></h2><span>Switch a store off to leave it out of comparisons</span></div><div class="stores-grid">${activeStores().map(storeCard).join("")}</div>${comingSoon().length ? `<div class="results-heading"><h2>Coming soon <span class="count-bubble">${comingSoon().length}</span></h2><span>Not connected yet</span></div><div class="soon-grid">${comingSoon().map((st) => `<article class="soon-card">${storeBadge(st.id)}<div><h3>${esc(st.name)}</h3><p>Waiting on an official source for live prices and store locations.</p></div></article>`).join("")}</div>` : ""}<section class="future-card">${icon("leaf")}<div><h3>More stores on the way</h3><p>A store is added once an official source for its real prices and locations is connected.</p></div></section>${demo()}`
+      `<section class="area-card"><span class="area-icon">${icon("pin")}</span><div><h2>Shopping near <span>${esc(shopZip())}</span></h2><p>${intro}</p></div>${form}</section>${locationStatus ? `<p class="location-status" role="status">${esc(locationStatus)}</p>` : ""}<div class="results-heading"><h2>Stores you compare <span class="count-bubble">${enabledStores().length} on</span></h2><span>Switch a store off to leave it out of comparisons</span></div><div class="stores-grid">${activeStores().map(storeCard).join("")}</div>${comingSoon().length ? `<div class="results-heading"><h2>Coming soon <span class="count-bubble">${comingSoon().length}</span></h2><span>Not connected yet</span></div><div class="soon-grid">${comingSoon().map((st) => `<article class="soon-card">${storeBadge(st.id)}<div><h3>${esc(st.name)}</h3>${storeStatus(st)}<p>Waiting on an official source for live prices and store locations.</p></div></article>`).join("")}</div>` : ""}<section class="future-card">${icon("leaf")}<div><h3>More stores on the way</h3><p>A store is added once an official source for its real prices and locations is connected.</p></div></section>${demo()}`
     );
   }
   async function findLocations(zip) {
@@ -529,13 +535,19 @@
       main.classList?.add("view-enter");
     }
     document.querySelector("#location-icon").innerHTML = icon("pin");
-    const chosen = activeStores()
-      .filter((st) => isOn(st.id))
-      .map((st) => locationFor(st.id)?.name || st.name);
+    const enabled = activeStores().filter((st) => isOn(st.id));
     const label = document.querySelector("#location-label");
     if (label) label.textContent = `Near ${shopZip()}`;
     const sidebar = document.querySelector("#sidebar-stores");
-    if (sidebar) sidebar.textContent = chosen.length ? chosen.join(" · ") : "No stores enabled";
+    if (sidebar)
+      sidebar.innerHTML = enabled.length
+        ? `<ul class="sidebar-store-list">${enabled
+            .map((st) => {
+              const place = (locationFor(st.id)?.name || "").replace(new RegExp(`^${st.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*-\\s*`, "i"), "");
+              return `<li>${storeStatus(st)}<span><strong>${esc(st.name)}</strong>${place ? `<small>${esc(place)}</small>` : ""}</span></li>`;
+            })
+            .join("")}</ul>`
+        : "No stores enabled";
     updateAccountChrome();
     renderedUid = Account.user()?.uid || null;
     renderedLocked = Account.locked();
@@ -688,6 +700,21 @@
       save();
       render();
       notify(`${item.name} removed.`, true);
+    }
+    if (action === "clear-list" && state.items.length) {
+      removed = { items: state.items };
+      state.items = [];
+      activeId = null;
+      save();
+      render();
+      notify("List cleared.", true);
+    }
+    if (action === "undo" && removed?.items) {
+      state.items = [...removed.items, ...state.items].slice(0, 200);
+      removed = null;
+      save();
+      render();
+      notify("List restored.");
     }
     if (action === "undo" && removed) {
       state.items.splice(removed.index, 0, removed.item);

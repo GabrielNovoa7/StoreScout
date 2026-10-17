@@ -9,7 +9,10 @@
       family: ["Ralphs", "King Soopers", "Fred Meyer", "Fry's", "Harris Teeter", "Smith's", "QFC", "Dillons", "Mariano's", "Food 4 Less"] },
     { id: "wholefoods", name: "Whole Foods", label: "Whole Foods", short: "WF", color: "#00674b", domain: "wholefoodsmarket.com", live: true, status: "active" },
     { id: "heb", name: "H-E-B", label: "H-E-B", short: "H", color: "#df4c4c", domain: "heb.com", live: false, status: "coming-soon" },
-    { id: "walmart", name: "Walmart", label: "Walmart", short: "W", color: "#3274bb", domain: "walmart.com", live: false, status: "coming-soon" },
+    { id: "sams", name: "Sam's Club", label: "Sam's Club", short: "SC", color: "#0067a0", domain: "samsclub.com", live: false, status: "coming-soon" },
+    { id: "costco", name: "Costco", label: "Costco", short: "C", color: "#e31837", domain: "costco.com", live: false, status: "coming-soon" },
+    { id: "aldi", name: "Aldi", label: "Aldi", short: "A", color: "#00005f", domain: "aldi.us", live: false, status: "coming-soon" },
+    { id: "walmart", name: "Walmart", label: "Walmart", short: "W", color: "#3274bb", domain: "walmart.com", live: true, status: "active" },
     { id: "sellers", name: "Sellers Bros.", label: "Sellers Bros.", short: "S", color: "#c8102e", domain: "sellersbros.com", live: true, status: "active", pricing: "weekly-ad" },
   ];
   const liveStoreIds = () => stores.filter((s) => s.live).map((s) => s.id);

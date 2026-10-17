@@ -163,7 +163,7 @@ test('coming-soon stores are hidden from comparisons and shopping but keep saved
  assert.match(h.html(),/Kroger · 1 gal · Qty 1/);assert.doesNotMatch(h.html(),/<h2>(Walmart|H-E-B)<\/h2>/);
  assert.match(h.html(),/1 still needs a product/);
  h.click('navigate',{view:'stores'});
- assert.match(h.html(),/Coming soon/);assert.match(h.html(),/H-E-B<\/h3>/);assert.match(h.html(),/Walmart<\/h3>/);assert.doesNotMatch(h.html(),/Sellers Bros\.<\/h3>/);assert.match(h.html(),/<h2>Sellers Bros\.<\/h2>/);assert.match(h.html(),/Also covers Ralphs/);
+ assert.match(h.html(),/Coming soon/);assert.match(h.html(),/H-E-B<\/h3>/);assert.doesNotMatch(h.html(),/Walmart<\/h3>/);assert.match(h.html(),/<h2>Walmart<\/h2>/);assert.doesNotMatch(h.html(),/Sellers Bros\.<\/h3>/);assert.match(h.html(),/<h2>Sellers Bros\.<\/h2>/);assert.match(h.html(),/Also covers Ralphs/);
  h.click('toggle-store',{store:'heb'});assert.ok(h.state().stores.includes('heb'));
  assert.equal(h.state().items[0].offerId,'eggs-w');
 });
@@ -260,4 +260,27 @@ test('dropping "gluten free" from the search stops picking for gluten-free torti
  assert.ok(!h.html().includes('Picking for'));
  h.click('select-live',{live:flour.id});
  assert.equal(h.state().items[0].offerId,null);assert.equal(h.state().items[1].offerId,flour.id);
+});
+
+test('old sample Walmart picks stay hidden now that Walmart has live prices',()=>{
+ const h=uiHarness([{id:'eggs',name:'Eggs',quantity:1,offerId:'eggs-w',done:false}],{stores:['walmart']});
+ h.click('navigate',{view:'shopping'});
+ assert.doesNotMatch(h.html(),/<h2>Walmart<\/h2>/);assert.equal(h.state().items[0].offerId,'eggs-w');
+});
+test('Clear list empties the list and Undo brings every item back',()=>{
+ const h=uiHarness([{id:'a',name:'Milk',quantity:1,offerId:null,done:false},{id:'b',name:'Eggs',quantity:2,offerId:null,done:false}]);
+ assert.match(h.html(),/data-action="clear-list"/);
+ h.click('clear-list');assert.equal(h.state().items.length,0);assert.doesNotMatch(h.html(),/data-action="clear-list"/);
+ h.click('undo');assert.equal(h.state().items.map(i=>i.name).join(','),'Milk,Eggs');
+});
+test("Sam's Club, Costco and Aldi are listed as coming soon",()=>{
+ const h=uiHarness([],{realStatus:true});h.click('navigate',{view:'stores'});
+ for(const name of ["Sam&#39;s Club",'Costco','Aldi'])assert.match(h.html(),new RegExp(`<h3>${name}</h3>`));
+ assert.ok(!M.stores.find(s=>s.id==='costco').live);
+});
+test('store cards and the sidebar show an Active or Not active status',()=>{
+ const h=uiHarness([],{retailers:fakeRetailers([]),stores:['kroger'],realStatus:true});h.click('navigate',{view:'stores'});
+ assert.match(h.html(),/<h2>Kroger<\/h2><span class="store-status is-active">/);
+ assert.match(h.html(),/<h2>Whole Foods<\/h2><span class="store-status ">/);
+ assert.match(h.html(),/<h3>Costco<\/h3><span class="store-status ">/);
 });

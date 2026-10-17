@@ -939,3 +939,206 @@ h3 {
     animation: rise 320ms var(--ease-out) both;
   }
 }
+
+/* Clear list */
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.clear-list {
+  color: var(--muted);
+  font-size: 13px;
+}
+.clear-list:hover {
+  color: var(--ink);
+}
+
+/* Coming-soon store marks when a logo can't load */
+.store-mark.sams {
+  background: #0067a0;
+}
+.store-mark.costco {
+  background: #e31837;
+}
+.store-mark.aldi {
+  background: #00005f;
+}
+
+/* Store status: pulsing green when active, flat grey when not. */
+.store-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.status-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: hsl(0 0% 62%);
+  flex-shrink: 0;
+}
+.store-status.is-active {
+  color: var(--ink);
+}
+.store-status.is-active .status-dot {
+  background: #22a35a;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .store-status.is-active .status-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: #22a35a;
+    animation: status-pulse 1.8s var(--ease-out) infinite;
+  }
+}
+@keyframes status-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* Store cards: one clear top-to-bottom order. */
+.store-name-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.store-name-line h2 {
+  margin: 0;
+}
+.store-name-line .toggle {
+  margin-left: auto;
+}
+.store-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.store-card-body > .button {
+  margin-top: auto;
+}
+.store-location {
+  margin: 0;
+}
+.store-location span {
+  gap: 3px;
+}
+.store-location strong {
+  font-size: 15px;
+}
+.store-location small {
+  font-size: 13px;
+}
+.store-location .use-nearest {
+  justify-self: start;
+  margin: 2px 0 0;
+  padding: 0;
+  font-size: 13px;
+  color: var(--green);
+}
+.store-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0;
+}
+.store-family {
+  margin: 0;
+  line-height: 1.5;
+}
+.nearby-stores {
+  background: var(--surface-soft);
+  border-radius: var(--r-surface);
+  padding: 12px;
+}
+.nearby-label {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink);
+}
+.nearby-stores .location-list {
+  margin: 0;
+  max-height: 260px;
+}
+.nearby-stores .location-list li {
+  background: var(--white);
+  border: 0;
+}
+.nearby-stores .location-list li.chosen {
+  box-shadow: inset 0 0 0 2px var(--green);
+}
+.soon-card .store-status {
+  margin: 2px 0 4px;
+}
+
+/* Sidebar: one store per line. */
+.sidebar-store-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.sidebar-store-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.sidebar-store-list .store-status {
+  font-size: 0;
+  gap: 0;
+  margin-top: 6px;
+}
+.sidebar-store-list li > span {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.sidebar-store-list strong {
+  font-size: 13px;
+  color: var(--ink);
+}
+.sidebar-store-list small {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+/* Account: compact saved line. */
+.account-callout.saved-line {
+  display: flex;
+  align-items: center;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+}
+.account-callout.saved-line p {
+  flex: 1 1 260px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.account-callout.saved-line.is-saved p::before {
+  content: "✓ ";
+  color: var(--green);
+  font-weight: 700;
+}
+.account-callout.saved-line .button {
+  min-height: 34px;
+  padding: 6px 14px;
+  font-size: 13px;
+}
